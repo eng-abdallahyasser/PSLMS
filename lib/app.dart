@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lms/core/theme/app_theme.dart';
+import 'package:lms/injection_container.dart';
+import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:lms/features/auth/presentation/pages/login_page.dart';
+import 'package:lms/features/auth/presentation/pages/register_page.dart';
+import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
+import 'package:lms/features/courses/presentation/pages/courses_page.dart';
+import 'package:lms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:lms/features/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:lms/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:lms/features/profile/presentation/pages/profile_page.dart';
+
+class App extends StatelessWidget {
+  App({super.key});
+
+  final _router = GoRouter(
+    initialLocation: '/login',
+    routes: [
+      GoRoute(
+        path: '/login',
+        name: 'login',
+        builder: (context, state) => const LoginPage(),
+      ),
+      GoRoute(
+        path: '/register',
+        name: 'register',
+        builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/dashboard',
+        name: 'dashboard',
+        builder: (context, state) => const DashboardPage(),
+      ),
+      GoRoute(
+        path: '/courses',
+        name: 'courses',
+        builder: (context, state) => const CoursesPage(),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: 'profile',
+        builder: (context, state) => const ProfilePage(),
+      ),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<AuthCubit>()..checkAuth()),
+        BlocProvider(create: (_) => sl<CourseCubit>()),
+        BlocProvider(create: (_) => sl<DashboardCubit>()),
+        BlocProvider(create: (_) => sl<ProfileCubit>()),
+      ],
+      child: MaterialApp.router(
+        title: 'LMS',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        routerConfig: _router,
+      ),
+    );
+  }
+}

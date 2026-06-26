@@ -1,0 +1,73 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lms/core/widgets/app_widgets.dart';
+import 'package:lms/features/courses/domain/entities/course_entity.dart';
+import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
+import 'package:lms/features/courses/presentation/widgets/course_card.dart';
+
+class CoursesPage extends StatefulWidget {
+  const CoursesPage({super.key});
+
+  @override
+  State<CoursesPage> createState() => _CoursesPageState();
+}
+
+class _CoursesPageState extends State<CoursesPage> {
+  final _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<CourseCubit>().getCourses();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<CourseCubit>().loadMore();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CourseCubit, CourseState>(
+      builder: (context, state) {
+        return switch (state) {
+          CourseInitial() => const SizedBox.shrink(),
+          CourseLoading() => const AppLoadingWidget(message: 'Loading courses...'),
+          CourseLoaded(:final courses, :final hasReachedMax) =>
+            _buildCourseList(courses, hasReachedMax),
+          CourseError(:final message) => AppErrorWidget(
+              message: message,
+              onRetry: () => context.read<CourseCubit>().getCourses(),
+            ),
+        };
+      },
+    );
+  }
+
+  Widget _buildCourseList(List<CourseEntity> courses, bool hasReachedMax) {
+    return ListView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(16),
+      itemCount: courses.length + (hasReachedMax ? 0 : 1),
+      itemBuilder: (context, index) {
+        if (index >= courses.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        return CourseCard(course: courses[index]);
+      },
+    );
+  }
+}
