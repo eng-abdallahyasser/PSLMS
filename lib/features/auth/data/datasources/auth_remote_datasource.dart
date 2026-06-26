@@ -153,10 +153,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   ServerException _handleDioError(DioException e) {
     log(name: 'Auth Remote Data Source','=== Dio Error ===');
     log(name: 'Auth Remote Data Source','Type: ${e.type}');
-    log(name: 'Auth Remote Data Source',  'Message: ${e.message}');
+    log(name: 'Auth Remote Data Source','Message: ${e.message}');
+    log(name: 'Auth Remote Data Source','Underlying Error: ${e.error}');
+    log(name: 'Auth Remote Data Source','Underlying Type: ${e.error.runtimeType}');
     log(name: 'Auth Remote Data Source','Status: ${e.response?.statusCode}');
-    log(name: 'Auth Remote Data Source',  'Response Data: ${e.response?.data}');
-    log(name: 'Auth Remote Data Source', '=== End ===');
+    log(name: 'Auth Remote Data Source','Response Data: ${e.response?.data}');
+    log(name: 'Auth Remote Data Source','=== End ===');
     final error = e.error;
     if (error is ServerException) return error;
     if (error is AuthException) {

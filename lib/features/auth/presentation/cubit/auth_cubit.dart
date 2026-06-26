@@ -76,7 +76,7 @@ class RegisterEvent extends AuthEvent {
     required this.lastName,
     required this.email,
     required this.password,
-    this.role = 'LEARNER',
+    this.role = 'learner',
   });
 
   @override

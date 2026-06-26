@@ -8,11 +8,11 @@ enum UserRole {
   String get value {
     switch (this) {
       case UserRole.learner:
-        return 'LEARNER';
+        return 'learner';
       case UserRole.instructor:
-        return 'INSTRUCTOR';
+        return 'instructor';
       case UserRole.admin:
-        return 'ADMIN';
+        return 'admin';
     }
   }
 

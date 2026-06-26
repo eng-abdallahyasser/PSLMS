@@ -32,7 +32,7 @@ class RegisterParams extends Equatable {
     required this.lastName,
     required this.email,
     required this.password,
-    this.role = 'LEARNER',
+    this.role = 'learner',
   });
 
   @override

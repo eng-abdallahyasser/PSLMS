@@ -20,7 +20,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
-  String _selectedRole = 'LEARNER';
+  String _selectedRole = 'learner';
 
   @override
   void dispose() {
@@ -170,11 +170,11 @@ class _RegisterPageState extends State<RegisterPage> {
                     ),
                     items: const [
                       DropdownMenuItem(
-                        value: 'LEARNER',
+                        value: 'learner',
                         child: Text('Learner'),
                       ),
                       DropdownMenuItem(
-                        value: 'INSTRUCTOR',
+                        value: 'instructor',
                         child: Text('Instructor'),
                       ),
                     ],

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "417630244428",
+    "project_id": "lmsedu-39ea3",
+    "storage_bucket": "lmsedu-39ea3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417630244428:android:1b08f586985724acfdaee9",
+        "android_client_info": {
+          "package_name": "com.example.lms"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAC7P3kPWySmPyAow88cpoT7oenqexkxvM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
