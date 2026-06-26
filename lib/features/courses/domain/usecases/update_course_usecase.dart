@@ -1,0 +1,26 @@
+import 'package:dartz/dartz.dart';
+import 'package:lms/core/errors/failures.dart';
+import 'package:lms/features/courses/domain/entities/course_entity.dart';
+import 'package:lms/features/courses/domain/repositories/course_repository.dart';
+
+class UpdateCourseUseCase {
+  final CourseRepository repository;
+
+  UpdateCourseUseCase(this.repository);
+
+  Future<Either<Failure, CourseEntity>> call({
+    required String id,
+    String? title,
+    String? description,
+    String? visibility,
+    String? thumbnailUrl,
+  }) {
+    return repository.updateCourse(
+      id: id,
+      title: title,
+      description: description,
+      visibility: visibility,
+      thumbnailUrl: thumbnailUrl,
+    );
+  }
+}

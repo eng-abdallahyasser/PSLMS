@@ -1,11 +1,27 @@
 import 'package:equatable/equatable.dart';
 
+class InstructorEntity extends Equatable {
+  final String firstName;
+  final String lastName;
+
+  const InstructorEntity({
+    required this.firstName,
+    required this.lastName,
+  });
+
+  String get fullName => '$firstName $lastName';
+
+  @override
+  List<Object?> get props => [firstName, lastName];
+}
+
 class CourseEntity extends Equatable {
   final String id;
   final String title;
   final String description;
+  final String visibility;
+  final InstructorEntity? instructor;
   final String? thumbnailUrl;
-  final String? instructorName;
   final int lessonCount;
   final int durationMinutes;
   final String difficulty;
@@ -17,8 +33,9 @@ class CourseEntity extends Equatable {
     required this.id,
     required this.title,
     required this.description,
+    this.visibility = 'PUBLIC',
+    this.instructor,
     this.thumbnailUrl,
-    this.instructorName,
     this.lessonCount = 0,
     this.durationMinutes = 0,
     this.difficulty = 'beginner',
@@ -31,8 +48,9 @@ class CourseEntity extends Equatable {
     String? id,
     String? title,
     String? description,
+    String? visibility,
+    InstructorEntity? instructor,
     String? thumbnailUrl,
-    String? instructorName,
     int? lessonCount,
     int? durationMinutes,
     String? difficulty,
@@ -44,8 +62,9 @@ class CourseEntity extends Equatable {
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
+      visibility: visibility ?? this.visibility,
+      instructor: instructor ?? this.instructor,
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
-      instructorName: instructorName ?? this.instructorName,
       lessonCount: lessonCount ?? this.lessonCount,
       durationMinutes: durationMinutes ?? this.durationMinutes,
       difficulty: difficulty ?? this.difficulty,
@@ -60,8 +79,9 @@ class CourseEntity extends Equatable {
         id,
         title,
         description,
+        visibility,
+        instructor,
         thumbnailUrl,
-        instructorName,
         lessonCount,
         durationMinutes,
         difficulty,

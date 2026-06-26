@@ -11,24 +11,30 @@ class RegisterUseCase {
 
   Future<Either<Failure, UserEntity>> call(RegisterParams params) {
     return repository.register(
-      name: params.name,
+      firstName: params.firstName,
+      lastName: params.lastName,
       email: params.email,
       password: params.password,
+      role: params.role,
     );
   }
 }
 
 class RegisterParams extends Equatable {
-  final String name;
+  final String firstName;
+  final String lastName;
   final String email;
   final String password;
+  final String role;
 
   const RegisterParams({
-    required this.name,
+    required this.firstName,
+    required this.lastName,
     required this.email,
     required this.password,
+    this.role = 'LEARNER',
   });
 
   @override
-  List<Object> get props => [name, email, password];
+  List<Object> get props => [firstName, lastName, email, password, role];
 }

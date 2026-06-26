@@ -11,18 +11,20 @@ abstract class AuthLocalDataSource {
   Future<String?> getToken();
   Future<void> saveToken(String token);
   Future<void> clearToken();
+  Future<String?> getRefreshToken();
+  Future<void> saveRefreshToken(String token);
+  Future<void> clearRefreshToken();
 }
 
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
-  final SharedPreferences sharedPreferences;
 
   AuthLocalDataSourceImpl({required this.sharedPreferences});
+  final SharedPreferences sharedPreferences;
 
   @override
   Future<UserModel?> getCachedUser() async {
     try {
-      final userJson =
-          sharedPreferences.getString(AppConstants.userKey);
+      final userJson = sharedPreferences.getString(AppConstants.userKey);
       if (userJson != null) {
         return UserModel.fromJson(
           json.decode(userJson) as Map<String, dynamic>,
@@ -79,6 +81,33 @@ class AuthLocalDataSourceImpl implements AuthLocalDataSource {
       await sharedPreferences.remove(AppConstants.tokenKey);
     } catch (e) {
       throw CacheException('Failed to clear token: $e');
+    }
+  }
+
+  @override
+  Future<String?> getRefreshToken() async {
+    try {
+      return sharedPreferences.getString(AppConstants.refreshTokenKey);
+    } catch (e) {
+      throw CacheException('Failed to get refresh token: $e');
+    }
+  }
+
+  @override
+  Future<void> saveRefreshToken(String token) async {
+    try {
+      await sharedPreferences.setString(AppConstants.refreshTokenKey, token);
+    } catch (e) {
+      throw CacheException('Failed to save refresh token: $e');
+    }
+  }
+
+  @override
+  Future<void> clearRefreshToken() async {
+    try {
+      await sharedPreferences.remove(AppConstants.refreshTokenKey);
+    } catch (e) {
+      throw CacheException('Failed to clear refresh token: $e');
     }
   }
 }

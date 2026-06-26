@@ -10,8 +10,15 @@ class GetCoursesUseCase {
 
   Future<Either<Failure, List<CourseEntity>>> call({
     int page = 1,
-    int pageSize = 20,
+    int limit = 10,
+    String? search,
+    String? visibilityFilter,
   }) {
-    return repository.getCourses(page: page, pageSize: pageSize);
+    return repository.getCourses(
+      page: page,
+      limit: limit,
+      search: search,
+      visibilityFilter: visibilityFilter,
+    );
   }
 }

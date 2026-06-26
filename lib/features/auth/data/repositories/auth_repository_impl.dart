@@ -9,15 +9,15 @@ import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteDataSource remoteDataSource;
-  final AuthLocalDataSource localDataSource;
-  final NetworkInfo networkInfo;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
   });
+  final AuthRemoteDataSource remoteDataSource;
+  final AuthLocalDataSource localDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, UserEntity>> login({
@@ -25,15 +25,19 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
-      final userModel = await remoteDataSource.login(
+      final loginResponse = await remoteDataSource.login(
         email: email,
         password: password,
       );
-      await localDataSource.cacheUser(userModel);
-      return Right(userModel.toEntity());
+      // Save tokens
+      await localDataSource.saveToken(loginResponse.accessToken);
+      await localDataSource.saveRefreshToken(loginResponse.refreshToken);
+      // Cache user
+      await localDataSource.cacheUser(loginResponse.user);
+      return Right(loginResponse.user.toEntity());
     } on ServerException catch (e) {
       return Left(
         ServerFailure(message: e.message, statusCode: e.statusCode),
@@ -47,18 +51,22 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, UserEntity>> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String role,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final userModel = await remoteDataSource.register(
-        name: name,
+        firstName: firstName,
+        lastName: lastName,
         email: email,
         password: password,
+        role: role,
       );
       await localDataSource.cacheUser(userModel);
       return Right(userModel.toEntity());
@@ -93,6 +101,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await localDataSource.clearCache();
       await localDataSource.clearToken();
+      await localDataSource.clearRefreshToken();
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -102,7 +111,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> forgotPassword(String email) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.forgotPassword(email);
@@ -136,34 +145,32 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, UserEntity>> updateProfile({
-    String? name,
-    String? avatarUrl,
-  }) async {
-    if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
-    }
-    try {
-      final userModel = await remoteDataSource.updateProfile(
-        name: name,
-        avatarUrl: avatarUrl,
-      );
-      await localDataSource.cacheUser(userModel);
-      return Right(userModel.toEntity());
-    } on ServerException catch (e) {
-      return Left(
-        ServerFailure(message: e.message, statusCode: e.statusCode),
-      );
-    }
-  }
-
-  @override
   Future<Either<Failure, bool>> isAuthenticated() async {
     try {
       final token = await localDataSource.getToken();
       return Right(token != null && token.isNotEmpty);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> refreshToken(String refreshToken) async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final newAccessToken = await remoteDataSource.refreshToken(refreshToken);
+      await localDataSource.saveToken(newAccessToken);
+      return Right(newAccessToken);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    } on AuthException catch (e) {
+      return Left(
+        AuthFailure(message: e.message, statusCode: e.statusCode),
+      );
     }
   }
 

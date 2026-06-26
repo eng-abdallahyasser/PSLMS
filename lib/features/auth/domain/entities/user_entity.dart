@@ -1,22 +1,64 @@
 import 'package:equatable/equatable.dart';
 
+enum UserRole {
+  learner,
+  instructor,
+  admin;
+
+  String get value {
+    switch (this) {
+      case UserRole.learner:
+        return 'LEARNER';
+      case UserRole.instructor:
+        return 'INSTRUCTOR';
+      case UserRole.admin:
+        return 'ADMIN';
+    }
+  }
+
+  static UserRole fromString(String value) {
+    switch (value.toUpperCase()) {
+      case 'LEARNER':
+        return UserRole.learner;
+      case 'INSTRUCTOR':
+        return UserRole.instructor;
+      case 'ADMIN':
+        return UserRole.admin;
+      default:
+        return UserRole.learner;
+    }
+  }
+}
+
 class UserEntity extends Equatable {
-  final String id;
-  final String email;
-  final String name;
-  final String? avatarUrl;
-  final String? role;
-  final DateTime? createdAt;
 
   const UserEntity({
     required this.id,
     required this.email,
-    required this.name,
+    required this.firstName,
+    required this.lastName,
+    this.role = UserRole.learner,
     this.avatarUrl,
-    this.role,
     this.createdAt,
   });
+  final String id;
+  final String email;
+  final String firstName;
+  final String lastName;
+  final UserRole role;
+  final String? avatarUrl;
+  final DateTime? createdAt;
+
+  String get fullName => '$firstName $lastName';
 
   @override
-  List<Object?> get props => [id, email, name, avatarUrl, role, createdAt];
+  List<Object?> get props => [
+        id,
+        email,
+        firstName,
+        lastName,
+        role,
+        avatarUrl,
+        createdAt,
+      ];
 }

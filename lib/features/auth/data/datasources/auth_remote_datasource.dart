@@ -1,18 +1,24 @@
+
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
+import 'package:lms/features/auth/data/models/login_response.dart';
 import 'package:lms/features/auth/data/models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> login({
+  Future<LoginResponse> login({
     required String email,
     required String password,
   });
 
   Future<UserModel> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String role,
   });
 
   Future<UserModel> getCurrentUser();
@@ -26,19 +32,16 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
-  Future<UserModel> updateProfile({
-    String? name,
-    String? avatarUrl,
-  });
+  Future<String> refreshToken(String refreshToken);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final ApiClient apiClient;
 
   AuthRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
-  Future<UserModel> login({
+  Future<LoginResponse> login({
     required String email,
     required String password,
   }) async {
@@ -50,7 +53,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'password': password,
         },
       );
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      log(name: 'Auth Remote Data Source',  '=== Login Response ===');
+      log(name: 'Auth Remote Data Source',  'Status: ${response.statusCode}');
+      log(name: 'Auth Remote Data Source',  'Headers: ${response.headers}');
+      log(name: 'Auth Remote Data Source',  'Body: ${response.data}');
+      log(name: 'Auth Remote Data Source',  '=== End ===');
+      return LoginResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -58,20 +66,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String role,
   }) async {
     try {
       final response = await apiClient.post(
         '/auth/register',
         data: {
-          'name': name,
+          'firstName': firstName,
+          'lastName': lastName,
           'email': email,
           'password': password,
+          'role': role,
         },
       );
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data as Map<String, dynamic>;
+      return UserModel.fromJson(data['user'] as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -80,7 +93,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> getCurrentUser() async {
     try {
-      final response = await apiClient.get('/auth/me');
+      final response = await apiClient.get('/users/me');
       return UserModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -115,7 +128,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '/auth/reset-password',
         data: {
           'token': token,
-          'password': password,
+          'newPassword': password,
         },
       );
     } on DioException catch (e) {
@@ -124,25 +137,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> updateProfile({
-    String? name,
-    String? avatarUrl,
-  }) async {
+  Future<String> refreshToken(String refreshToken) async {
     try {
-      final response = await apiClient.put(
-        '/auth/profile',
-        data: {
-          if (name != null) 'name': name,
-          if (avatarUrl != null) 'avatar_url': avatarUrl,
-        },
+      final response = await apiClient.post(
+        '/auth/refresh',
+        data: {'refreshToken': refreshToken},
       );
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
+      final data = response.data as Map<String, dynamic>;
+      return data['accessToken'] as String;
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
   }
 
   ServerException _handleDioError(DioException e) {
+    log(name: 'Auth Remote Data Source','=== Dio Error ===');
+    log(name: 'Auth Remote Data Source','Type: ${e.type}');
+    log(name: 'Auth Remote Data Source',  'Message: ${e.message}');
+    log(name: 'Auth Remote Data Source','Status: ${e.response?.statusCode}');
+    log(name: 'Auth Remote Data Source',  'Response Data: ${e.response?.data}');
+    log(name: 'Auth Remote Data Source', '=== End ===');
     final error = e.error;
     if (error is ServerException) return error;
     if (error is AuthException) {

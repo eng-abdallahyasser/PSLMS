@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:lms/core/constants/app_constants.dart';
 import 'package:lms/core/errors/exceptions.dart';
@@ -5,11 +7,10 @@ import 'package:lms/core/errors/exceptions.dart';
 /// Centralized HTTP client using Dio with interceptors for auth, logging,
 /// and error handling.
 class ApiClient {
-  late final Dio _dio;
 
   ApiClient({
     String? baseUrl,
-    String? token,
+    String? Function()? tokenProvider,
   }) {
     _dio = Dio(
       BaseOptions(
@@ -24,7 +25,7 @@ class ApiClient {
     );
 
     _dio.interceptors.addAll([
-      _AuthInterceptor(token),
+      _AuthInterceptor(tokenProvider),
       _ErrorInterceptor(),
       LogInterceptor(
         requestBody: true,
@@ -33,12 +34,14 @@ class ApiClient {
       ),
     ]);
   }
+  late final Dio _dio;
 
   Future<Response<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    log(name:'API Client','GET request to $path with queryParameters: $queryParameters');
     return _dio.get<T>(path, queryParameters: queryParameters, options: options);
   }
 
@@ -48,6 +51,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    log(name:'API Client','POST request to $path with data: $data and queryParameters: $queryParameters');
     return _dio.post<T>(
       path,
       data: data,
@@ -62,6 +66,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    log(name:'API Client','PUT request to $path with data: $data and queryParameters: $queryParameters');
     return _dio.put<T>(
       path,
       data: data,
@@ -76,6 +81,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    log(name:'API Client','PATCH request to $path with data: $data and queryParameters: $queryParameters');
     return _dio.patch<T>(
       path,
       data: data,
@@ -101,17 +107,18 @@ class ApiClient {
 
 /// Interceptor that attaches the auth token to requests.
 class _AuthInterceptor extends Interceptor {
-  final String? _token;
 
-  _AuthInterceptor(this._token);
+  _AuthInterceptor(this._tokenProvider);
+  final String? Function()? _tokenProvider;
 
   @override
   void onRequest(
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) {
-    if (_token != null && _token!.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $_token';
+    final token = _tokenProvider?.call();
+    if (token != null && token.isNotEmpty) {
+      options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
   }

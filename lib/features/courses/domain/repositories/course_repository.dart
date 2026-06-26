@@ -5,14 +5,27 @@ import 'package:lms/features/courses/domain/entities/course_entity.dart';
 abstract class CourseRepository {
   Future<Either<Failure, List<CourseEntity>>> getCourses({
     int page = 1,
-    int pageSize = 20,
+    int limit = 10,
+    String? search,
+    String? visibilityFilter,
   });
 
   Future<Either<Failure, CourseEntity>> getCourseById(String id);
 
-  Future<Either<Failure, List<CourseEntity>>> getEnrolledCourses();
+  Future<Either<Failure, CourseEntity>> createCourse({
+    required String title,
+    required String description,
+    String visibility = 'PUBLIC',
+    String? thumbnailUrl,
+  });
 
-  Future<Either<Failure, void>> enrollCourse(String courseId);
+  Future<Either<Failure, CourseEntity>> updateCourse({
+    required String id,
+    String? title,
+    String? description,
+    String? visibility,
+    String? thumbnailUrl,
+  });
 
-  Future<Either<Failure, List<CourseEntity>>> searchCourses(String query);
+  Future<Either<Failure, void>> deleteCourse(String id);
 }

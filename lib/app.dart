@@ -8,10 +8,19 @@ import 'package:lms/features/auth/presentation/pages/login_page.dart';
 import 'package:lms/features/auth/presentation/pages/register_page.dart';
 import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:lms/features/courses/presentation/pages/courses_page.dart';
+import 'package:lms/features/contents/presentation/cubit/content_cubit.dart';
+import 'package:lms/features/contents/presentation/pages/contents_page.dart';
+import 'package:lms/features/enrollments/presentation/cubit/enrollment_cubit.dart';
+import 'package:lms/features/enrollments/presentation/pages/enrollments_page.dart';
 import 'package:lms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:lms/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:lms/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:lms/features/profile/presentation/pages/profile_page.dart';
+
+// Helper to parse courseId from path
+String _courseIdFromState(GoRouterState state) {
+  return state.pathParameters['courseId'] ?? '';
+}
 
 class App extends StatelessWidget {
   App({super.key});
@@ -40,6 +49,20 @@ class App extends StatelessWidget {
         builder: (context, state) => const CoursesPage(),
       ),
       GoRoute(
+        path: '/courses/:courseId/contents',
+        name: 'contents',
+        builder: (context, state) => ContentsPage(
+          courseId: _courseIdFromState(state),
+        ),
+      ),
+      GoRoute(
+        path: '/courses/:courseId/enrollments',
+        name: 'enrollments',
+        builder: (context, state) => EnrollmentsPage(
+          courseId: _courseIdFromState(state),
+        ),
+      ),
+      GoRoute(
         path: '/profile',
         name: 'profile',
         builder: (context, state) => const ProfilePage(),
@@ -54,6 +77,8 @@ class App extends StatelessWidget {
         BlocProvider(create: (_) => sl<AuthCubit>()..checkAuth()),
         BlocProvider(create: (_) => sl<CourseCubit>()),
         BlocProvider(create: (_) => sl<DashboardCubit>()),
+        BlocProvider(create: (_) => sl<ContentCubit>()),
+        BlocProvider(create: (_) => sl<EnrollmentCubit>()),
         BlocProvider(create: (_) => sl<ProfileCubit>()),
       ],
       child: MaterialApp.router(

@@ -9,9 +9,11 @@ abstract class AuthRepository {
   });
 
   Future<Either<Failure, UserEntity>> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String role,
   });
 
   Future<Either<Failure, UserEntity>> getCurrentUser();
@@ -25,10 +27,7 @@ abstract class AuthRepository {
     required String password,
   });
 
-  Future<Either<Failure, UserEntity>> updateProfile({
-    String? name,
-    String? avatarUrl,
-  });
-
   Future<Either<Failure, bool>> isAuthenticated();
+
+  Future<Either<Failure, String>> refreshToken(String refreshToken);
 }

@@ -1,0 +1,60 @@
+import 'package:dartz/dartz.dart';
+import 'package:lms/core/errors/exceptions.dart';
+import 'package:lms/core/errors/failures.dart';
+import 'package:lms/core/network/network_info.dart';
+import 'package:lms/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
+import 'package:lms/features/dashboard/domain/entities/dashboard_stats_entity.dart';
+import 'package:lms/features/dashboard/domain/repositories/dashboard_repository.dart';
+
+class DashboardRepositoryImpl implements DashboardRepository {
+  final DashboardRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
+
+  DashboardRepositoryImpl({
+    required this.remoteDataSource,
+    required this.networkInfo,
+  });
+
+  @override
+  Future<Either<Failure, DashboardStatsEntity>> getStats() async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final courses = await remoteDataSource.getCourses();
+
+      final enrolledCourses =
+          courses.where((c) => c.isEnrolled).toList();
+      final enrolledCount = enrolledCourses.length;
+      final completedCount =
+          enrolledCourses.where((c) => c.progress >= 100).length;
+
+      // Compute aggregate metrics from enrolled courses
+      int totalLessonsCompleted = 0;
+      int totalMinutesLearned = 0;
+      double totalProgress = 0;
+
+      for (final course in enrolledCourses) {
+        final progressFraction = (course.progress / 100).clamp(0.0, 1.0);
+        totalLessonsCompleted += (course.lessonCount * progressFraction).round();
+        totalMinutesLearned += (course.durationMinutes * progressFraction).round();
+        totalProgress += course.progress;
+      }
+
+      final overallProgress =
+          enrolledCount > 0 ? totalProgress / enrolledCount : 0.0;
+
+      return Right(DashboardStatsEntity(
+        enrolledCourses: enrolledCount,
+        completedCourses: completedCount,
+        totalLessonsCompleted: totalLessonsCompleted,
+        totalMinutesLearned: totalMinutesLearned,
+        overallProgress: overallProgress,
+      ));
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+}

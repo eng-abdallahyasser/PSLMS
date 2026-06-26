@@ -1,6 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/profile/domain/entities/profile_entity.dart';
+import 'package:lms/features/profile/domain/usecases/get_profile_usecase.dart';
+import 'package:lms/features/profile/domain/usecases/update_preferences_usecase.dart';
+import 'package:lms/features/profile/domain/usecases/update_profile_usecase.dart';
 
 // ----- States -----
 
@@ -51,43 +55,99 @@ class GetProfileEvent extends ProfileEvent {
 }
 
 class UpdateProfileEvent extends ProfileEvent {
-  final String? name;
-  final String? bio;
+  final String? firstName;
+  final String? lastName;
 
-  const UpdateProfileEvent({this.name, this.bio});
+  const UpdateProfileEvent({this.firstName, this.lastName});
 
   @override
-  List<Object?> get props => [name ?? '', bio ?? ''];
+  List<Object?> get props => [firstName ?? '', lastName ?? ''];
+}
+
+class UpdatePreferencesEvent extends ProfileEvent {
+  final String? lang;
+  final String? mode;
+
+  const UpdatePreferencesEvent({this.lang, this.mode});
+
+  @override
+  List<Object?> get props => [lang ?? '', mode ?? ''];
 }
 
 // ----- Cubit -----
 
 class ProfileCubit extends Cubit<ProfileState> {
-  ProfileCubit() : super(const ProfileInitial());
+  final GetProfileUseCase getProfileUseCase;
+  final UpdateProfileUseCase updateProfileUseCase;
+  final UpdatePreferencesUseCase updatePreferencesUseCase;
+
+  ProfileCubit({
+    required this.getProfileUseCase,
+    required this.updateProfileUseCase,
+    required this.updatePreferencesUseCase,
+  }) : super(const ProfileInitial());
 
   Future<void> getProfile() async {
     emit(const ProfileLoading());
-    // TODO: Implement with real data source
-    await Future.delayed(const Duration(milliseconds: 300));
-    emit(const ProfileLoaded(ProfileEntity(
-      id: '1',
-      name: 'John Doe',
-      email: 'john@example.com',
-      bio: 'Lifelong learner',
-      joinedAt: null,
-    )));
+    final result = await getProfileUseCase();
+    result.fold(
+      (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
+      (profile) => emit(ProfileLoaded(profile)),
+    );
   }
 
-  Future<void> updateProfile({String? name, String? bio}) async {
+  Future<void> updateProfile({
+    String? firstName,
+    String? lastName,
+  }) async {
     emit(const ProfileLoading());
-    // TODO: Implement with real data source
-    await Future.delayed(const Duration(milliseconds: 300));
-    emit(ProfileLoaded(ProfileEntity(
-      id: '1',
-      name: name ?? 'John Doe',
-      email: 'john@example.com',
-      bio: bio,
-      joinedAt: null,
-    )));
+    final result = await updateProfileUseCase(
+      firstName: firstName,
+      lastName: lastName,
+    );
+    result.fold(
+      (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
+      (profile) => emit(ProfileLoaded(profile)),
+    );
+  }
+
+  Future<void> updatePreferences({
+    String? lang,
+    String? mode,
+  }) async {
+    final currentState = state;
+    if (currentState case ProfileLoaded(:final profile)) {
+      // Optimistic update
+      emit(ProfileLoaded(ProfileEntity(
+        id: profile.id,
+        email: profile.email,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        role: profile.role,
+        avatarUrl: profile.avatarUrl,
+        lang: lang ?? profile.lang,
+        mode: mode ?? profile.mode,
+        createdAt: profile.createdAt,
+      )));
+    }
+    final result = await updatePreferencesUseCase(lang: lang, mode: mode);
+    result.fold(
+      (failure) {
+        // Revert on failure — re-fetch profile
+        getProfile();
+      },
+      (_) {
+        // Success — UI already updated optimistically
+      },
+    );
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    return switch (failure) {
+      ServerFailure f => f.message,
+      NetworkFailure f => f.message,
+      AuthFailure f => f.message,
+      _ => 'An unexpected error occurred',
+    };
   }
 }

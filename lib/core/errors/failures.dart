@@ -2,9 +2,9 @@ import 'package:equatable/equatable.dart';
 
 /// Abstract base class for all failures.
 abstract class Failure extends Equatable {
-  final String message;
 
   const Failure(this.message);
+  final String message;
 
   @override
   List<Object> get props => [message];
@@ -12,14 +12,14 @@ abstract class Failure extends Equatable {
 
 /// Failure originating from server errors.
 class ServerFailure extends Failure {
-  final int? statusCode;
-  final dynamic data;
 
   const ServerFailure({
     required String message,
     this.statusCode,
     this.data,
   }) : super(message);
+  final int? statusCode;
+  final dynamic data;
 
   @override
   List<Object> get props => [message, statusCode ?? 0];
@@ -27,24 +27,22 @@ class ServerFailure extends Failure {
 
 /// Failure due to network connectivity issues.
 class NetworkFailure extends Failure {
-  const NetworkFailure([String message = 'No internet connection'])
-      : super(message);
+  const NetworkFailure([super.message = 'No internet connection']);
 }
 
 /// Failure from cache/storage operations.
 class CacheFailure extends Failure {
-  const CacheFailure([String message = 'Cache operation failed'])
-      : super(message);
+  const CacheFailure([super.message = 'Cache operation failed']);
 }
 
 /// Failure from authentication errors.
 class AuthFailure extends Failure {
-  final int? statusCode;
 
   const AuthFailure({
     required String message,
     this.statusCode,
   }) : super(message);
+  final int? statusCode;
 
   @override
   List<Object> get props => [message, statusCode ?? 0];
@@ -52,12 +50,12 @@ class AuthFailure extends Failure {
 
 /// Failure from input validation errors.
 class ValidationFailure extends Failure {
-  final Map<String, dynamic>? errors;
 
   const ValidationFailure({
     required String message,
     this.errors,
   }) : super(message);
+  final Map<String, dynamic>? errors;
 
   @override
   List<Object> get props => [message, errors ?? {}];

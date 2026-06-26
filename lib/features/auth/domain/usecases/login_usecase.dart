@@ -5,9 +5,9 @@ import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class LoginUseCase {
-  final AuthRepository repository;
 
   LoginUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, UserEntity>> call(LoginParams params) {
     return repository.login(

@@ -69,9 +69,9 @@ class CourseCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   // Instructor
-                  if (course.instructorName != null)
+                  if (course.instructor != null)
                     Text(
-                      course.instructorName!,
+                      course.instructor!.fullName,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],

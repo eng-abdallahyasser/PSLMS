@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lms/core/utils/validators.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
@@ -13,15 +14,18 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  String _selectedRole = 'LEARNER';
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -31,9 +35,11 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onRegister() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthCubit>().register(
-            name: _nameController.text.trim(),
+            firstName: _firstNameController.text.trim(),
+            lastName: _lastNameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text,
+            role: _selectedRole,
           );
     }
   }
@@ -53,6 +59,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 backgroundColor: Colors.red,
               ),
             );
+          }
+          if (state is AuthUnauthenticated) {
+            // Registration success — navigate to login
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Account created! Please sign in.'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            context.go('/login');
           }
         },
         child: SafeArea(
@@ -80,11 +96,20 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                   ),
                   const SizedBox(height: 32),
-                  // Name
+                  // First Name
                   AppTextField(
-                    label: 'Full Name',
-                    hint: 'Enter your full name',
-                    controller: _nameController,
+                    label: 'First Name',
+                    hint: 'Enter your first name',
+                    controller: _firstNameController,
+                    validator: Validators.name,
+                    prefixIcon: const Icon(Icons.person_outlined),
+                  ),
+                  const SizedBox(height: 16),
+                  // Last Name
+                  AppTextField(
+                    label: 'Last Name',
+                    hint: 'Enter your last name',
+                    controller: _lastNameController,
                     validator: Validators.name,
                     prefixIcon: const Icon(Icons.person_outlined),
                   ),
@@ -135,6 +160,30 @@ class _RegisterPageState extends State<RegisterPage> {
                     },
                     prefixIcon: const Icon(Icons.lock_outlined),
                   ),
+                  const SizedBox(height: 16),
+                  // Role Selector
+                  DropdownButtonFormField<String>(
+                    value: _selectedRole,
+                    decoration: const InputDecoration(
+                      labelText: 'Role',
+                      prefixIcon: Icon(Icons.school_outlined),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'LEARNER',
+                        child: Text('Learner'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'INSTRUCTOR',
+                        child: Text('Instructor'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() => _selectedRole = value);
+                      }
+                    },
+                  ),
                   const SizedBox(height: 24),
                   // Register Button
                   BlocBuilder<AuthCubit, AuthState>(
@@ -157,9 +206,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
+                        onPressed: () => context.go('/login'),
                         child: const Text('Sign In'),
                       ),
                     ],

@@ -1,32 +1,42 @@
 import 'package:equatable/equatable.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 
 class ProfileEntity extends Equatable {
   final String id;
-  final String name;
   final String email;
-  final String? phone;
+  final String firstName;
+  final String lastName;
+  final UserRole role;
   final String? avatarUrl;
-  final String? bio;
-  final DateTime? joinedAt;
+  final String lang;
+  final String mode;
+  final DateTime? createdAt;
 
   const ProfileEntity({
     required this.id,
-    required this.name,
     required this.email,
-    this.phone,
+    required this.firstName,
+    required this.lastName,
+    this.role = UserRole.learner,
     this.avatarUrl,
-    this.bio,
-    this.joinedAt,
+    this.lang = 'en',
+    this.mode = 'light',
+    this.createdAt,
   });
+
+  String get fullName => '$firstName $lastName';
+  String get initials => '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}';
 
   @override
   List<Object?> get props => [
         id,
-        name,
         email,
-        phone,
+        firstName,
+        lastName,
+        role,
         avatarUrl,
-        bio,
-        joinedAt,
+        lang,
+        mode,
+        createdAt,
       ];
 }

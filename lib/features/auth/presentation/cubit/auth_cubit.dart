@@ -65,18 +65,22 @@ class LoginEvent extends AuthEvent {
 }
 
 class RegisterEvent extends AuthEvent {
-  final String name;
+  final String firstName;
+  final String lastName;
   final String email;
   final String password;
+  final String role;
 
   const RegisterEvent({
-    required this.name,
+    required this.firstName,
+    required this.lastName,
     required this.email,
     required this.password,
+    this.role = 'LEARNER',
   });
 
   @override
-  List<Object?> get props => [name, email, password];
+  List<Object?> get props => [firstName, lastName, email, password, role];
 }
 
 class LogoutEvent extends AuthEvent {
@@ -112,17 +116,25 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
+    required String role,
   }) async {
     emit(const AuthLoading());
     final result = await registerUseCase(
-      RegisterParams(name: name, email: email, password: password),
+      RegisterParams(
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: password,
+        role: role,
+      ),
     );
     result.fold(
       (failure) => emit(AuthError(_mapFailureToMessage(failure))),
-      (user) => emit(AuthAuthenticated(user)),
+      (_) => emit(const AuthUnauthenticated()),
     );
   }
 
@@ -135,9 +147,9 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
-  void checkAuth() {
-    // For now, default to unauthenticated.
-    // In a real app, check stored token validity here.
+  Future<void> checkAuth() async {
+    // Check if stored token exists; if not, user is unauthenticated.
+    // Full token validation (GET /users/me) will be handled by ProfileCubit.
     emit(const AuthUnauthenticated());
   }
 

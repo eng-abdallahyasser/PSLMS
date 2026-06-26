@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lms/core/utils/validators.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
@@ -143,9 +144,7 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       TextButton(
-                        onPressed: () {
-                          // TODO: Navigate to register
-                        },
+                        onPressed: () => context.go('/register'),
                         child: const Text('Sign Up'),
                       ),
                     ],

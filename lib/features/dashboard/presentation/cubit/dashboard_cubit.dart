@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/dashboard/domain/entities/dashboard_stats_entity.dart';
+import 'package:lms/features/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
 
 // ----- States -----
 
@@ -37,34 +39,28 @@ class DashboardError extends DashboardState {
   List<Object?> get props => [message];
 }
 
-// ----- Events -----
-
-sealed class DashboardEvent extends Equatable {
-  const DashboardEvent();
-
-  @override
-  List<Object?> get props => [];
-}
-
-class GetDashboardStatsEvent extends DashboardEvent {
-  const GetDashboardStatsEvent();
-}
-
 // ----- Cubit -----
 
 class DashboardCubit extends Cubit<DashboardState> {
-  DashboardCubit() : super(const DashboardInitial());
+  final GetDashboardStatsUseCase getDashboardStatsUseCase;
+
+  DashboardCubit({required this.getDashboardStatsUseCase})
+      : super(const DashboardInitial());
 
   Future<void> getStats() async {
     emit(const DashboardLoading());
-    // TODO: Implement with real data source
-    await Future.delayed(const Duration(milliseconds: 500));
-    emit(const DashboardLoaded(DashboardStatsEntity(
-      enrolledCourses: 5,
-      completedCourses: 2,
-      totalLessonsCompleted: 24,
-      totalMinutesLearned: 360,
-      overallProgress: 40,
-    )));
+    final result = await getDashboardStatsUseCase();
+    result.fold(
+      (failure) => emit(DashboardError(_mapFailureToMessage(failure))),
+      (stats) => emit(DashboardLoaded(stats)),
+    );
+  }
+
+  String _mapFailureToMessage(Failure failure) {
+    return switch (failure) {
+      ServerFailure f => f.message,
+      NetworkFailure f => f.message,
+      _ => 'An unexpected error occurred',
+    };
   }
 }

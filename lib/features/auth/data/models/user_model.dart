@@ -1,12 +1,25 @@
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
+
+  factory UserModel.fromEntity(UserEntity entity) {
+    return UserModel(
+      id: entity.id,
+      email: entity.email,
+      firstName: entity.firstName,
+      lastName: entity.lastName,
+      role: entity.role,
+      avatarUrl: entity.avatarUrl,
+      createdAt: entity.createdAt,
+    );
+  }
   const UserModel({
     required super.id,
     required super.email,
-    required super.name,
-    super.avatarUrl,
+    required super.firstName,
+    required super.lastName,
     super.role,
+    super.avatarUrl,
     super.createdAt,
   });
 
@@ -14,9 +27,12 @@ class UserModel extends UserEntity {
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
-      name: json['name'] as String,
-      avatarUrl: json['avatar_url'] as String?,
-      role: json['role'] as String?,
+      firstName: json['firstName'] as String? ?? json['first_name'] as String? ?? '',
+      lastName: json['lastName'] as String? ?? json['last_name'] as String? ?? '',
+      role: json['role'] != null
+          ? UserRole.fromString(json['role'] as String)
+          : UserRole.learner,
+      avatarUrl: json['avatar_url'] as String? ?? json['avatarUrl'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -27,9 +43,10 @@ class UserModel extends UserEntity {
     return {
       'id': id,
       'email': email,
-      'name': name,
+      'firstName': firstName,
+      'lastName': lastName,
+      'role': role.value,
       'avatar_url': avatarUrl,
-      'role': role,
       'created_at': createdAt?.toIso8601String(),
     };
   }
@@ -38,21 +55,11 @@ class UserModel extends UserEntity {
     return UserEntity(
       id: id,
       email: email,
-      name: name,
-      avatarUrl: avatarUrl,
+      firstName: firstName,
+      lastName: lastName,
       role: role,
+      avatarUrl: avatarUrl,
       createdAt: createdAt,
-    );
-  }
-
-  factory UserModel.fromEntity(UserEntity entity) {
-    return UserModel(
-      id: entity.id,
-      email: entity.email,
-      name: entity.name,
-      avatarUrl: entity.avatarUrl,
-      role: entity.role,
-      createdAt: entity.createdAt,
     );
   }
 }

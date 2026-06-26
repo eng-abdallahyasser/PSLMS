@@ -3,9 +3,9 @@ import 'package:lms/core/theme/app_theme.dart';
 
 /// Loading overlay widget.
 class AppLoadingWidget extends StatelessWidget {
-  final String? message;
 
   const AppLoadingWidget({super.key, this.message});
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -34,14 +34,14 @@ class AppLoadingWidget extends StatelessWidget {
 
 /// Error display widget with retry action.
 class AppErrorWidget extends StatelessWidget {
-  final String message;
-  final VoidCallback? onRetry;
 
   const AppErrorWidget({
     super.key,
     required this.message,
     this.onRetry,
   });
+  final String message;
+  final VoidCallback? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +82,6 @@ class AppErrorWidget extends StatelessWidget {
 
 /// Custom app bar widget.
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final List<Widget>? actions;
-  final Widget? leading;
-  final bool showBackButton;
 
   const AppBarWidget({
     super.key,
@@ -94,6 +90,10 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
     this.leading,
     this.showBackButton = true,
   });
+  final String title;
+  final List<Widget>? actions;
+  final Widget? leading;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -116,10 +116,6 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget {
 
 /// Primary button widget.
 class AppPrimaryButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final IconData? icon;
 
   const AppPrimaryButton({
     super.key,
@@ -128,6 +124,10 @@ class AppPrimaryButton extends StatelessWidget {
     this.isLoading = false,
     this.icon,
   });
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -158,15 +158,6 @@ class AppPrimaryButton extends StatelessWidget {
 
 /// Text form field with common styling.
 class AppTextField extends StatelessWidget {
-  final String label;
-  final String? hint;
-  final TextEditingController? controller;
-  final String? Function(String?)? validator;
-  final bool obscureText;
-  final TextInputType keyboardType;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
-  final void Function(String)? onChanged;
 
   const AppTextField({
     super.key,
@@ -180,6 +171,15 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.onChanged,
   });
+  final String label;
+  final String? hint;
+  final TextEditingController? controller;
+  final String? Function(String?)? validator;
+  final bool obscureText;
+  final TextInputType keyboardType;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final void Function(String)? onChanged;
 
   @override
   Widget build(BuildContext context) {
