@@ -1,6 +1,5 @@
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:lms/core/constants/app_constants.dart';
 import 'package:lms/core/errors/exceptions.dart';
 
@@ -26,12 +25,8 @@ class ApiClient {
 
     _dio.interceptors.addAll([
       _AuthInterceptor(tokenProvider),
+      _LogInterceptor(),
       _ErrorInterceptor(),
-      LogInterceptor(
-        requestBody: true,
-        responseBody: true,
-        error: true,
-      ),
     ]);
   }
   late final Dio _dio;
@@ -41,7 +36,6 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log(name:'API Client','GET request to $path with queryParameters: $queryParameters');
     return _dio.get<T>(path, queryParameters: queryParameters, options: options);
   }
 
@@ -51,7 +45,6 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log(name:'API Client','POST request to $path with data: $data and queryParameters: $queryParameters');
     return _dio.post<T>(
       path,
       data: data,
@@ -66,7 +59,6 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log(name:'API Client','PUT request to $path with data: $data and queryParameters: $queryParameters');
     return _dio.put<T>(
       path,
       data: data,
@@ -81,7 +73,6 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log(name:'API Client','PATCH request to $path with data: $data and queryParameters: $queryParameters');
     return _dio.patch<T>(
       path,
       data: data,
@@ -121,6 +112,44 @@ class _AuthInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
+  }
+}
+
+/// Interceptor that logs all requests and responses to the debug console.
+class _LogInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final buffer = StringBuffer()
+      ..writeln('─── HTTP ─── ${options.method} ${options.path} ───')
+      ..writeln('Headers: ${options.headers}')
+      ..writeln('Query: ${options.queryParameters}');
+    if (options.data != null) {
+      buffer.writeln('Body: ${options.data}');
+    }
+    debugPrint(buffer.toString());
+    handler.next(options);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    final buffer = StringBuffer()
+      ..writeln('─── RESPONSE ─── ${response.statusCode} ${response.requestOptions.path} ───')
+      ..writeln('Data: ${response.data}');
+    debugPrint(buffer.toString());
+    handler.next(response);
+  }
+
+  @override
+  void onError(DioException err, ErrorInterceptorHandler handler) {
+    final buffer = StringBuffer()
+      ..writeln('─── ERROR ─── ${err.response?.statusCode} ${err.requestOptions.path} ───')
+      ..writeln('Type: ${err.type}')
+      ..writeln('Message: ${err.message}');
+    if (err.response?.data != null) {
+      buffer.writeln('Data: ${err.response?.data}');
+    }
+    debugPrint(buffer.toString());
+    handler.next(err);
   }
 }
 

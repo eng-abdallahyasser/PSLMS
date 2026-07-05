@@ -5,6 +5,7 @@ import 'package:lms/features/profile/domain/entities/profile_entity.dart';
 import 'package:lms/features/profile/domain/usecases/get_profile_usecase.dart';
 import 'package:lms/features/profile/domain/usecases/update_preferences_usecase.dart';
 import 'package:lms/features/profile/domain/usecases/update_profile_usecase.dart';
+import 'package:lms/features/profile/domain/usecases/upload_avatar_usecase.dart';
 
 // ----- States -----
 
@@ -74,17 +75,28 @@ class UpdatePreferencesEvent extends ProfileEvent {
   List<Object?> get props => [lang ?? '', mode ?? ''];
 }
 
+class UploadAvatarEvent extends ProfileEvent {
+  final String filePath;
+
+  const UploadAvatarEvent({required this.filePath});
+
+  @override
+  List<Object?> get props => [filePath];
+}
+
 // ----- Cubit -----
 
 class ProfileCubit extends Cubit<ProfileState> {
   final GetProfileUseCase getProfileUseCase;
   final UpdateProfileUseCase updateProfileUseCase;
   final UpdatePreferencesUseCase updatePreferencesUseCase;
+  final UploadAvatarUseCase uploadAvatarUseCase;
 
   ProfileCubit({
     required this.getProfileUseCase,
     required this.updateProfileUseCase,
     required this.updatePreferencesUseCase,
+    required this.uploadAvatarUseCase,
   }) : super(const ProfileInitial());
 
   Future<void> getProfile() async {
@@ -108,6 +120,35 @@ class ProfileCubit extends Cubit<ProfileState> {
     result.fold(
       (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
       (profile) => emit(ProfileLoaded(profile)),
+    );
+  }
+
+  Future<void> uploadAvatar(String filePath) async {
+    final currentState = state;
+    emit(const ProfileLoading());
+    final result = await uploadAvatarUseCase(filePath);
+    result.fold(
+      (failure) {
+        emit(ProfileError(_mapFailureToMessage(failure)));
+        if (currentState case ProfileLoaded(:final profile)) {
+          emit(ProfileLoaded(profile));
+        }
+      },
+      (avatarUrl) {
+        if (currentState case ProfileLoaded(:final profile)) {
+          emit(ProfileLoaded(ProfileEntity(
+            id: profile.id,
+            email: profile.email,
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            role: profile.role,
+            avatarUrl: avatarUrl,
+            lang: profile.lang,
+            mode: profile.mode,
+            createdAt: profile.createdAt,
+          )));
+        }
+      },
     );
   }
 

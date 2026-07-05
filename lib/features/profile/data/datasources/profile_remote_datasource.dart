@@ -15,6 +15,8 @@ abstract class ProfileRemoteDataSource {
     String? lang,
     String? mode,
   });
+
+  Future<String> uploadAvatar(String filePath);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -25,7 +27,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<ProfileModel> getProfile() async {
     try {
-      final response = await apiClient.get('/users/me');
+      final response = await apiClient.get('/profile/me');
       return ProfileModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -42,7 +44,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (firstName != null) body['firstName'] = firstName;
       if (lastName != null) body['lastName'] = lastName;
 
-      final response = await apiClient.patch('/users/profile', data: body);
+      final response = await apiClient.patch('/profile/me', data: body);
       return ProfileModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -59,7 +61,25 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (lang != null) body['lang'] = lang;
       if (mode != null) body['mode'] = mode;
 
-      await apiClient.patch('/users/preferences', data: body);
+      await apiClient.patch('/profile/me/preferences', data: body);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<String> uploadAvatar(String filePath) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(filePath),
+      });
+
+      final response = await apiClient.post(
+        '/profile/me/avatar',
+        data: formData,
+      );
+      final data = response.data as Map<String, dynamic>;
+      return data['avatarUrl'] as String? ?? data['avatar_url'] as String? ?? '';
     } on DioException catch (e) {
       throw _handleError(e);
     }

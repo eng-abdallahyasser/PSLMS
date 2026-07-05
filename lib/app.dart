@@ -6,6 +6,7 @@ import 'package:lms/injection_container.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/auth/presentation/pages/login_page.dart';
 import 'package:lms/features/auth/presentation/pages/register_page.dart';
+import 'package:lms/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:lms/features/courses/presentation/pages/courses_page.dart';
 import 'package:lms/features/contents/presentation/cubit/content_cubit.dart';
@@ -37,6 +38,11 @@ class App extends StatelessWidget {
         path: '/register',
         name: 'register',
         builder: (context, state) => const RegisterPage(),
+      ),
+      GoRoute(
+        path: '/verify-email',
+        name: 'verifyEmail',
+        builder: (context, state) => const VerifyEmailPage(),
       ),
       GoRoute(
         path: '/dashboard',

@@ -60,15 +60,15 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
             );
           }
-          if (state is AuthUnauthenticated) {
-            // Registration success — navigate to login
+          if (state is AuthOtpSent) {
+            // Registration success — navigate to email verification
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Account created! Please sign in.'),
+                content: Text('Account created! Verify your email.'),
                 backgroundColor: Colors.green,
               ),
             );
-            context.go('/login');
+            context.go('/verify-email');
           }
         },
         child: SafeArea(

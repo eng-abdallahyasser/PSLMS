@@ -14,4 +14,6 @@ abstract class ProfileRepository {
     String? lang,
     String? mode,
   });
+
+  Future<Either<Failure, String>> uploadAvatar(String filePath);
 }

@@ -1,0 +1,17 @@
+import 'package:dartz/dartz.dart';
+import 'package:lms/core/errors/failures.dart';
+import 'package:lms/features/courses/domain/entities/course_entity.dart';
+import 'package:lms/features/enrollments/domain/repositories/enrollment_repository.dart';
+
+class GetMyCoursesUseCase {
+  final EnrollmentRepository repository;
+
+  GetMyCoursesUseCase(this.repository);
+
+  Future<Either<Failure, List<CourseEntity>>> call({
+    int page = 1,
+    int limit = 10,
+  }) {
+    return repository.getMyCourses(page: page, limit: limit);
+  }
+}

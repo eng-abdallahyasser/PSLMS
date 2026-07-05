@@ -47,6 +47,9 @@ class _LoginPageState extends State<LoginPage> {
               ),
             );
           }
+          if (state is AuthAuthenticated) {
+            context.go('/dashboard');
+          }
         },
         child: SafeArea(
           child: SingleChildScrollView(
@@ -54,18 +57,21 @@ class _LoginPageState extends State<LoginPage> {
             child: Form(
               key: _formKey,
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                // crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 48),
-                  // Logo / App Name
-                  Icon(
-                    Icons.school,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'asstes/images/logo.jpeg',
+                      height: 100,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Welcome Back',
+                    'Manara',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,

@@ -4,7 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
 import 'package:lms/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:lms/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:lms/features/auth/data/models/device_info_model.dart';
 import 'package:lms/features/auth/data/models/user_model.dart';
+import 'package:lms/features/auth/data/services/social_auth_service.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
@@ -14,15 +16,20 @@ class AuthRepositoryImpl implements AuthRepository {
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
+    required this.socialAuthService,
   });
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
+  final SocialAuthService socialAuthService;
 
   @override
   Future<Either<Failure, UserEntity>> login({
     required String email,
     required String password,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
   }) async {
     if (await networkInfo.isConnected == false) {
       return const Left(NetworkFailure());
@@ -31,11 +38,12 @@ class AuthRepositoryImpl implements AuthRepository {
       final loginResponse = await remoteDataSource.login(
         email: email,
         password: password,
+        client: client,
+        deviceToken: deviceToken,
+        deviceInfo: deviceInfo,
       );
-      // Save tokens
       await localDataSource.saveToken(loginResponse.accessToken);
       await localDataSource.saveRefreshToken(loginResponse.refreshToken);
-      // Cache user
       await localDataSource.cacheUser(loginResponse.user);
       return Right(loginResponse.user.toEntity());
     } on ServerException catch (e) {
@@ -56,6 +64,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String role,
+    String? client,
   }) async {
     if (await networkInfo.isConnected == false) {
       return const Left(NetworkFailure());
@@ -67,6 +76,7 @@ class AuthRepositoryImpl implements AuthRepository {
         email: email,
         password: password,
         role: role,
+        client: client,
       );
       await localDataSource.cacheUser(userModel);
       return Right(userModel.toEntity());
@@ -171,6 +181,138 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(
         AuthFailure(message: e.message, statusCode: e.statusCode),
       );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> verifyEmail({
+    required String email,
+    required String otp,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await remoteDataSource.verifyEmail(email: email, otp: otp);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendOtp({
+    required String email,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await remoteDataSource.sendOtp(email: email);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> completeRegistration({
+    required String tempToken,
+    String? role,
+    String? client,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await remoteDataSource.completeRegistration(
+        tempToken: tempToken,
+        role: role,
+        client: client,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithGoogle({
+    String role = 'learner',
+    String client = 'mobile',
+  }) async {
+    try {
+      final result = await socialAuthService.signInWithGoogle(
+        role: role,
+        client: client,
+      );
+
+      if (result.needsRegistration) {
+        return Left(ServerFailure(
+          message: 'Registration incomplete',
+          statusCode: 400,
+        ));
+      }
+
+      if (result.accessToken != null) {
+        await localDataSource.saveToken(result.accessToken!);
+      }
+      if (result.refreshToken != null) {
+        await localDataSource.saveRefreshToken(result.refreshToken!);
+      }
+
+      final user = await remoteDataSource.getCurrentUser();
+      await localDataSource.cacheUser(user);
+      return Right(user.toEntity());
+    } on SocialAuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(message: e.message, statusCode: e.statusCode));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithFacebook({
+    String role = 'learner',
+    String client = 'mobile',
+  }) async {
+    try {
+      final result = await socialAuthService.signInWithFacebook(
+        role: role,
+        client: client,
+      );
+
+      if (result.needsRegistration) {
+        return Left(ServerFailure(
+          message: 'Registration incomplete',
+          statusCode: 400,
+        ));
+      }
+
+      if (result.accessToken != null) {
+        await localDataSource.saveToken(result.accessToken!);
+      }
+      if (result.refreshToken != null) {
+        await localDataSource.saveRefreshToken(result.refreshToken!);
+      }
+
+      final user = await remoteDataSource.getCurrentUser();
+      await localDataSource.cacheUser(user);
+      return Right(user.toEntity());
+    } on SocialAuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(message: e.message, statusCode: e.statusCode));
     }
   }
 

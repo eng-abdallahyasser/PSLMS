@@ -90,7 +90,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
       }
 
       final response = await apiClient.get(
-        '/courses',
+        '/learner/courses',
         queryParameters: queryParams,
       );
       final body = response.data as Map<String, dynamic>;
@@ -107,7 +107,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   @override
   Future<CourseModel> getCourseById(String id) async {
     try {
-      final response = await apiClient.get('/courses/$id');
+      final response = await apiClient.get('/learner/courses/$id');
       return CourseModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -123,7 +123,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   }) async {
     try {
       final response = await apiClient.post(
-        '/courses',
+        '/instructor/courses',
         data: {
           'title': title,
           'description': description,
@@ -152,7 +152,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
       if (visibility != null) data['visibility'] = visibility;
       if (thumbnailUrl != null) data['thumbnailUrl'] = thumbnailUrl;
 
-      final response = await apiClient.patch('/courses/$id', data: data);
+      final response = await apiClient.patch('/instructor/courses/$id', data: data);
       return CourseModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleError(e);
@@ -162,7 +162,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   @override
   Future<void> deleteCourse(String id) async {
     try {
-      await apiClient.delete('/courses/$id');
+      await apiClient.delete('/instructor/courses/$id');
     } on DioException catch (e) {
       throw _handleError(e);
     }

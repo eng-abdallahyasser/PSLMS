@@ -4,13 +4,18 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
+import 'package:lms/features/auth/data/models/device_info_model.dart';
 import 'package:lms/features/auth/data/models/login_response.dart';
 import 'package:lms/features/auth/data/models/user_model.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthRemoteDataSource {
   Future<LoginResponse> login({
     required String email,
     required String password,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
   });
 
   Future<UserModel> register({
@@ -19,6 +24,7 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
     required String role,
+    String? client,
   });
 
   Future<UserModel> getCurrentUser();
@@ -33,6 +39,21 @@ abstract class AuthRemoteDataSource {
   });
 
   Future<String> refreshToken(String refreshToken);
+
+  Future<void> verifyEmail({
+    required String email,
+    required String otp,
+  });
+
+  Future<void> sendOtp({
+    required String email,
+  });
+
+  Future<void> completeRegistration({
+    required String tempToken,
+    String? role,
+    String? client,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -44,6 +65,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<LoginResponse> login({
     required String email,
     required String password,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
   }) async {
     try {
       final response = await apiClient.post(
@@ -51,6 +75,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {
           'email': email,
           'password': password,
+          'client': client,
+          if (deviceToken != null) 'deviceToken': deviceToken,
+          if (deviceInfo != null) 'deviceInfo': deviceInfo.toJson(),
         },
       );
       log(name: 'Auth Remote Data Source',  '=== Login Response ===');
@@ -71,6 +98,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
     required String role,
+    String? client,
   }) async {
     try {
       final response = await apiClient.post(
@@ -81,10 +109,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'email': email,
           'password': password,
           'role': role,
+          if (client != null) 'client': client,
         },
       );
       final data = response.data as Map<String, dynamic>;
-      return UserModel.fromJson(data['user'] as Map<String, dynamic>);
+      return UserModel(
+        id: data['id'] as String? ?? '',
+        email: data['email'] as String? ?? email,
+        firstName: data['firstName'] as String? ?? data['first_name'] as String? ?? firstName,
+        lastName: data['lastName'] as String? ?? data['last_name'] as String? ?? lastName,
+        role: data['role'] != null
+            ? UserRole.fromString(data['role'] as String)
+            : UserRole.fromString(role),
+      );
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -93,7 +130,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> getCurrentUser() async {
     try {
-      final response = await apiClient.get('/users/me');
+      final response = await apiClient.get('/profile/me');
       return UserModel.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -145,6 +182,58 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       final data = response.data as Map<String, dynamic>;
       return data['accessToken'] as String;
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
+  Future<void> verifyEmail({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      await apiClient.post(
+        '/auth/verify-email',
+        data: {
+          'email': email,
+          'otp': otp,
+        },
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
+  Future<void> sendOtp({
+    required String email,
+  }) async {
+    try {
+      await apiClient.post(
+        '/auth/send-otp',
+        data: {'email': email},
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
+  Future<void> completeRegistration({
+    required String tempToken,
+    String? role,
+    String? client,
+  }) async {
+    try {
+      await apiClient.post(
+        '/auth/complete-registration',
+        data: {
+          'tempToken': tempToken,
+          if (role != null) 'role': role,
+          if (client != null) 'client': client,
+        },
+      );
     } on DioException catch (e) {
       throw _handleDioError(e);
     }

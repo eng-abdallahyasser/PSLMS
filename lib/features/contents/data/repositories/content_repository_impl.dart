@@ -56,4 +56,51 @@ class ContentRepositoryImpl implements ContentRepository {
       );
     }
   }
+
+  @override
+  Future<Either<Failure, PaginatedContents>> getMyCourseContents(
+    String courseId, {
+    int page = 1,
+    int limit = 10,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final response = await remoteDataSource.getMyCourseContents(
+        courseId,
+        page: page,
+        limit: limit,
+      );
+      return Right(PaginatedContents(
+        data: response.data.map((c) => c.toEntity()).toList(),
+        totalItems: response.totalItems,
+      ));
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, ContentEntity>> getMyContentDetail(
+    String courseId,
+    String contentId,
+  ) async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final content = await remoteDataSource.getMyContentDetail(
+        courseId,
+        contentId,
+      );
+      return Right(content.toEntity());
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
 }

@@ -1,10 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
+import 'package:lms/features/auth/data/models/device_info_model.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
+import 'package:lms/features/auth/domain/usecases/complete_registration_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/facebook_sign_in_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/google_sign_in_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/login_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/register_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/send_otp_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/verify_email_usecase.dart';
 
 // ----- States -----
 
@@ -36,6 +42,28 @@ class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated();
 }
 
+class AuthOtpSent extends AuthState {
+  final String email;
+
+  const AuthOtpSent(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class AuthEmailVerified extends AuthState {
+  final String email;
+
+  const AuthEmailVerified(this.email);
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class AuthRegistrationCompleted extends AuthState {
+  const AuthRegistrationCompleted();
+}
+
 class AuthError extends AuthState {
   final String message;
 
@@ -57,11 +85,20 @@ sealed class AuthEvent extends Equatable {
 class LoginEvent extends AuthEvent {
   final String email;
   final String password;
+  final String client;
+  final String? deviceToken;
+  final DeviceInfo? deviceInfo;
 
-  const LoginEvent({required this.email, required this.password});
+  const LoginEvent({
+    required this.email,
+    required this.password,
+    this.client = 'mobile',
+    this.deviceToken,
+    this.deviceInfo,
+  });
 
   @override
-  List<Object?> get props => [email, password];
+  List<Object?> get props => [email, password, client, deviceToken, deviceInfo];
 }
 
 class RegisterEvent extends AuthEvent {
@@ -70,6 +107,7 @@ class RegisterEvent extends AuthEvent {
   final String email;
   final String password;
   final String role;
+  final String? client;
 
   const RegisterEvent({
     required this.firstName,
@@ -77,10 +115,11 @@ class RegisterEvent extends AuthEvent {
     required this.email,
     required this.password,
     this.role = 'learner',
+    this.client,
   });
 
   @override
-  List<Object?> get props => [firstName, lastName, email, password, role];
+  List<Object?> get props => [firstName, lastName, email, password, role, client];
 }
 
 class LogoutEvent extends AuthEvent {
@@ -91,17 +130,87 @@ class CheckAuthEvent extends AuthEvent {
   const CheckAuthEvent();
 }
 
+class SendOtpEvent extends AuthEvent {
+  final String email;
+
+  const SendOtpEvent({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
+class VerifyEmailEvent extends AuthEvent {
+  final String email;
+  final String otp;
+
+  const VerifyEmailEvent({required this.email, required this.otp});
+
+  @override
+  List<Object?> get props => [email, otp];
+}
+
+class CompleteRegistrationEvent extends AuthEvent {
+  final String tempToken;
+  final String? role;
+  final String? client;
+
+  const CompleteRegistrationEvent({
+    required this.tempToken,
+    this.role,
+    this.client,
+  });
+
+  @override
+  List<Object?> get props => [tempToken, role, client];
+}
+
+class GoogleSignInEvent extends AuthEvent {
+  final String role;
+  final String client;
+
+  const GoogleSignInEvent({
+    this.role = 'learner',
+    this.client = 'mobile',
+  });
+
+  @override
+  List<Object?> get props => [role, client];
+}
+
+class FacebookSignInEvent extends AuthEvent {
+  final String role;
+  final String client;
+
+  const FacebookSignInEvent({
+    this.role = 'learner',
+    this.client = 'mobile',
+  });
+
+  @override
+  List<Object?> get props => [role, client];
+}
+
 // ----- Cubit -----
 
 class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
+  final SendOtpUseCase sendOtpUseCase;
+  final VerifyEmailUseCase verifyEmailUseCase;
+  final CompleteRegistrationUseCase completeRegistrationUseCase;
+  final GoogleSignInUseCase googleSignInUseCase;
+  final FacebookSignInUseCase facebookSignInUseCase;
 
   AuthCubit({
     required this.loginUseCase,
     required this.registerUseCase,
     required this.logoutUseCase,
+    required this.sendOtpUseCase,
+    required this.verifyEmailUseCase,
+    required this.completeRegistrationUseCase,
+    required this.googleSignInUseCase,
+    required this.facebookSignInUseCase,
   }) : super(const AuthInitial());
 
   Future<void> login({required String email, required String password}) async {
@@ -134,7 +243,7 @@ class AuthCubit extends Cubit<AuthState> {
     );
     result.fold(
       (failure) => emit(AuthError(_mapFailureToMessage(failure))),
-      (_) => emit(const AuthUnauthenticated()),
+      (_) => emit(AuthOtpSent(email)),
     );
   }
 
@@ -148,9 +257,74 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> checkAuth() async {
-    // Check if stored token exists; if not, user is unauthenticated.
-    // Full token validation (GET /users/me) will be handled by ProfileCubit.
     emit(const AuthUnauthenticated());
+  }
+
+  Future<void> sendOtp({required String email}) async {
+    emit(const AuthLoading());
+    final result = await sendOtpUseCase(SendOtpParams(email: email));
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (_) => emit(AuthOtpSent(email)),
+    );
+  }
+
+  Future<void> verifyEmail({required String email, required String otp}) async {
+    emit(const AuthLoading());
+    final result = await verifyEmailUseCase(
+      VerifyEmailParams(email: email, otp: otp),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (_) => emit(AuthEmailVerified(email)),
+    );
+  }
+
+  Future<void> completeRegistration({
+    required String tempToken,
+    String? role,
+    String? client,
+  }) async {
+    emit(const AuthLoading());
+    final result = await completeRegistrationUseCase(
+      CompleteRegistrationParams(
+        tempToken: tempToken,
+        role: role,
+        client: client,
+      ),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (_) => emit(const AuthRegistrationCompleted()),
+    );
+  }
+
+  Future<void> signInWithGoogle({
+    String role = 'learner',
+    String client = 'mobile',
+  }) async {
+    emit(const AuthLoading());
+    final result = await googleSignInUseCase(
+      GoogleSignInParams(role: role, client: client),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (user) => emit(AuthAuthenticated(user)),
+    );
+  }
+
+  Future<void> signInWithFacebook({
+    String role = 'learner',
+    String client = 'mobile',
+  }) async {
+    emit(const AuthLoading());
+    final result = await facebookSignInUseCase(
+      FacebookSignInParams(role: role, client: client),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (user) => emit(AuthAuthenticated(user)),
+    );
   }
 
   String _mapFailureToMessage(Failure failure) {

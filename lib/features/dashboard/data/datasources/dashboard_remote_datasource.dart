@@ -23,7 +23,7 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
   }) async {
     try {
       final response = await apiClient.get(
-        '/courses',
+        '/learner/courses',
         queryParameters: {
           'page': page,
           'limit': limit,

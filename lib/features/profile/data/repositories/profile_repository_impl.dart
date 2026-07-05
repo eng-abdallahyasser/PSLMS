@@ -72,4 +72,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
       );
     }
   }
+
+  @override
+  Future<Either<Failure, String>> uploadAvatar(String filePath) async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final avatarUrl = await remoteDataSource.uploadAvatar(filePath);
+      return Right(avatarUrl);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
 }

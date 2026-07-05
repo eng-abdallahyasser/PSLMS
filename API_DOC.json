@@ -1,0 +1,3058 @@
+{
+"openapi": "3.0.0",
+"paths": {
+"/api": {
+"get": {
+"description": "Returns API health status.",
+"operationId": "getHealthCheck",
+"parameters": [],
+"responses": {
+"200": {
+"description": "API is healthy"
+}
+},
+"summary": "Health check",
+"tags": [
+"Health"
+]
+}
+},
+"/api/auth/register": {
+"post": {
+"description": "Creates a new user account with email and password.",
+"operationId": "register",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/RegisterDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "User registered successfully"
+},
+"400": {
+"description": "Validation failed or email already exists"
+}
+},
+"summary": "Register a new user",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/login": {
+"post": {
+"description": "Authenticates a user and returns JWT tokens.",
+"operationId": "login",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/LoginDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Login successful, returns tokens"
+},
+"401": {
+"description": "Invalid credentials"
+}
+},
+"summary": "Login with credentials",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/verify-email": {
+"post": {
+"description": "Verifies user email using OTP code.",
+"operationId": "verifyEmail",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/VerifyEmailDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Email verified successfully"
+},
+"400": {
+"description": "Invalid or expired OTP"
+}
+},
+"summary": "Verify email address",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/send-otp": {
+"post": {
+"description": "Sends a 6-digit OTP code to the provided email address.",
+"operationId": "sendOtp",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/SendOtpDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "OTP sent successfully"
+},
+"429": {
+"description": "Rate limit exceeded"
+}
+},
+"summary": "Send OTP to email",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/forgot-password": {
+"post": {
+"description": "Sends a password reset link to the user's email.",
+"operationId": "forgotPassword",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/ForgotPasswordDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Reset email sent if account exists"
+}
+},
+"summary": "Request password reset",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/reset-password": {
+"post": {
+"description": "Resets the user password using a reset token.",
+"operationId": "resetPassword",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/ResetPasswordDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Password reset successfully"
+},
+"400": {
+"description": "Invalid or expired token"
+}
+},
+"summary": "Reset password",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/refresh": {
+"post": {
+"description": "Exchanges a refresh token for a new access token.",
+"operationId": "refresh",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/RefreshTokenDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Tokens refreshed successfully"
+},
+"401": {
+"description": "Invalid or expired refresh token"
+}
+},
+"summary": "Refresh access token",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/logout": {
+"post": {
+"description": "Invalidates the user's refresh token.",
+"operationId": "logout",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Logged out successfully"
+},
+"401": {
+"description": "Unauthorized"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Logout user",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/google": {
+"get": {
+"description": "Redirects user to Google OAuth consent screen.",
+"operationId": "googleAuth",
+"parameters": [
+{
+"name": "role",
+"required": false,
+"in": "query",
+"schema": {
+"type": "string",
+"enum": [
+"admin",
+"instructor",
+"learner"
+]
+}
+},
+{
+"name": "client",
+"required": false,
+"in": "query",
+"schema": {
+"type": "string",
+"enum": [
+"web",
+"mobile"
+]
+}
+},
+{
+"required": false,
+"name": "role",
+"in": "query",
+"schema": {
+"type": "string"
+}
+},
+{
+"required": false,
+"name": "client",
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": ""
+},
+"302": {
+"description": "Redirect to Google"
+}
+},
+"summary": "Google OAuth login",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/google/callback": {
+"get": {
+"description": "Handles Google OAuth callback and returns auth result via postMessage.",
+"operationId": "googleAuthRedirect",
+"parameters": [
+{
+"name": "state",
+"required": true,
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "OAuth success HTML page"
+}
+},
+"summary": "Google OAuth callback",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/facebook": {
+"get": {
+"description": "Redirects user to Facebook OAuth dialog.",
+"operationId": "facebookAuth",
+"parameters": [
+{
+"name": "role",
+"required": false,
+"in": "query",
+"schema": {
+"type": "string",
+"enum": [
+"admin",
+"instructor",
+"learner"
+]
+}
+},
+{
+"name": "client",
+"required": false,
+"in": "query",
+"schema": {
+"type": "string",
+"enum": [
+"web",
+"mobile"
+]
+}
+},
+{
+"required": false,
+"name": "role",
+"in": "query",
+"schema": {
+"type": "string"
+}
+},
+{
+"required": false,
+"name": "client",
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": ""
+},
+"302": {
+"description": "Redirect to Facebook"
+}
+},
+"summary": "Facebook OAuth login",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/facebook/callback": {
+"get": {
+"description": "Handles Facebook OAuth callback and returns auth result via postMessage.",
+"operationId": "facebookAuthRedirect",
+"parameters": [
+{
+"name": "state",
+"required": true,
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "OAuth success HTML page"
+}
+},
+"summary": "Facebook OAuth callback",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/complete-registration": {
+"post": {
+"description": "Completes registration for OAuth users by selecting a role.",
+"operationId": "completeRegistration",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/CompleteRegistrationDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Registration completed successfully"
+},
+"400": {
+"description": "Invalid temp token"
+}
+},
+"summary": "Complete OAuth registration",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/admin/users": {
+"post": {
+"description": "Creates a new user. Admin only.",
+"operationId": "create",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/CreateUserDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "User created"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Create user (Admin)",
+"tags": [
+"Admin Users"
+]
+},
+"get": {
+"description": "Returns paginated list of all users. Admin only.",
+"operationId": "findAll",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Paginated users list"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List all users (Admin)",
+"tags": [
+"Admin Users"
+]
+}
+},
+"/api/admin/users/{id}": {
+"get": {
+"description": "Returns a single user by ID. Admin only.",
+"operationId": "findOne",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "User found"
+},
+"404": {
+"description": "User not found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get user by ID (Admin)",
+"tags": [
+"Admin Users"
+]
+},
+"patch": {
+"description": "Updates a user's details. Admin only.",
+"operationId": "update",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/UpdateUserDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "User updated"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update user (Admin)",
+"tags": [
+"Admin Users"
+]
+},
+"delete": {
+"description": "Deactivates a user account. Admin only.",
+"operationId": "remove",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "User deactivated"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Deactivate user (Admin)",
+"tags": [
+"Admin Users"
+]
+}
+},
+"/api/profile/me": {
+"get": {
+"description": "Returns the authenticated user's profile.",
+"operationId": "getProfile",
+"parameters": [],
+"responses": {
+"200": {
+"description": "User profile retrieved"
+},
+"401": {
+"description": "Unauthorized"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get current user profile",
+"tags": [
+"Profile"
+]
+},
+"patch": {
+"description": "Updates the authenticated user's first and last name.",
+"operationId": "updateProfile",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/UpdateProfileDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Profile updated"
+},
+"401": {
+"description": "Unauthorized"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update profile",
+"tags": [
+"Profile"
+]
+}
+},
+"/api/profile/me/preferences": {
+"patch": {
+"description": "Updates the authenticated user's preferences (language, theme).",
+"operationId": "updatePreferences",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/UpdatePreferencesDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Preferences updated"
+},
+"401": {
+"description": "Unauthorized"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update preferences",
+"tags": [
+"Profile"
+]
+}
+},
+"/api/profile/me/avatar": {
+"post": {
+"description": "Uploads a profile avatar image.",
+"operationId": "uploadAvatar",
+"parameters": [],
+"requestBody": {
+"required": true,
+"description": "Avatar image file",
+"content": {
+"multipart/form-data": {
+"schema": {
+"type": "object",
+"properties": {
+"file": {
+"type": "string",
+"format": "binary"
+}
+}
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Avatar uploaded"
+},
+"400": {
+"description": "File is required"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Upload avatar",
+"tags": [
+"Profile"
+]
+}
+},
+"/api/learner/instructors": {
+"get": {
+"description": "Search for instructors by name.",
+"operationId": "searchInstructors",
+"parameters": [
+{
+"name": "q",
+"required": true,
+"in": "query",
+"schema": {
+"type": "string"
+}
+},
+{
+"name": "limit",
+"required": false,
+"in": "query",
+"schema": {}
+},
+{
+"name": "page",
+"required": false,
+"in": "query",
+"schema": {}
+}
+],
+"responses": {
+"200": {
+"description": "Instructor search results"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Search instructors (Learner)",
+"tags": [
+"StudentInstructors"
+]
+}
+},
+"/api/learner/instructors/{id}": {
+"get": {
+"description": "Returns a single instructor's public profile. Learner only.",
+"operationId": "findOne",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Instructor found"
+},
+"404": {
+"description": "Instructor not found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get instructor by ID (Learner)",
+"tags": [
+"Learner Instructors"
+]
+}
+},
+"/api/instructor/subscription": {
+"get": {
+"description": "Returns the instructor's current subscription with usage.",
+"operationId": "getMySubscription",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Subscription usage"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get my subscription (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/plans": {
+"get": {
+"description": "Returns all active subscription plans for the instructor.",
+"operationId": "getPlans",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Plans list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List plans (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/checkout": {
+"post": {
+"description": "Creates a Stripe checkout session for subscription payment.",
+"operationId": "createCheckout",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/CreateCheckoutSessionDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Checkout URL returned"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Create Stripe checkout (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/portal": {
+"post": {
+"description": "Creates a Stripe customer portal session for managing subscription.",
+"operationId": "createPortal",
+"parameters": [],
+"responses": {
+"201": {
+"description": "Portal URL returned"
+},
+"400": {
+"description": "No Stripe customer found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Create Stripe portal (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/choose-plan": {
+"post": {
+"description": "Selects a plan. Free plans are applied immediately; paid plans redirect to Stripe.",
+"operationId": "choosePlan",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/CreateCheckoutSessionDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Plan chosen"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Choose subscription plan (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/storage": {
+"post": {
+"description": "Creates a Stripe checkout session for a 10 GB storage add-on.",
+"operationId": "buyStorage",
+"parameters": [],
+"responses": {
+"201": {
+"description": "Checkout URL returned"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Buy storage add-on (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+},
+"get": {
+"description": "Returns the instructor's active storage add-ons.",
+"operationId": "getStorageAddons",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Storage add-ons list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get storage add-ons (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/refresh-subscription": {
+"post": {
+"description": "Refreshes the instructor's subscription usage data.",
+"operationId": "refreshSubscription",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Refreshed subscription data"
+},
+"201": {
+"description": ""
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Refresh subscription (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/instructor/subscription/cancel": {
+"post": {
+"description": "Cancels the instructor's active subscription.",
+"operationId": "cancel",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Subscription cancelled"
+},
+"201": {
+"description": ""
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Cancel subscription (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
+"/api/admin/subscriptions": {
+"get": {
+"description": "Returns all subscriptions. Admin only.",
+"operationId": "getAll",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Subscriptions list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List all subscriptions (Admin)",
+"tags": [
+"Admin Subscriptions"
+]
+}
+},
+"/api/admin/subscriptions/plans": {
+"get": {
+"description": "Returns all active subscription plans. Admin only.",
+"operationId": "getPlans",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Plans list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List subscription plans (Admin)",
+"tags": [
+"Admin Subscriptions"
+]
+}
+},
+"/api/admin/subscriptions/{id}/status": {
+"patch": {
+"description": "Updates a subscription's status. Admin only.",
+"operationId": "updateStatus",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Subscription updated"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update subscription status (Admin)",
+"tags": [
+"Admin Subscriptions"
+]
+}
+},
+"/api/stripe/webhook": {
+"post": {
+"description": "Handles incoming Stripe webhook events (public endpoint).",
+"operationId": "handleWebhook",
+"parameters": [
+{
+"name": "stripe-signature",
+"required": true,
+"in": "header",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Webhook received"
+}
+},
+"summary": "Stripe webhook",
+"tags": [
+"Stripe Webhook"
+]
+}
+},
+"/api/admin/courses": {
+"get": {
+"description": "Returns paginated list of all courses. Admin only.",
+"operationId": "findAll",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Paginated courses list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List all courses (Admin)",
+"tags": [
+"Admin Courses"
+]
+}
+},
+"/api/admin/courses/{id}": {
+"get": {
+"description": "Returns a single course by ID. Admin only.",
+"operationId": "findOne",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get course by ID (Admin)",
+"tags": [
+"Admin Courses"
+]
+},
+"patch": {
+"description": "Updates any course. Admin only.",
+"operationId": "update",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/UpdateCourseDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Course updated"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update course (Admin)",
+"tags": [
+"Admin Courses"
+]
+},
+"delete": {
+"description": "Deletes any course. Admin only.",
+"operationId": "remove",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course deleted"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Delete course (Admin)",
+"tags": [
+"Admin Courses"
+]
+}
+},
+"/api/instructor/courses": {
+"post": {
+"description": "Creates a new course. Instructor only.",
+"operationId": "create",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/CreateCourseDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Course created"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Create course (Instructor)",
+"tags": [
+"Instructor Courses"
+]
+},
+"get": {
+"description": "Returns paginated list of the instructor's courses.",
+"operationId": "findAll",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Paginated courses list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List instructor courses",
+"tags": [
+"Instructor Courses"
+]
+}
+},
+"/api/instructor/courses/stats/dashboard": {
+"get": {
+"description": "Returns dashboard statistics for the instructor.",
+"operationId": "getDashboardStats",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Dashboard stats"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get dashboard stats (Instructor)",
+"tags": [
+"Instructor Courses"
+]
+}
+},
+"/api/instructor/courses/{id}": {
+"get": {
+"description": "Returns a single course owned by the instructor.",
+"operationId": "findOne",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course found"
+},
+"404": {
+"description": "Course not found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get course by ID (Instructor)",
+"tags": [
+"Instructor Courses"
+]
+},
+"patch": {
+"description": "Updates a course's details.",
+"operationId": "update",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/UpdateCourseDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Course updated"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update course",
+"tags": [
+"Instructor Courses"
+]
+},
+"delete": {
+"description": "Deletes a course.",
+"operationId": "remove",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course deleted"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Delete course",
+"tags": [
+"Instructor Courses"
+]
+}
+},
+"/api/learner/courses": {
+"get": {
+"description": "Returns paginated list of public courses. Learner only.",
+"operationId": "findAll",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Paginated courses list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List public courses (Learner)",
+"tags": [
+"Learner Courses"
+]
+}
+},
+"/api/learner/courses/{id}": {
+"get": {
+"description": "Returns a single public course. Learner only.",
+"operationId": "findOne",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course found"
+},
+"404": {
+"description": "Course not found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get public course (Learner)",
+"tags": [
+"Learner Courses"
+]
+}
+},
+"/api/admin/enrollments": {
+"get": {
+"description": "Returns paginated list of all enrollments. Admin only.",
+"operationId": "findAll",
+"parameters": [
+{
+"name": "page",
+"required": false,
+"in": "query",
+"schema": {
+"type": "string"
+}
+},
+{
+"name": "limit",
+"required": false,
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Paginated enrollments list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List all enrollments (Admin)",
+"tags": [
+"Admin Enrollments"
+]
+}
+},
+"/api/admin/enrollments/{id}": {
+"patch": {
+"description": "Updates enrollment status. Admin only.",
+"operationId": "update",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/RespondEnrollmentDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Enrollment updated"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update enrollment (Admin)",
+"tags": [
+"Admin Enrollments"
+]
+}
+},
+"/api/instructor/courses/{courseId}/enrollments": {
+"get": {
+"description": "Returns enrollments for an instructor's course.",
+"operationId": "getCourseEnrollments",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course enrollments list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get course enrollments (Instructor)",
+"tags": [
+"Instructor Enrollments"
+]
+}
+},
+"/api/instructor/enrollments/{id}/respond": {
+"patch": {
+"description": "Approves or rejects an enrollment request.",
+"operationId": "respond",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/RespondEnrollmentDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Enrollment responded"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Respond to enrollment (Instructor)",
+"tags": [
+"Instructor Enrollments"
+]
+}
+},
+"/api/instructor/courses/{courseId}/invite": {
+"post": {
+"description": "Invites a learner to enroll in a course.",
+"operationId": "invite",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/InviteLearnerDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Learner invited"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Invite learner (Instructor)",
+"tags": [
+"Instructor Enrollments"
+]
+}
+},
+"/api/instructor/enrollments/{id}": {
+"delete": {
+"description": "Removes a learner from a course.",
+"operationId": "remove",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Learner removed"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Remove learner (Instructor)",
+"tags": [
+"Instructor Enrollments"
+]
+}
+},
+"/api/learner/courses/{courseId}/enroll": {
+"post": {
+"description": "Requests enrollment in a course as a learner.",
+"operationId": "requestEnrollment",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"201": {
+"description": "Enrollment requested"
+},
+"403": {
+"description": "Forbidden"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Request enrollment (Learner)",
+"tags": [
+"Learner Enrollments"
+]
+}
+},
+"/api/learner/my-courses": {
+"get": {
+"description": "Returns the learner's enrolled courses.",
+"operationId": "getMyCourses",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Enrolled courses list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get my courses (Learner)",
+"tags": [
+"Learner Enrollments"
+]
+}
+},
+"/api/learner/my-courses/{courseId}": {
+"get": {
+"description": "Returns enrolled course with contents.",
+"operationId": "getMyCourseDetail",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Course detail with contents"
+},
+"403": {
+"description": "Not enrolled"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get course detail (Learner)",
+"tags": [
+"Learner Enrollments"
+]
+}
+},
+"/api/instructor/courses/{courseId}/content": {
+"get": {
+"description": "Returns paginated list of course content items. Instructor only.",
+"operationId": "findAll",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Paginated content list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List course content (Instructor)",
+"tags": [
+"Instructor Content"
+]
+},
+"post": {
+"description": "Uploads a new content item (video, PDF, etc.) to a course. Instructor only.",
+"operationId": "upload",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"multipart/form-data": {
+"schema": {
+"$ref": "#/components/schemas/CreateVideoDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Content uploaded"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Upload content (Instructor)",
+"tags": [
+"Instructor Content"
+]
+}
+},
+"/api/instructor/courses/{courseId}/content/reorder": {
+"patch": {
+"description": "Reorders content items within a course. Instructor only.",
+"operationId": "reorder",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/ReorderVideosDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Content reordered"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Reorder content (Instructor)",
+"tags": [
+"Instructor Content"
+]
+}
+},
+"/api/instructor/courses/{courseId}/content/{contentId}": {
+"patch": {
+"description": "Updates a content item's metadata. Instructor only.",
+"operationId": "update",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+},
+{
+"name": "contentId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/UpdateVideoDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Content updated"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update content (Instructor)",
+"tags": [
+"Instructor Content"
+]
+},
+"delete": {
+"description": "Removes a content item from a course. Instructor only.",
+"operationId": "remove",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+},
+{
+"name": "contentId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Content deleted"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Delete content (Instructor)",
+"tags": [
+"Instructor Content"
+]
+}
+},
+"/api/learner/my-courses/{courseId}/content": {
+"get": {
+"description": "Returns paginated list of course content for enrolled learners.",
+"operationId": "findAll",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Paginated content list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List course content (Learner)",
+"tags": [
+"Learner Content"
+]
+}
+},
+"/api/learner/my-courses/{courseId}/content/{contentId}": {
+"get": {
+"description": "Returns a single content item for an enrolled learner.",
+"operationId": "findOne",
+"parameters": [
+{
+"name": "courseId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+},
+{
+"name": "contentId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Content detail"
+},
+"404": {
+"description": "Content not found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get content detail (Learner)",
+"tags": [
+"Learner Content"
+]
+}
+},
+"/api/notifications": {
+"get": {
+"description": "Returns all notifications for the authenticated user.",
+"operationId": "findAll",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Notifications list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List notifications",
+"tags": [
+"Notifications"
+]
+}
+},
+"/api/notifications/{id}/read": {
+"patch": {
+"description": "Marks a single notification as read.",
+"operationId": "markAsRead",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Notification marked as read"
+},
+"404": {
+"description": "Notification not found"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Mark notification as read",
+"tags": [
+"Notifications"
+]
+}
+},
+"/api/notifications/read-all": {
+"post": {
+"description": "Marks all unread notifications as read.",
+"operationId": "markAllAsRead",
+"parameters": [],
+"responses": {
+"200": {
+"description": "All notifications marked as read"
+},
+"201": {
+"description": ""
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Mark all notifications as read",
+"tags": [
+"Notifications"
+]
+}
+},
+"/api/instructor/students/invite": {
+"post": {
+"description": "Sends an invitation email to a student email address.",
+"operationId": "invite",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/InviteStudentDto"
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Invitation sent"
+},
+"403": {
+"description": "Student limit reached or rate limited"
+},
+"409": {
+"description": "Already linked"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Invite student by email (Instructor)",
+"tags": [
+"InstructorStudents"
+]
+}
+},
+"/api/instructor/students": {
+"get": {
+"description": "Returns paginated list of students linked to the instructor.",
+"operationId": "listStudents",
+"parameters": [
+{
+"name": "status",
+"required": false,
+"in": "query",
+"schema": {
+"enum": [
+"invited",
+"requested",
+"active",
+"removed"
+],
+"type": "string"
+}
+},
+{
+"name": "page",
+"required": false,
+"in": "query",
+"schema": {
+"type": "number"
+}
+},
+{
+"name": "limit",
+"required": false,
+"in": "query",
+"schema": {
+"type": "number"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Paginated student list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List students (Instructor)",
+"tags": [
+"InstructorStudents"
+]
+}
+},
+"/api/instructor/students/requests": {
+"get": {
+"description": "Returns pending student join requests.",
+"operationId": "listRequests",
+"parameters": [
+{
+"name": "limit",
+"required": false,
+"in": "query",
+"schema": {}
+},
+{
+"name": "page",
+"required": false,
+"in": "query",
+"schema": {}
+}
+],
+"responses": {
+"200": {
+"description": "Join requests list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List join requests (Instructor)",
+"tags": [
+"InstructorStudents"
+]
+}
+},
+"/api/instructor/students/requests/{id}/respond": {
+"patch": {
+"description": "Approve or decline a student join request.",
+"operationId": "respondToRequest",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/RespondRequestDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Request responded"
+},
+"403": {
+"description": "Student limit reached"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Respond to join request (Instructor)",
+"tags": [
+"InstructorStudents"
+]
+}
+},
+"/api/instructor/students/{id}": {
+"delete": {
+"description": "Removes a student from the instructor's student list.",
+"operationId": "removeStudent",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Student removed"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Remove student (Instructor)",
+"tags": [
+"InstructorStudents"
+]
+}
+},
+"/api/learner/instructors/{instructorId}/join": {
+"post": {
+"description": "Send a join request to an instructor.",
+"operationId": "requestToJoin",
+"parameters": [
+{
+"name": "instructorId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"201": {
+"description": "Join request sent"
+},
+"409": {
+"description": "Already linked or pending"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Request to join instructor (Learner)",
+"tags": [
+"StudentInstructors"
+]
+}
+},
+"/api/learner/my-instructors": {
+"get": {
+"description": "Returns instructors the student is linked to.",
+"operationId": "myInstructors",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Instructors list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "My instructors (Learner)",
+"tags": [
+"StudentInstructors"
+]
+}
+},
+"/api/learner/my-instructors/{instructorId}/courses": {
+"get": {
+"operationId": "getInstructorCourses",
+"parameters": [
+{
+"name": "instructorId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": ""
+}
+},
+"tags": [
+"StudentInstructors"
+]
+}
+},
+"/api/learner/invitations/accept": {
+"get": {
+"description": "Accept an instructor invitation via token.",
+"operationId": "accept",
+"parameters": [
+{
+"name": "token",
+"required": true,
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Invitation accepted"
+},
+"400": {
+"description": "Invalid token"
+},
+"410": {
+"description": "Invitation expired"
+}
+},
+"summary": "Accept invitation (Learner)",
+"tags": [
+"LearnerInvitations"
+]
+}
+},
+"/api/learner/invitations/info": {
+"get": {
+"operationId": "getInfo",
+"parameters": [
+{
+"name": "token",
+"required": true,
+"in": "query",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": ""
+}
+},
+"tags": [
+"LearnerInvitations"
+]
+}
+},
+"/api/instructor/students/{studentId}/assign": {
+"post": {
+"description": "Assign a student to specific courses. Empty array removes all, omit to assign all.",
+"operationId": "assign",
+"parameters": [
+{
+"name": "studentId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/AssignCourseDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Courses assigned"
+},
+"201": {
+"description": ""
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Assign student to courses (Instructor)",
+"tags": [
+"CourseAssignments"
+]
+}
+},
+"/api/instructor/students/{studentId}/assignments": {
+"get": {
+"description": "Returns course IDs the student is assigned to.",
+"operationId": "getAssignments",
+"parameters": [
+{
+"name": "studentId",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"responses": {
+"200": {
+"description": "Student course assignments"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Get student assignments (Instructor)",
+"tags": [
+"CourseAssignments"
+]
+}
+}
+},
+"info": {
+"title": "manara API",
+"description": "The manara API description",
+"version": "1.0",
+"contact": {}
+},
+"tags": [],
+"servers": [],
+"components": {
+"securitySchemes": {
+"bearer": {
+"scheme": "bearer",
+"bearerFormat": "JWT",
+"type": "http"
+}
+},
+"schemas": {
+"RegisterDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+},
+"password": {
+"pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
+"type": "string",
+"maxLength": 50,
+"minLength": 1
+},
+"firstName": {
+"minLength": 1,
+"type": "string"
+},
+"lastName": {
+"minLength": 1,
+"type": "string"
+},
+"role": {
+"enum": [
+"admin",
+"instructor",
+"learner"
+],
+"type": "string"
+},
+"client": {
+"enum": [
+"web",
+"mobile"
+],
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"email",
+"password",
+"firstName",
+"lastName"
+]
+},
+"DeviceInfo": {
+"properties": {
+"brand": {
+"minLength": 1,
+"type": "string"
+},
+"deviceType": {
+"minLength": 1,
+"type": "string"
+},
+"osVersion": {
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"brand",
+"deviceType"
+]
+},
+"LoginDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+},
+"password": {
+"maxLength": 50,
+"type": "string",
+"minLength": 1
+},
+"client": {
+"minLength": 1,
+"type": "string",
+"enum": [
+"web",
+"mobile"
+]
+},
+"deviceToken": {
+"type": "string"
+},
+"deviceInfo": {
+"$ref": "#/definitions/DeviceInfo"
+}
+},
+"type": "object",
+"required": [
+"email",
+"password",
+"client"
+]
+},
+"VerifyEmailDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+},
+"otp": {
+"minLength": 1,
+"maxLength": 6,
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"email",
+"otp"
+]
+},
+"SendOtpDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+}
+},
+"type": "object",
+"required": [
+"email"
+]
+},
+"ForgotPasswordDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+}
+},
+"type": "object",
+"required": [
+"email"
+]
+},
+"ResetPasswordDto": {
+"properties": {
+"token": {
+"minLength": 1,
+"type": "string"
+},
+"newPassword": {
+"pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
+"type": "string",
+"maxLength": 50,
+"minLength": 1
+}
+},
+"type": "object",
+"required": [
+"token",
+"newPassword"
+]
+},
+"RefreshTokenDto": {
+"properties": {
+"refreshToken": {
+"minLength": 1,
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"refreshToken"
+]
+},
+"CompleteRegistrationDto": {
+"properties": {
+"tempToken": {
+"minLength": 1,
+"type": "string"
+},
+"role": {
+"enum": [
+"admin",
+"instructor",
+"learner"
+],
+"type": "string"
+},
+"client": {
+"enum": [
+"web",
+"mobile"
+],
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"tempToken"
+]
+},
+"CreateUserDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+},
+"password": {
+"minLength": 1,
+"type": "string"
+},
+"firstName": {
+"minLength": 1,
+"type": "string"
+},
+"lastName": {
+"minLength": 1,
+"type": "string"
+},
+"role": {
+"minLength": 1,
+"type": "string",
+"enum": [
+"admin",
+"instructor",
+"learner"
+]
+},
+"isActive": {
+"type": "boolean"
+}
+},
+"type": "object",
+"required": [
+"email",
+"password",
+"firstName",
+"lastName",
+"role"
+]
+},
+"UpdateUserDto": {
+"properties": {
+"email": {
+"format": "email",
+"type": "string"
+},
+"password": {
+"minLength": 6,
+"type": "string"
+},
+"firstName": {
+"type": "string"
+},
+"lastName": {
+"type": "string"
+},
+"role": {
+"enum": [
+"admin",
+"instructor",
+"learner"
+],
+"type": "string"
+},
+"isActive": {
+"type": "boolean"
+}
+},
+"type": "object"
+},
+"UpdateProfileDto": {
+"properties": {
+"firstName": {
+"minLength": 1,
+"type": "string"
+},
+"lastName": {
+"minLength": 1,
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"firstName",
+"lastName"
+]
+},
+"UpdatePreferencesDto": {
+"properties": {
+"lang": {
+"type": "string",
+"enum": [
+"ar",
+"en"
+]
+},
+"mode": {
+"type": "string",
+"enum": [
+"light",
+"dark"
+]
+}
+},
+"type": "object"
+},
+"CreateCheckoutSessionDto": {
+"properties": {
+"planType": {
+"enum": [
+"free",
+"pro",
+"plus",
+"enterprise"
+],
+"type": "string"
+},
+"successUrl": {
+"type": "string"
+},
+"cancelUrl": {
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"planType"
+]
+},
+"UpdateCourseDto": {
+"properties": {
+"title": {
+"type": "string"
+},
+"description": {
+"type": "string"
+},
+"visibility": {
+"enum": [
+"public",
+"private"
+],
+"type": "string"
+},
+"thumbnailUrl": {
+"format": "url",
+"type": "string"
+},
+"isActive": {
+"type": "boolean"
+}
+},
+"type": "object"
+},
+"CreateCourseDto": {
+"properties": {
+"title": {
+"minLength": 1,
+"type": "string"
+},
+"description": {
+"minLength": 1,
+"type": "string"
+},
+"visibility": {
+"enum": [
+"public",
+"private"
+],
+"type": "string"
+},
+"thumbnailUrl": {
+"format": "url",
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"title",
+"description"
+]
+},
+"RespondEnrollmentDto": {
+"properties": {
+"status": {
+"minLength": 1,
+"type": "string",
+"enum": [
+"pending",
+"approved",
+"rejected"
+]
+}
+},
+"type": "object",
+"required": [
+"status"
+]
+},
+"InviteLearnerDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+}
+},
+"type": "object",
+"required": [
+"email"
+]
+},
+"CreateVideoDto": {
+"properties": {
+"title": {
+"minLength": 1,
+"type": "string"
+},
+"description": {
+"type": "string"
+}
+},
+"type": "object",
+"required": [
+"title"
+]
+},
+"ReorderVideosDto": {
+"properties": {
+"videoIds": {
+"minLength": 1,
+"type": "array",
+"items": {
+"type": "string"
+}
+}
+},
+"type": "object",
+"required": [
+"videoIds"
+]
+},
+"UpdateVideoDto": {
+"properties": {
+"title": {
+"type": "string"
+},
+"description": {
+"type": "string"
+}
+},
+"type": "object"
+},
+"InviteStudentDto": {
+"properties": {
+"email": {
+"minLength": 1,
+"type": "string",
+"format": "email"
+}
+},
+"type": "object",
+"required": [
+"email"
+]
+},
+"RespondRequestDto": {
+"properties": {
+"action": {
+"minLength": 1,
+"type": "string",
+"enum": [
+"approve",
+"decline"
+]
+}
+},
+"type": "object",
+"required": [
+"action"
+]
+},
+"AssignCourseDto": {
+"properties": {
+"courseIds": {
+"items": {
+"format": "uuid",
+"type": "string"
+},
+"type": "array"
+}
+},
+"type": "object"
+},
+"OAuthInitDto": {
+"properties": {
+"role": {
+"enum": [
+"admin",
+"instructor",
+"learner"
+],
+"type": "string"
+},
+"client": {
+"enum": [
+"web",
+"mobile"
+],
+"type": "string"
+}
+},
+"type": "object"
+}
+}
+}
+}

@@ -170,6 +170,7 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.onChanged,
+    this.maxLength,
   });
   final String label;
   final String? hint;
@@ -180,6 +181,7 @@ class AppTextField extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final void Function(String)? onChanged;
+  final int? maxLength;
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +191,7 @@ class AppTextField extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       onChanged: onChanged,
+      maxLength: maxLength,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

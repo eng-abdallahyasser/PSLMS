@@ -16,6 +16,7 @@ class RegisterUseCase {
       email: params.email,
       password: params.password,
       role: params.role,
+      client: params.client,
     );
   }
 }
@@ -26,6 +27,7 @@ class RegisterParams extends Equatable {
   final String email;
   final String password;
   final String role;
+  final String? client;
 
   const RegisterParams({
     required this.firstName,
@@ -33,8 +35,9 @@ class RegisterParams extends Equatable {
     required this.email,
     required this.password,
     this.role = 'learner',
+    this.client,
   });
 
   @override
-  List<Object> get props => [firstName, lastName, email, password, role];
+  List<Object?> get props => [firstName, lastName, email, password, role, client];
 }

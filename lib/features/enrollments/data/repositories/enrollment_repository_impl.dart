@@ -2,8 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
+import 'package:lms/features/courses/domain/entities/course_entity.dart';
 import 'package:lms/features/enrollments/data/datasources/enrollment_remote_datasource.dart';
 import 'package:lms/features/enrollments/domain/entities/enrollment_entity.dart';
+import 'package:lms/features/enrollments/domain/entities/my_course_detail_entity.dart';
 import 'package:lms/features/enrollments/domain/repositories/enrollment_repository.dart';
 
 class EnrollmentRepositoryImpl implements EnrollmentRepository {
@@ -23,6 +25,41 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     try {
       final enrollment = await remoteDataSource.enroll(courseId);
       return Right(enrollment.toEntity());
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CourseEntity>>> getMyCourses({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final response = await remoteDataSource.getMyCourses(page: page, limit: limit);
+      return Right(response.data.map((c) => c.toEntity()).toList());
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, MyCourseDetailEntity>> getMyCourseDetail(
+    String courseId,
+  ) async {
+    if (await networkInfo.isConnected == false) {
+      return Left(NetworkFailure());
+    }
+    try {
+      final detail = await remoteDataSource.getMyCourseDetail(courseId);
+      return Right(detail.toEntity());
     } on ServerException catch (e) {
       return Left(
         ServerFailure(message: e.message, statusCode: e.statusCode),
