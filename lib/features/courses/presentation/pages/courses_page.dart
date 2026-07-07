@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/courses/domain/entities/course_entity.dart';
 import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
@@ -38,19 +40,49 @@ class _CoursesPageState extends State<CoursesPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CourseCubit, CourseState>(
-      builder: (context, state) {
-        return switch (state) {
-          CourseInitial() => const SizedBox.shrink(),
-          CourseLoading() => const AppLoadingWidget(message: 'Loading courses...'),
-          CourseLoaded(:final courses, :final hasReachedMax) =>
-            _buildCourseList(courses, hasReachedMax),
-          CourseError(:final message) => AppErrorWidget(
-              message: message,
-              onRetry: () => context.read<CourseCubit>().getCourses(),
-            ),
-        };
-      },
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
+      appBar: AppBar(
+        title: const Text(
+          'Courses',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: const Color(0xFF1565C0),
+        foregroundColor: Colors.white,
+      ),
+      body: BlocBuilder<CourseCubit, CourseState>(
+        builder: (context, state) {
+          return switch (state) {
+            CourseInitial() => const SizedBox.shrink(),
+            CourseLoading() => const AppLoadingWidget(message: 'Loading courses...'),
+            CourseLoaded(:final courses, :final hasReachedMax) =>
+              _buildCourseList(courses, hasReachedMax),
+            CourseError(:final message) => Center(
+                child: AppErrorWidget(
+                  message: message,
+                  onRetry: () => context.read<CourseCubit>().getCourses(),
+                ),
+              ),
+          };
+        },
+      ),
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: 1,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.pop();
+              break;
+            case 1:
+              break;
+            case 2:
+              context.push('/profile');
+              break;
+          }
+        },
+      ),
     );
   }
 

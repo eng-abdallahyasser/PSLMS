@@ -12,25 +12,62 @@ class VerifyEmailPage extends StatefulWidget {
 }
 
 class _VerifyEmailPageState extends State<VerifyEmailPage> {
-  final _otpController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final _otpControllers = List.generate(6, (_) => TextEditingController());
+  final _otpFocusNodes = List.generate(6, (_) => FocusNode());
 
   @override
   void dispose() {
-    _otpController.dispose();
+    for (final controller in _otpControllers) {
+      controller.dispose();
+    }
+    for (final node in _otpFocusNodes) {
+      node.dispose();
+    }
     super.dispose();
   }
 
   String get _email =>
       (context.read<AuthCubit>().state as AuthOtpSent).email;
 
-  void _verify() {
-    if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthCubit>().verifyEmail(
-            email: _email,
-            otp: _otpController.text.trim(),
-          );
+  String get _otp => _otpControllers.map((c) => c.text).join();
+
+  void _onDigitChanged(int index, String value) {
+    if (value.length > 1) {
+      // Handle paste: distribute characters across fields
+      final digits = value.replaceAll(RegExp(r'[^0-9]'), '').split('');
+      for (int i = 0; i < digits.length && index + i < 6; i++) {
+        _otpControllers[index + i].text = digits[i];
+        if (index + i < 5) {
+          _otpFocusNodes[index + i + 1].requestFocus();
+        } else {
+          _otpFocusNodes[index + i].unfocus();
+        }
+      }
+      return;
     }
+
+    if (value.isNotEmpty && index < 5) {
+      _otpFocusNodes[index + 1].requestFocus();
+    } else if (value.isNotEmpty && index == 5) {
+      _otpFocusNodes[index].unfocus();
+    }
+  }
+
+  void _verify() {
+    final otp = _otp;
+    if (otp.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter all 6 digits'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    context.read<AuthCubit>().verifyEmail(
+          email: _email,
+          otp: otp,
+        );
   }
 
   void _resendOtp() {
@@ -74,85 +111,111 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 48),
-                  Icon(
-                    Icons.email_outlined,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Verify Your Email',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 48),
+                Icon(
+                  Icons.email_outlined,
+                  size: 80,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Verify Your Email',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'We sent a verification code to',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  _email,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                ),
+                const SizedBox(height: 40),
+                // 6-digit OTP input row
+                Form(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(6, (index) {
+                      return SizedBox(
+                        width: 52,
+                        height: 64,
+                        child: TextFormField(
+                          controller: _otpControllers[index],
+                          focusNode: _otpFocusNodes[index],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            filled: true,
+                            fillColor: Colors.grey[100],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: Color(0xFF1565C0),
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.all(12),
+                          ),
+                          onChanged: (value) => _onDigitChanged(index, value),
+                          onEditingComplete: () {},
                         ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'We sent a verification code to',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _email,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                  ),
-                  const SizedBox(height: 32),
-                  AppTextField(
-                    label: 'OTP Code',
-                    hint: 'Enter 6-digit code',
-                    controller: _otpController,
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'OTP is required';
-                      }
-                      if (value.trim().length != 6) {
-                        return 'OTP must be 6 digits';
-                      }
-                      return null;
-                    },
-                    prefixIcon: const Icon(Icons.pin_outlined),
-                  ),
-                  const SizedBox(height: 24),
-                  BlocBuilder<AuthCubit, AuthState>(
-                    builder: (context, state) {
-                      return AppPrimaryButton(
-                        label: 'Verify Email',
-                        isLoading: state is AuthLoading,
-                        onPressed: _verify,
-                        icon: Icons.verified_outlined,
                       );
-                    },
+                    }),
                   ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Didn't receive the code? ",
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                      TextButton(
-                        onPressed: _resendOtp,
-                        child: const Text('Resend'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 32),
+                BlocBuilder<AuthCubit, AuthState>(
+                  builder: (context, state) {
+                    return AppPrimaryButton(
+                      label: 'Verify Email',
+                      isLoading: state is AuthLoading,
+                      onPressed: _verify,
+                      icon: Icons.verified_outlined,
+                    );
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Didn't receive the code? ",
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    TextButton(
+                      onPressed: _resendOtp,
+                      child: const Text('Resend'),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),

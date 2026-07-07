@@ -5,6 +5,7 @@ import 'package:lms/features/auth/data/models/device_info_model.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/usecases/complete_registration_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/facebook_sign_in_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/google_sign_in_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/login_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/logout_usecase.dart';
@@ -196,6 +197,7 @@ class AuthCubit extends Cubit<AuthState> {
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
   final SendOtpUseCase sendOtpUseCase;
   final VerifyEmailUseCase verifyEmailUseCase;
   final CompleteRegistrationUseCase completeRegistrationUseCase;
@@ -206,6 +208,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.loginUseCase,
     required this.registerUseCase,
     required this.logoutUseCase,
+    required this.getCurrentUserUseCase,
     required this.sendOtpUseCase,
     required this.verifyEmailUseCase,
     required this.completeRegistrationUseCase,
@@ -257,7 +260,12 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> checkAuth() async {
-    emit(const AuthUnauthenticated());
+    emit(const AuthLoading());
+    final result = await getCurrentUserUseCase();
+    result.fold(
+      (failure) => emit(const AuthUnauthenticated()),
+      (user) => emit(AuthAuthenticated(user)),
+    );
   }
 
   Future<void> sendOtp({required String email}) async {

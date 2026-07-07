@@ -1,5 +1,6 @@
+import 'dart:developer' as developer;
+
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:lms/core/constants/app_constants.dart';
 import 'package:lms/core/errors/exceptions.dart';
 
@@ -25,7 +26,6 @@ class ApiClient {
 
     _dio.interceptors.addAll([
       _AuthInterceptor(tokenProvider),
-      _LogInterceptor(),
       _ErrorInterceptor(),
     ]);
   }
@@ -36,7 +36,10 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.get<T>(path, queryParameters: queryParameters, options: options);
+    developer.log('GET $path');
+    final response = await _dio.get<T>(path, queryParameters: queryParameters, options: options);
+    developer.log('GET $path: ${response.statusCode} ${response.data}');
+    return response;
   }
 
   Future<Response<T>> post<T>(
@@ -45,12 +48,15 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.post<T>(
+    developer.log('POST $path');
+    final response = await _dio.post<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
+    developer.log('POST $path: ${response.statusCode} ${response.data}');
+    return response;
   }
 
   Future<Response<T>> put<T>(
@@ -59,12 +65,15 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.put<T>(
+    developer.log('PUT $path');
+    final response = await _dio.put<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
+    developer.log('PUT $path: ${response.statusCode} ${response.data}');
+    return response;
   }
 
   Future<Response<T>> patch<T>(
@@ -73,12 +82,15 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.patch<T>(
+    developer.log('PATCH $path');
+    final response = await _dio.patch<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
+    developer.log('PATCH $path: ${response.statusCode} ${response.data}');
+    return response;
   }
 
   Future<Response<T>> delete<T>(
@@ -87,12 +99,15 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    return _dio.delete<T>(
+    developer.log('DELETE $path');
+    final response = await _dio.delete<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
+    developer.log('DELETE $path: ${response.statusCode} ${response.data}');
+    return response;
   }
 }
 
@@ -112,44 +127,6 @@ class _AuthInterceptor extends Interceptor {
       options.headers['Authorization'] = 'Bearer $token';
     }
     handler.next(options);
-  }
-}
-
-/// Interceptor that logs all requests and responses to the debug console.
-class _LogInterceptor extends Interceptor {
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final buffer = StringBuffer()
-      ..writeln('─── HTTP ─── ${options.method} ${options.path} ───')
-      ..writeln('Headers: ${options.headers}')
-      ..writeln('Query: ${options.queryParameters}');
-    if (options.data != null) {
-      buffer.writeln('Body: ${options.data}');
-    }
-    debugPrint(buffer.toString());
-    handler.next(options);
-  }
-
-  @override
-  void onResponse(Response response, ResponseInterceptorHandler handler) {
-    final buffer = StringBuffer()
-      ..writeln('─── RESPONSE ─── ${response.statusCode} ${response.requestOptions.path} ───')
-      ..writeln('Data: ${response.data}');
-    debugPrint(buffer.toString());
-    handler.next(response);
-  }
-
-  @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
-    final buffer = StringBuffer()
-      ..writeln('─── ERROR ─── ${err.response?.statusCode} ${err.requestOptions.path} ───')
-      ..writeln('Type: ${err.type}')
-      ..writeln('Message: ${err.message}');
-    if (err.response?.data != null) {
-      buffer.writeln('Data: ${err.response?.data}');
-    }
-    debugPrint(buffer.toString());
-    handler.next(err);
   }
 }
 

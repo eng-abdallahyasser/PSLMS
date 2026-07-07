@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
@@ -35,7 +36,7 @@ class _DashboardPageState extends State<DashboardPage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.person_outline),
-            onPressed: () => context.go('/profile'),
+            onPressed: () => context.push('/profile'),
             tooltip: 'Profile',
           ),
         ],
@@ -55,52 +56,20 @@ class _DashboardPageState extends State<DashboardPage> {
           };
         },
       ),
-      bottomNavigationBar: _buildBottomNav(),
-    );
-  }
-
-  Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(13),
-            blurRadius: 8,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF1565C0),
-        unselectedItemColor: Colors.grey,
         onTap: (index) {
           switch (index) {
             case 0:
               break;
             case 1:
-              context.go('/courses');
+              context.push('/courses');
               break;
             case 2:
-              context.go('/profile');
+              context.push('/profile');
               break;
           }
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Courses',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
       ),
     );
   }
@@ -301,7 +270,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   icon: Icons.menu_book,
                   label: 'Browse Courses',
                   color: const Color(0xFF1565C0),
-                  onTap: () => context.go('/courses'),
+                  onTap: () => context.push('/courses'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -310,7 +279,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   icon: Icons.person,
                   label: 'My Profile',
                   color: const Color(0xFF6A1B9A),
-                  onTap: () => context.go('/profile'),
+                  onTap: () => context.push('/profile'),
                 ),
               ),
             ],
@@ -337,22 +306,27 @@ class _DashboardPageState extends State<DashboardPage> {
         padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
                 color: bgColor,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: color, size: 20),
             ),
-            const Spacer(),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: color,
+            const SizedBox(height: 6),
+            Flexible(
+              child: Text(
+                value,
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(height: 2),
@@ -362,6 +336,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 fontSize: 12,
                 color: Colors.grey,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

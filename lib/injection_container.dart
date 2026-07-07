@@ -12,6 +12,7 @@ import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 import 'package:lms/features/auth/data/services/social_auth_service.dart';
 import 'package:lms/features/auth/domain/usecases/complete_registration_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/facebook_sign_in_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/google_sign_in_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/login_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/logout_usecase.dart';
@@ -160,6 +161,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<FacebookSignInUseCase>(
     () => FacebookSignInUseCase(sl<AuthRepository>()),
   );
+  sl.registerLazySingleton<GetCurrentUserUseCase>(
+    () => GetCurrentUserUseCase(sl<AuthRepository>()),
+  );
 
   // Cubit
   sl.registerFactory<AuthCubit>(
@@ -167,6 +171,7 @@ Future<void> initDependencies() async {
       loginUseCase: sl<LoginUseCase>(),
       registerUseCase: sl<RegisterUseCase>(),
       logoutUseCase: sl<LogoutUseCase>(),
+      getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),
       sendOtpUseCase: sl<SendOtpUseCase>(),
       verifyEmailUseCase: sl<VerifyEmailUseCase>(),
       completeRegistrationUseCase: sl<CompleteRegistrationUseCase>(),

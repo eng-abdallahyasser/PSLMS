@@ -337,11 +337,19 @@ class AuthRepositoryImpl implements AuthRepository {
       } on CacheException catch (e) {
         return Left(CacheFailure(e.message));
       }
-    } on ServerException catch (e) {
-      return Left(
-        ServerFailure(message: e.message, statusCode: e.statusCode),
-      );
+    } on ServerException {
+      // Server error — try cache as fallback
+      try {
+        final cached = await cacheCall();
+        if (cached != null) {
+          return Right(cached.toEntity());
+        }
+        return Left(ServerFailure(message: 'Could not fetch user data'));
+      } on CacheException catch (e) {
+        return Left(CacheFailure(e.message));
+      }
     } on AuthException catch (e) {
+      // Token invalid/expired — force re-login, do not use stale cache
       return Left(
         AuthFailure(message: e.message, statusCode: e.statusCode),
       );
