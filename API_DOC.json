@@ -133,6 +133,64 @@
 ]
 }
 },
+"/api/auth/send-mobile-otp": {
+"post": {
+"description": "Sends a 6-digit OTP code to the provided mobile number.",
+"operationId": "sendMobileOtp",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/SendMobileOtpDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Mobile OTP sent successfully"
+},
+"429": {
+"description": "Rate limit exceeded"
+}
+},
+"summary": "Send Mobile OTP",
+"tags": [
+"Auth"
+]
+}
+},
+"/api/auth/verify-mobile-otp": {
+"post": {
+"description": "Verifies mobile OTP and returns JWT tokens.",
+"operationId": "verifyMobileOtp",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/VerifyMobileOtpDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Mobile OTP verified successfully, returns tokens"
+},
+"400": {
+"description": "Invalid or expired OTP"
+}
+},
+"summary": "Verify mobile OTP and login",
+"tags": [
+"Auth"
+]
+}
+},
 "/api/auth/forgot-password": {
 "post": {
 "description": "Sends a password reset link to the user's email.",
@@ -2543,6 +2601,11 @@
 "type": "string",
 "format": "email"
 },
+"mobileNumber": {
+"pattern": "^\\+[1-9]\\d{1,14}$",
+"type": "string",
+"minLength": 1
+},
 "password": {
 "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
 "type": "string",
@@ -2576,6 +2639,7 @@
 "type": "object",
 "required": [
 "email",
+"mobileNumber",
 "password",
 "firstName",
 "lastName"
@@ -2667,6 +2731,61 @@
 "email"
 ]
 },
+"SendMobileOtpDto": {
+"properties": {
+"mobileNumber": {
+"pattern": "^\\+[1-9]\\d{1,14}$",
+"type": "string",
+"minLength": 1
+},
+"client": {
+"minLength": 1,
+"type": "string",
+"enum": [
+"web",
+"mobile"
+]
+}
+},
+"type": "object",
+"required": [
+"mobileNumber",
+"client"
+]
+},
+"VerifyMobileOtpDto": {
+"properties": {
+"mobileNumber": {
+"pattern": "^\\+[1-9]\\d{1,14}$",
+"type": "string",
+"minLength": 1
+},
+"otp": {
+"minLength": 1,
+"type": "string"
+},
+"client": {
+"minLength": 1,
+"type": "string",
+"enum": [
+"web",
+"mobile"
+]
+},
+"deviceToken": {
+"type": "string"
+},
+"deviceInfo": {
+"$ref": "#/definitions/DeviceInfo"
+}
+},
+"type": "object",
+"required": [
+"mobileNumber",
+"otp",
+"client"
+]
+},
 "ForgotPasswordDto": {
 "properties": {
 "email": {
@@ -2744,6 +2863,10 @@
 "minLength": 1,
 "type": "string",
 "format": "email"
+},
+"mobileNumber": {
+"pattern": "^\\+[1-9]\\d{1,14}$",
+"type": "string"
 },
 "password": {
 "minLength": 1,

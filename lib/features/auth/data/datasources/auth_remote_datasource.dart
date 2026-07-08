@@ -1,4 +1,5 @@
 
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
@@ -231,16 +232,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  ServerException _handleDioError(DioException e) {
+  Never _handleDioError(DioException e) {
     final error = e.error;
-    if (error is ServerException) return error;
-    if (error is AuthException) {
-      return ServerException(
-        message: error.message,
-        statusCode: error.statusCode,
-      );
-    }
-    return ServerException(
+    log('[DEBUG] _handleDioError: errorType=${error.runtimeType} message=${error is AuthException ? error.message : error is ServerException ? error.message : e.message}');
+    if (error is ServerException) throw error;
+    if (error is AuthException) throw error;
+    if (error is NetworkException) throw error;
+    throw ServerException(
       message: e.message ?? 'An unexpected error occurred',
       statusCode: e.response?.statusCode,
     );

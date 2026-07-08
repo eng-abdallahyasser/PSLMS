@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
@@ -59,6 +60,16 @@ class AuthEmailVerified extends AuthState {
 
   @override
   List<Object?> get props => [email];
+}
+
+class AuthEmailNotVerified extends AuthState {
+  final String email;
+  final String message;
+
+  const AuthEmailNotVerified({required this.email, required this.message});
+
+  @override
+  List<Object?> get props => [email, message];
 }
 
 class AuthRegistrationCompleted extends AuthState {
@@ -218,12 +229,26 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> login({required String email, required String password}) async {
     emit(const AuthLoading());
+    log('[DEBUG] Cubit login: calling loginUseCase');
     final result = await loginUseCase(
       LoginParams(email: email, password: password),
     );
+    log('[DEBUG] Cubit login: result received, fold called');
     result.fold(
-      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
-      (user) => emit(AuthAuthenticated(user)),
+      (failure) {
+        log('[DEBUG] Cubit login: failure branch type=${failure.runtimeType} message=${failure.message} errorCode=${failure is AuthFailure ? failure.errorCode : 'N/A'}');
+        if (failure is AuthFailure && failure.errorCode == 'VERIFY_EMAIL') {
+          log('[DEBUG] Cubit login: emitting AuthEmailNotVerified email=$email');
+          emit(AuthEmailNotVerified(email: email, message: failure.message));
+        } else {
+          log('[DEBUG] Cubit login: emitting AuthError');
+          emit(AuthError(_mapFailureToMessage(failure)));
+        }
+      },
+      (user) {
+        log('[DEBUG] Cubit login: success branch, emitting AuthAuthenticated');
+        emit(AuthAuthenticated(user));
+      },
     );
   }
 

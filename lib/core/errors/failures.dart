@@ -41,11 +41,13 @@ class AuthFailure extends Failure {
   const AuthFailure({
     required String message,
     this.statusCode,
+    this.errorCode,
   }) : super(message);
   final int? statusCode;
+  final String? errorCode;
 
   @override
-  List<Object> get props => [message, statusCode ?? 0];
+  List<Object> get props => [message, statusCode ?? 0, errorCode ?? ''];
 }
 
 /// Failure from input validation errors.

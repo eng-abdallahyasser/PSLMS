@@ -16,6 +16,15 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
   final _otpFocusNodes = List.generate(6, (_) => FocusNode());
 
   @override
+  void initState() {
+    super.initState();
+    final state = context.read<AuthCubit>().state;
+    if (state is AuthEmailNotVerified) {
+      context.read<AuthCubit>().sendOtp(email: state.email);
+    }
+  }
+
+  @override
   void dispose() {
     for (final controller in _otpControllers) {
       controller.dispose();
@@ -26,8 +35,14 @@ class _VerifyEmailPageState extends State<VerifyEmailPage> {
     super.dispose();
   }
 
-  String get _email =>
-      (context.read<AuthCubit>().state as AuthOtpSent).email;
+  String get _email {
+    final extra = GoRouterState.of(context).extra;
+    if (extra is String && extra.isNotEmpty) return extra;
+    final state = context.read<AuthCubit>().state;
+    if (state is AuthOtpSent) return state.email;
+    if (state is AuthEmailNotVerified) return state.email;
+    return '';
+  }
 
   String get _otp => _otpControllers.map((c) => c.text).join();
 

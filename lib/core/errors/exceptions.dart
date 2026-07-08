@@ -40,12 +40,14 @@ class AuthException implements Exception {
   const AuthException({
     required this.message,
     this.statusCode,
+    this.errorCode,
   });
   final String message;
   final int? statusCode;
+  final String? errorCode;
 
   @override
-  String toString() => 'AuthException: $message (status: $statusCode)';
+  String toString() => 'AuthException: $message (status: $statusCode, errorCode: $errorCode)';
 }
 
 /// Exception for validation errors.

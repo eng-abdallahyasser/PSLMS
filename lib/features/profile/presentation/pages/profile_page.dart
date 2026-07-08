@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/profile/domain/entities/profile_entity.dart';
@@ -35,32 +36,32 @@ class _ProfilePageState extends State<ProfilePage> {
         foregroundColor: Colors.white,
       ),
       body: BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state is AuthUnauthenticated) {
-          context.go('/login');
-        }
-        if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
-      },
-      child: BlocBuilder<ProfileCubit, ProfileState>(
-        builder: (context, state) {
-          return switch (state) {
-            ProfileInitial() => const SizedBox.shrink(),
-            ProfileLoading() => const AppLoadingWidget(),
-            ProfileLoaded(:final profile) => _buildProfile(profile),
-            ProfileError(:final message) => AppErrorWidget(
+        listener: (context, state) {
+          if (state is AuthUnauthenticated) {
+            context.go('/login');
+          }
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<ProfileCubit, ProfileState>(
+          builder: (context, state) {
+            return switch (state) {
+              ProfileInitial() => const SizedBox.shrink(),
+              ProfileLoading() => const AppLoadingWidget(),
+              ProfileLoaded(:final profile) => _buildProfile(profile),
+              ProfileError(:final message) => AppErrorWidget(
                 message: message,
                 onRetry: () => context.read<ProfileCubit>().getProfile(),
               ),
-          };
-        },
-      ),
+            };
+          },
+        ),
       ),
     );
   }
@@ -100,9 +101,9 @@ class _ProfilePageState extends State<ProfilePage> {
         Center(
           child: Text(
             profile.fullName,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
         ),
         const SizedBox(height: 4),
@@ -110,10 +111,7 @@ class _ProfilePageState extends State<ProfilePage> {
         Center(
           child: Text(
             profile.email,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
         ),
         const SizedBox(height: 4),
@@ -131,9 +129,9 @@ class _ProfilePageState extends State<ProfilePage> {
         // Preferences Section
         Text(
           'Preferences',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         // Language Toggle
@@ -149,9 +147,9 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
               selected: {profile.lang},
               onSelectionChanged: (selected) {
-                context
-                    .read<ProfileCubit>()
-                    .updatePreferences(lang: selected.first);
+                context.read<ProfileCubit>().updatePreferences(
+                  lang: selected.first,
+                );
               },
             ),
           ),
@@ -161,15 +159,13 @@ class _ProfilePageState extends State<ProfilePage> {
           child: ListTile(
             leading: const Icon(Icons.dark_mode),
             title: const Text('Theme'),
-            subtitle: Text(
-              profile.mode == 'dark' ? 'Dark Mode' : 'Light Mode',
-            ),
+            subtitle: Text(profile.mode == 'dark' ? 'Dark Mode' : 'Light Mode'),
             trailing: Switch(
               value: profile.mode == 'dark',
               onChanged: (value) {
-                context
-                    .read<ProfileCubit>()
-                    .updatePreferences(mode: value ? 'dark' : 'light');
+                context.read<ProfileCubit>().updatePreferences(
+                  mode: value ? 'dark' : 'light',
+                );
               },
             ),
           ),
@@ -178,9 +174,9 @@ class _ProfilePageState extends State<ProfilePage> {
         // Menu Items
         Text(
           'Account',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         _buildMenuItem(
@@ -200,11 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
           title: 'Help & Support',
           onTap: () {},
         ),
-        _buildMenuItem(
-          icon: Icons.info_outline,
-          title: 'About',
-          onTap: () {},
-        ),
+        _buildMenuItem(icon: Icons.info_outline, title: 'About', onTap: () {}),
         const SizedBox(height: 24),
         // Logout
         SizedBox(
@@ -212,16 +204,14 @@ class _ProfilePageState extends State<ProfilePage> {
           child: OutlinedButton.icon(
             onPressed: () => context.read<AuthCubit>().logout(),
             icon: const Icon(Icons.logout, color: Colors.red),
-            label: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.red),
-            ),
+            label: const Text('Logout', style: TextStyle(color: Colors.red)),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: Colors.red),
               padding: const EdgeInsets.symmetric(vertical: 12),
             ),
           ),
         ),
+        _buildVersionFooter(),
       ],
     );
   }
@@ -262,9 +252,9 @@ class _ProfilePageState extends State<ProfilePage> {
           ElevatedButton(
             onPressed: () {
               context.read<ProfileCubit>().updateProfile(
-                    firstName: firstNameController.text.trim(),
-                    lastName: lastNameController.text.trim(),
-                  );
+                firstName: firstNameController.text.trim(),
+                lastName: lastNameController.text.trim(),
+              );
               Navigator.of(ctx).pop();
             },
             child: const Text('Save'),
@@ -287,6 +277,24 @@ class _ProfilePageState extends State<ProfilePage> {
         trailing: const Icon(Icons.chevron_right),
         onTap: onTap,
       ),
+    );
+  }
+
+  Widget _buildVersionFooter() {
+    return FutureBuilder<PackageInfo>(
+      future: PackageInfo.fromPlatform(),
+      builder: (context, snapshot) {
+        final version = snapshot.data?.version ?? '';
+        final build = snapshot.data?.buildNumber ?? '';
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text(
+            'v$version${build.isNotEmpty ? '+$build' : ''}',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[400], fontSize: 12),
+          ),
+        );
+      },
     );
   }
 }

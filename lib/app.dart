@@ -47,7 +47,9 @@ class _AppState extends State<App> {
         final location = state.matchedLocation;
 
         if (authState is AuthInitial || authState is AuthLoading) {
-          return location == '/splash' ? null : '/splash';
+          final allowedRoutes = ['/splash', '/verify-email', '/login', '/register'];
+          if (!allowedRoutes.contains(location)) return '/splash';
+          return null;
         }
 
         if (authState is AuthAuthenticated) {
@@ -145,8 +147,11 @@ class _AppState extends State<App> {
         BlocProvider(create: (_) => sl<ProfileCubit>()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
-        listener: (_, _) {
+        listener: (context, state) {
           _authRefreshNotifier.value = !_authRefreshNotifier.value;
+          if (state is AuthEmailNotVerified) {
+            _router.go('/verify-email', extra: state.email);
+          }
         },
         child: MaterialApp.router(
           title: 'LMS',

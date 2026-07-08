@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
@@ -51,8 +52,9 @@ class AuthRepositoryImpl implements AuthRepository {
         ServerFailure(message: e.message, statusCode: e.statusCode),
       );
     } on AuthException catch (e) {
+      log('[DEBUG] Repo login caught AuthException: message=${e.message} errorCode=${e.errorCode} statusCode=${e.statusCode}');
       return Left(
-        AuthFailure(message: e.message, statusCode: e.statusCode),
+        AuthFailure(message: e.message, statusCode: e.statusCode, errorCode: e.errorCode),
       );
     }
   }
@@ -180,7 +182,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     } on AuthException catch (e) {
       return Left(
-        AuthFailure(message: e.message, statusCode: e.statusCode),
+        AuthFailure(message: e.message, statusCode: e.statusCode, errorCode: e.errorCode),
       );
     }
   }
@@ -276,7 +278,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on AuthException catch (e) {
-      return Left(AuthFailure(message: e.message, statusCode: e.statusCode));
+      return Left(AuthFailure(message: e.message, statusCode: e.statusCode, errorCode: e.errorCode));
     }
   }
 
@@ -313,7 +315,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     } on AuthException catch (e) {
-      return Left(AuthFailure(message: e.message, statusCode: e.statusCode));
+      return Left(AuthFailure(message: e.message, statusCode: e.statusCode, errorCode: e.errorCode));
     }
   }
 
@@ -350,9 +352,8 @@ class AuthRepositoryImpl implements AuthRepository {
         return Left(CacheFailure(e.message));
       }
     } on AuthException catch (e) {
-      // Token invalid/expired — force re-login, do not use stale cache
       return Left(
-        AuthFailure(message: e.message, statusCode: e.statusCode),
+        AuthFailure(message: e.message, statusCode: e.statusCode, errorCode: e.errorCode),
       );
     }
   }
