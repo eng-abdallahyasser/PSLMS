@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lms/core/theme/app_theme.dart';
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
 
 class CourseCard extends StatelessWidget {
   final CourseEntity course;

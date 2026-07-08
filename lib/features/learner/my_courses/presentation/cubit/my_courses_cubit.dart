@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
-import 'package:lms/features/enrollments/domain/entities/my_course_detail_entity.dart';
-import 'package:lms/features/enrollments/domain/usecases/get_my_course_detail_usecase.dart';
-import 'package:lms/features/enrollments/domain/usecases/get_my_courses_usecase.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
+import 'package:lms/features/shared/domain/entities/my_course_detail_entity.dart';
+import 'package:lms/features/learner/my_courses/domain/usecases/get_my_course_detail_usecase.dart';
+import 'package:lms/features/learner/my_courses/domain/usecases/get_my_courses_usecase.dart';
 
 sealed class MyCoursesState extends Equatable {
   const MyCoursesState();

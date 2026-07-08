@@ -1,6 +1,6 @@
-import 'package:lms/features/contents/data/models/content_model.dart';
-import 'package:lms/features/courses/data/models/course_model.dart';
-import 'package:lms/features/enrollments/domain/entities/my_course_detail_entity.dart';
+import 'package:lms/features/shared/data/models/content_model.dart';
+import 'package:lms/features/shared/data/models/course_model.dart';
+import 'package:lms/features/shared/domain/entities/my_course_detail_entity.dart';
 
 class MyCourseDetailModel {
   final CourseModel course;

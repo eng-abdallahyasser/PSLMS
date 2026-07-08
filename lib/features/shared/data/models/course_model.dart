@@ -1,4 +1,4 @@
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
 
 class InstructorModel extends InstructorEntity {
   const InstructorModel({

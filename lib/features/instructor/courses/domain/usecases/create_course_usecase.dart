@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/failures.dart';
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
-import 'package:lms/features/courses/domain/repositories/course_repository.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
+import 'package:lms/features/instructor/courses/domain/repositories/course_repository.dart';
 
 class CreateCourseUseCase {
   final CourseRepository repository;

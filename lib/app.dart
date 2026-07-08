@@ -8,17 +8,17 @@ import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/auth/presentation/pages/login_page.dart';
 import 'package:lms/features/auth/presentation/pages/register_page.dart';
 import 'package:lms/features/auth/presentation/pages/verify_email_page.dart';
-import 'package:lms/features/splash/presentation/pages/splash_page.dart';
-import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
-import 'package:lms/features/courses/presentation/pages/courses_page.dart';
-import 'package:lms/features/contents/presentation/cubit/content_cubit.dart';
-import 'package:lms/features/contents/presentation/pages/contents_page.dart';
-import 'package:lms/features/enrollments/presentation/cubit/enrollment_cubit.dart';
-import 'package:lms/features/enrollments/presentation/pages/enrollments_page.dart';
-import 'package:lms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
-import 'package:lms/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:lms/features/profile/presentation/cubit/profile_cubit.dart';
-import 'package:lms/features/profile/presentation/pages/profile_page.dart';
+import 'package:lms/features/shared/splash/presentation/pages/splash_page.dart';
+import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.dart';
+import 'package:lms/features/instructor/courses/presentation/pages/courses_page.dart';
+import 'package:lms/features/instructor/content/presentation/cubit/content_cubit.dart';
+import 'package:lms/features/instructor/content/presentation/pages/contents_page.dart';
+import 'package:lms/features/instructor/enrollments/presentation/cubit/enrollment_cubit.dart';
+import 'package:lms/features/instructor/enrollments/presentation/pages/enrollments_page.dart';
+import 'package:lms/features/instructor/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:lms/features/instructor/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:lms/features/shared/profile/presentation/cubit/profile_cubit.dart';
+import 'package:lms/features/shared/profile/presentation/pages/profile_page.dart';
 
 String _courseIdFromState(GoRouterState state) {
   return state.pathParameters['courseId'] ?? '';

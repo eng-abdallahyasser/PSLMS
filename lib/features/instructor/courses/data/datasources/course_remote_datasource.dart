@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
-import 'package:lms/features/courses/data/models/course_model.dart';
+import 'package:lms/features/shared/data/models/course_model.dart';
 
 /// Pagination metadata returned by the API.
 class PaginationMeta {

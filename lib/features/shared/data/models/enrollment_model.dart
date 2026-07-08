@@ -1,4 +1,4 @@
-import 'package:lms/features/enrollments/domain/entities/enrollment_entity.dart';
+import 'package:lms/features/shared/domain/entities/enrollment_entity.dart';
 
 class EnrollmentModel extends EnrollmentEntity {
   const EnrollmentModel({

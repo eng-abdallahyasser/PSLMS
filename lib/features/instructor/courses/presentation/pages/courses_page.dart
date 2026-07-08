@@ -5,9 +5,9 @@ import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
-import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
-import 'package:lms/features/courses/presentation/widgets/course_card.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
+import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.dart';
+import 'package:lms/features/instructor/courses/presentation/widgets/course_card.dart';
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({super.key});

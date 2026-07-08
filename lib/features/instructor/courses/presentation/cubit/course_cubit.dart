@@ -2,11 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
-import 'package:lms/features/courses/domain/usecases/create_course_usecase.dart';
-import 'package:lms/features/courses/domain/usecases/delete_course_usecase.dart';
-import 'package:lms/features/courses/domain/usecases/get_courses_usecase.dart';
-import 'package:lms/features/courses/domain/usecases/update_course_usecase.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
+import 'package:lms/features/instructor/courses/domain/usecases/create_course_usecase.dart';
+import 'package:lms/features/instructor/courses/domain/usecases/delete_course_usecase.dart';
+import 'package:lms/features/instructor/courses/domain/usecases/get_courses_usecase.dart';
+import 'package:lms/features/instructor/courses/domain/usecases/update_course_usecase.dart';
 
 // ----- States -----
 

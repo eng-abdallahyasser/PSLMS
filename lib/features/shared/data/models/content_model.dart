@@ -1,4 +1,4 @@
-import 'package:lms/features/contents/domain/entities/content_entity.dart';
+import 'package:lms/features/shared/domain/entities/content_entity.dart';
 
 class ContentModel extends ContentEntity {
   const ContentModel({

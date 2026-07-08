@@ -3,9 +3,9 @@ import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
-import 'package:lms/features/courses/data/datasources/course_remote_datasource.dart';
-import 'package:lms/features/courses/domain/entities/course_entity.dart';
-import 'package:lms/features/courses/domain/repositories/course_repository.dart';
+import 'package:lms/features/instructor/courses/data/datasources/course_remote_datasource.dart';
+import 'package:lms/features/shared/domain/entities/course_entity.dart';
+import 'package:lms/features/instructor/courses/domain/repositories/course_repository.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
   final CourseRemoteDataSource remoteDataSource;
