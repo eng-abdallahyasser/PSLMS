@@ -143,7 +143,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.resetPassword(
@@ -171,7 +171,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, String>> refreshToken(String refreshToken) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final response = await remoteDataSource.refreshToken(refreshToken);
@@ -225,6 +225,61 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, void>> sendMobileOtp({
+    required String mobileNumber,
+    required String client,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await remoteDataSource.sendMobileOtp(
+        mobileNumber: mobileNumber,
+        client: client,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> verifyMobileOtp({
+    required String mobileNumber,
+    required String otp,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      final loginResponse = await remoteDataSource.verifyMobileOtp(
+        mobileNumber: mobileNumber,
+        otp: otp,
+        client: client,
+        deviceToken: deviceToken,
+        deviceInfo: deviceInfo,
+      );
+      await localDataSource.saveToken(loginResponse.accessToken);
+      await localDataSource.saveRefreshToken(loginResponse.refreshToken);
+      await localDataSource.cacheUser(loginResponse.user);
+      return Right(loginResponse.user.toEntity());
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    } on AuthException catch (e) {
+      return Left(
+        AuthFailure(message: e.message, statusCode: e.statusCode, errorCode: e.errorCode),
+      );
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> completeRegistration({
     required String tempToken,
     String? role,
@@ -259,7 +314,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       if (result.needsRegistration) {
-        return Left(ServerFailure(
+        return const Left(ServerFailure(
           message: 'Registration incomplete',
           statusCode: 400,
         ));
@@ -296,7 +351,7 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       if (result.needsRegistration) {
-        return Left(ServerFailure(
+        return const Left(ServerFailure(
           message: 'Registration incomplete',
           statusCode: 400,
         ));
@@ -338,7 +393,7 @@ class AuthRepositoryImpl implements AuthRepository {
         if (cached != null) {
           return Right(cached.toEntity());
         }
-        return Left(NetworkFailure());
+        return const Left(NetworkFailure());
       } on CacheException catch (e) {
         return Left(CacheFailure(e.message));
       }
@@ -349,7 +404,7 @@ class AuthRepositoryImpl implements AuthRepository {
         if (cached != null) {
           return Right(cached.toEntity());
         }
-        return Left(ServerFailure(message: 'Could not fetch user data'));
+        return const Left(ServerFailure(message: 'Could not fetch user data'));
       } on CacheException catch (e) {
         return Left(CacheFailure(e.message));
       }

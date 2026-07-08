@@ -59,6 +59,7 @@ dependencies:
   # OAuth via system browser
   flutter_web_auth_2: ^4.1.0
   package_info_plus: ^10.2.0
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

@@ -31,4 +31,24 @@ abstract class ContentRepository {
     String courseId,
     String contentId,
   );
+
+  /// Reorder content items within a course (instructor).
+  Future<Either<Failure, void>> reorderContent({
+    required String courseId,
+    required List<String> contentIds,
+  });
+
+  /// Update a content item's metadata (instructor).
+  Future<Either<Failure, ContentEntity>> updateContent({
+    required String courseId,
+    required String contentId,
+    String? title,
+    String? description,
+  });
+
+  /// Delete a content item from a course (instructor).
+  Future<Either<Failure, void>> deleteContent({
+    required String courseId,
+    required String contentId,
+  });
 }

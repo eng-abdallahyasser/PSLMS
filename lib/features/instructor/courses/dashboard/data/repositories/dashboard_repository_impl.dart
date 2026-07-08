@@ -3,9 +3,9 @@ import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
-import 'package:lms/features/instructor/dashboard/data/datasources/dashboard_remote_datasource.dart';
-import 'package:lms/features/instructor/dashboard/domain/entities/dashboard_stats_entity.dart';
-import 'package:lms/features/instructor/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:lms/features/instructor/courses/dashboard/data/datasources/dashboard_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashboard_stats_entity.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/repositories/dashboard_repository.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
   final DashboardRemoteDataSource remoteDataSource;

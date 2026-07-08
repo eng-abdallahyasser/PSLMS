@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/shared/domain/entities/enrollment_entity.dart';
-import 'package:lms/features/instructor/enrollments/presentation/cubit/enrollment_cubit.dart';
+import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
 
 class EnrollmentsPage extends StatefulWidget {
   final String courseId;

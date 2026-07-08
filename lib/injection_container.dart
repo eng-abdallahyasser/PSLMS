@@ -12,6 +12,10 @@ import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 import 'package:lms/features/auth/data/services/social_auth_service.dart';
 import 'package:lms/features/auth/domain/usecases/complete_registration_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/facebook_sign_in_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/reset_password_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/send_mobile_otp_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/verify_mobile_otp_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/get_current_user_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/google_sign_in_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/login_usecase.dart';
@@ -25,34 +29,61 @@ import 'package:lms/features/instructor/courses/data/repositories/course_reposit
 import 'package:lms/features/instructor/courses/domain/repositories/course_repository.dart';
 import 'package:lms/features/instructor/courses/domain/usecases/create_course_usecase.dart';
 import 'package:lms/features/instructor/courses/domain/usecases/delete_course_usecase.dart';
+import 'package:lms/features/instructor/students/data/datasources/student_remote_datasource.dart';
+import 'package:lms/features/instructor/students/data/repositories/student_repository_impl.dart';
+import 'package:lms/features/instructor/students/domain/repositories/student_repository.dart';
+import 'package:lms/features/instructor/students/domain/usecases/invite_student_usecase.dart';
+import 'package:lms/features/instructor/students/domain/usecases/list_students_usecase.dart';
+import 'package:lms/features/instructor/students/domain/usecases/list_requests_usecase.dart';
+import 'package:lms/features/instructor/students/domain/usecases/respond_to_request_usecase.dart';
+import 'package:lms/features/instructor/students/domain/usecases/remove_student_usecase.dart';
+import 'package:lms/features/instructor/students/domain/usecases/assign_courses_usecase.dart';
+import 'package:lms/features/instructor/students/domain/usecases/get_assignments_usecase.dart';
+import 'package:lms/features/instructor/students/presentation/cubit/student_cubit.dart';
+import 'package:lms/features/instructor/subscriptions/data/datasources/subscription_remote_datasource.dart';
+import 'package:lms/features/instructor/subscriptions/data/repositories/subscription_repository_impl.dart';
+import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/cancel_subscription_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/create_checkout_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/create_portal_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/choose_plan_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/buy_storage_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/get_plans_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/get_storage_addons_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/get_subscription_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/domain/usecases/refresh_subscription_usecase.dart';
+import 'package:lms/features/instructor/subscriptions/presentation/cubit/subscription_cubit.dart';
 import 'package:lms/features/instructor/courses/domain/usecases/get_courses_usecase.dart';
 import 'package:lms/features/instructor/courses/domain/usecases/update_course_usecase.dart';
 import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.dart';
-import 'package:lms/features/instructor/content/data/datasources/content_remote_datasource.dart';
-import 'package:lms/features/instructor/content/data/repositories/content_repository_impl.dart';
-import 'package:lms/features/instructor/content/domain/repositories/content_repository.dart';
-import 'package:lms/features/instructor/content/domain/usecases/get_course_contents_usecase.dart';
-import 'package:lms/features/learner/content/domain/usecases/get_my_content_detail_usecase.dart';
-import 'package:lms/features/learner/content/domain/usecases/get_my_course_contents_usecase.dart';
-import 'package:lms/features/instructor/content/domain/usecases/upload_content_usecase.dart';
-import 'package:lms/features/instructor/content/presentation/cubit/content_cubit.dart';
-import 'package:lms/features/learner/content/presentation/cubit/learner_content_cubit.dart';
-import 'package:lms/features/instructor/dashboard/data/datasources/dashboard_remote_datasource.dart';
-import 'package:lms/features/instructor/dashboard/data/repositories/dashboard_repository_impl.dart';
-import 'package:lms/features/instructor/dashboard/domain/repositories/dashboard_repository.dart';
-import 'package:lms/features/instructor/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
-import 'package:lms/features/instructor/dashboard/presentation/cubit/dashboard_cubit.dart';
-import 'package:lms/features/instructor/enrollments/data/datasources/enrollment_remote_datasource.dart';
-import 'package:lms/features/instructor/enrollments/data/repositories/enrollment_repository_impl.dart';
-import 'package:lms/features/instructor/enrollments/domain/repositories/enrollment_repository.dart';
-import 'package:lms/features/learner/enrollments/domain/usecases/enroll_in_course_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/get_enrollments_usecase.dart';
+import 'package:lms/features/instructor/courses/content/data/datasources/content_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/content/data/repositories/content_repository_impl.dart';
+import 'package:lms/features/instructor/courses/content/domain/repositories/content_repository.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/delete_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/get_course_contents_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/reorder_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/update_content_usecase.dart';
+import 'package:lms/features/learner/my_courses/content/domain/usecases/get_my_content_detail_usecase.dart';
+import 'package:lms/features/learner/my_courses/content/domain/usecases/get_my_course_contents_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/upload_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/presentation/cubit/content_cubit.dart';
+import 'package:lms/features/learner/my_courses/content/presentation/cubit/learner_content_cubit.dart';
+import 'package:lms/features/instructor/courses/dashboard/data/datasources/dashboard_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/dashboard/data/repositories/dashboard_repository_impl.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
+import 'package:lms/features/instructor/courses/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:lms/features/instructor/courses/enrollments/data/datasources/enrollment_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/enrollments/data/repositories/enrollment_repository_impl.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/repositories/enrollment_repository.dart';
+import 'package:lms/features/learner/my_courses/enrollments/domain/usecases/enroll_in_course_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/get_enrollments_usecase.dart';
 import 'package:lms/features/learner/my_courses/domain/usecases/get_my_course_detail_usecase.dart';
 import 'package:lms/features/learner/my_courses/domain/usecases/get_my_courses_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/invite_learner_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/remove_enrollment_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/respond_to_enrollment_usecase.dart';
-import 'package:lms/features/instructor/enrollments/presentation/cubit/enrollment_cubit.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/invite_learner_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/remove_enrollment_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/respond_to_enrollment_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
 import 'package:lms/features/learner/my_courses/presentation/cubit/my_courses_cubit.dart';
 import 'package:lms/features/learner/instructors/data/datasources/instructor_remote_datasource.dart';
 import 'package:lms/features/learner/instructors/data/repositories/instructor_repository_impl.dart';
@@ -153,6 +184,12 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<LogoutUseCase>(
     () => LogoutUseCase(sl<AuthRepository>()),
   );
+  sl.registerLazySingleton<SendMobileOtpUseCase>(
+    () => SendMobileOtpUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<VerifyMobileOtpUseCase>(
+    () => VerifyMobileOtpUseCase(sl<AuthRepository>()),
+  );
   sl.registerLazySingleton<SendOtpUseCase>(
     () => SendOtpUseCase(sl<AuthRepository>()),
   );
@@ -168,6 +205,12 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<FacebookSignInUseCase>(
     () => FacebookSignInUseCase(sl<AuthRepository>()),
   );
+  sl.registerLazySingleton<ForgotPasswordUseCase>(
+    () => ForgotPasswordUseCase(sl<AuthRepository>()),
+  );
+  sl.registerLazySingleton<ResetPasswordUseCase>(
+    () => ResetPasswordUseCase(sl<AuthRepository>()),
+  );
   sl.registerLazySingleton<GetCurrentUserUseCase>(
     () => GetCurrentUserUseCase(sl<AuthRepository>()),
   );
@@ -181,6 +224,10 @@ Future<void> initDependencies() async {
       getCurrentUserUseCase: sl<GetCurrentUserUseCase>(),
       sendOtpUseCase: sl<SendOtpUseCase>(),
       verifyEmailUseCase: sl<VerifyEmailUseCase>(),
+      forgotPasswordUseCase: sl<ForgotPasswordUseCase>(),
+      resetPasswordUseCase: sl<ResetPasswordUseCase>(),
+      sendMobileOtpUseCase: sl<SendMobileOtpUseCase>(),
+      verifyMobileOtpUseCase: sl<VerifyMobileOtpUseCase>(),
       completeRegistrationUseCase: sl<CompleteRegistrationUseCase>(),
       googleSignInUseCase: sl<GoogleSignInUseCase>(),
       facebookSignInUseCase: sl<FacebookSignInUseCase>(),
@@ -248,6 +295,15 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<UploadContentUseCase>(
     () => UploadContentUseCase(sl<ContentRepository>()),
   );
+  sl.registerLazySingleton<ReorderContentUseCase>(
+    () => ReorderContentUseCase(sl<ContentRepository>()),
+  );
+  sl.registerLazySingleton<UpdateContentUseCase>(
+    () => UpdateContentUseCase(sl<ContentRepository>()),
+  );
+  sl.registerLazySingleton<DeleteContentUseCase>(
+    () => DeleteContentUseCase(sl<ContentRepository>()),
+  );
   sl.registerLazySingleton<GetMyCourseContentsUseCase>(
     () => GetMyCourseContentsUseCase(sl<ContentRepository>()),
   );
@@ -260,6 +316,9 @@ Future<void> initDependencies() async {
     () => ContentCubit(
       getCourseContentsUseCase: sl<GetCourseContentsUseCase>(),
       uploadContentUseCase: sl<UploadContentUseCase>(),
+      reorderContentUseCase: sl<ReorderContentUseCase>(),
+      updateContentUseCase: sl<UpdateContentUseCase>(),
+      deleteContentUseCase: sl<DeleteContentUseCase>(),
     ),
   );
   sl.registerFactory<LearnerContentCubit>(
@@ -407,6 +466,116 @@ Future<void> initDependencies() async {
       getNotificationsUseCase: sl<GetNotificationsUseCase>(),
       markNotificationReadUseCase: sl<MarkNotificationReadUseCase>(),
       markAllNotificationsReadUseCase: sl<MarkAllNotificationsReadUseCase>(),
+    ),
+  );
+
+  // ===== Subscriptions Feature =====
+
+  // Data source
+  sl.registerLazySingleton<SubscriptionRemoteDataSource>(
+    () => SubscriptionRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<SubscriptionRepository>(
+    () => SubscriptionRepositoryImpl(
+      remoteDataSource: sl<SubscriptionRemoteDataSource>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<GetSubscriptionUseCase>(
+    () => GetSubscriptionUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<GetPlansUseCase>(
+    () => GetPlansUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<CreateCheckoutUseCase>(
+    () => CreateCheckoutUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<CreatePortalUseCase>(
+    () => CreatePortalUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<ChoosePlanUseCase>(
+    () => ChoosePlanUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<BuyStorageUseCase>(
+    () => BuyStorageUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<GetStorageAddonsUseCase>(
+    () => GetStorageAddonsUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<RefreshSubscriptionUseCase>(
+    () => RefreshSubscriptionUseCase(sl<SubscriptionRepository>()),
+  );
+  sl.registerLazySingleton<CancelSubscriptionUseCase>(
+    () => CancelSubscriptionUseCase(sl<SubscriptionRepository>()),
+  );
+
+  // Cubit
+  sl.registerFactory<SubscriptionCubit>(
+    () => SubscriptionCubit(
+      getSubscriptionUseCase: sl<GetSubscriptionUseCase>(),
+      getPlansUseCase: sl<GetPlansUseCase>(),
+      createCheckoutUseCase: sl<CreateCheckoutUseCase>(),
+      createPortalUseCase: sl<CreatePortalUseCase>(),
+      choosePlanUseCase: sl<ChoosePlanUseCase>(),
+      buyStorageUseCase: sl<BuyStorageUseCase>(),
+      getStorageAddonsUseCase: sl<GetStorageAddonsUseCase>(),
+      refreshSubscriptionUseCase: sl<RefreshSubscriptionUseCase>(),
+      cancelSubscriptionUseCase: sl<CancelSubscriptionUseCase>(),
+    ),
+  );
+
+  // ===== Students Feature =====
+
+  // Data source
+  sl.registerLazySingleton<StudentRemoteDataSource>(
+    () => StudentRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<StudentRepository>(
+    () => StudentRepositoryImpl(
+      remoteDataSource: sl<StudentRemoteDataSource>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<InviteStudentUseCase>(
+    () => InviteStudentUseCase(sl<StudentRepository>()),
+  );
+  sl.registerLazySingleton<ListStudentsUseCase>(
+    () => ListStudentsUseCase(sl<StudentRepository>()),
+  );
+  sl.registerLazySingleton<ListRequestsUseCase>(
+    () => ListRequestsUseCase(sl<StudentRepository>()),
+  );
+  sl.registerLazySingleton<RespondToRequestUseCase>(
+    () => RespondToRequestUseCase(sl<StudentRepository>()),
+  );
+  sl.registerLazySingleton<RemoveStudentUseCase>(
+    () => RemoveStudentUseCase(sl<StudentRepository>()),
+  );
+  sl.registerLazySingleton<AssignCoursesUseCase>(
+    () => AssignCoursesUseCase(sl<StudentRepository>()),
+  );
+  sl.registerLazySingleton<GetAssignmentsUseCase>(
+    () => GetAssignmentsUseCase(sl<StudentRepository>()),
+  );
+
+  // Cubit
+  sl.registerFactory<StudentCubit>(
+    () => StudentCubit(
+      inviteStudentUseCase: sl<InviteStudentUseCase>(),
+      listStudentsUseCase: sl<ListStudentsUseCase>(),
+      listRequestsUseCase: sl<ListRequestsUseCase>(),
+      respondToRequestUseCase: sl<RespondToRequestUseCase>(),
+      removeStudentUseCase: sl<RemoveStudentUseCase>(),
+      assignCoursesUseCase: sl<AssignCoursesUseCase>(),
+      getAssignmentsUseCase: sl<GetAssignmentsUseCase>(),
     ),
   );
 

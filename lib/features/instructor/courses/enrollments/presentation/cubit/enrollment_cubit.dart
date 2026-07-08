@@ -2,11 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/shared/domain/entities/enrollment_entity.dart';
-import 'package:lms/features/learner/enrollments/domain/usecases/enroll_in_course_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/get_enrollments_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/invite_learner_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/remove_enrollment_usecase.dart';
-import 'package:lms/features/instructor/enrollments/domain/usecases/respond_to_enrollment_usecase.dart';
+import 'package:lms/features/learner/my_courses/enrollments/domain/usecases/enroll_in_course_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/get_enrollments_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/invite_learner_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/remove_enrollment_usecase.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/usecases/respond_to_enrollment_usecase.dart';
 
 // ----- States -----
 

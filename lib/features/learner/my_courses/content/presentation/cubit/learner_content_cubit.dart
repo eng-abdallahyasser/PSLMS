@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
-import 'package:lms/features/learner/content/domain/usecases/get_my_content_detail_usecase.dart';
-import 'package:lms/features/learner/content/domain/usecases/get_my_course_contents_usecase.dart';
+import 'package:lms/features/learner/my_courses/content/domain/usecases/get_my_content_detail_usecase.dart';
+import 'package:lms/features/learner/my_courses/content/domain/usecases/get_my_course_contents_usecase.dart';
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
 
 sealed class LearnerContentState extends Equatable {
@@ -63,14 +63,14 @@ class LearnerContentDetailError extends LearnerContentState {
 }
 
 class LearnerContentCubit extends Cubit<LearnerContentState> {
-  final GetMyCourseContentsUseCase getMyCourseContentsUseCase;
-  final GetMyContentDetailUseCase getMyContentDetailUseCase;
+
 
   LearnerContentCubit({
     required this.getMyCourseContentsUseCase,
     required this.getMyContentDetailUseCase,
   }) : super(const LearnerContentInitial());
-
+  final GetMyCourseContentsUseCase getMyCourseContentsUseCase;
+  final GetMyContentDetailUseCase getMyContentDetailUseCase;
   Future<void> getContents(String courseId, {int page = 1, int limit = 10}) async {
     emit(const LearnerContentLoading());
     final result = await getMyCourseContentsUseCase(

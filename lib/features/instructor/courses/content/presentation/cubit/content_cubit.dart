@@ -2,8 +2,11 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
-import 'package:lms/features/instructor/content/domain/usecases/get_course_contents_usecase.dart';
-import 'package:lms/features/instructor/content/domain/usecases/upload_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/delete_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/get_course_contents_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/reorder_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/update_content_usecase.dart';
+import 'package:lms/features/instructor/courses/content/domain/usecases/upload_content_usecase.dart';
 
 // ----- States -----
 
@@ -55,10 +58,16 @@ class ContentError extends ContentState {
 class ContentCubit extends Cubit<ContentState> {
   final GetCourseContentsUseCase getCourseContentsUseCase;
   final UploadContentUseCase uploadContentUseCase;
+  final ReorderContentUseCase reorderContentUseCase;
+  final UpdateContentUseCase updateContentUseCase;
+  final DeleteContentUseCase deleteContentUseCase;
 
   ContentCubit({
     required this.getCourseContentsUseCase,
     required this.uploadContentUseCase,
+    required this.reorderContentUseCase,
+    required this.updateContentUseCase,
+    required this.deleteContentUseCase,
   }) : super(const ContentInitial());
 
   Future<void> getContents(String courseId) async {
@@ -87,6 +96,64 @@ class ContentCubit extends Cubit<ContentState> {
       (failure) => emit(ContentError(_mapFailureToMessage(failure))),
       (_) {
         emit(const ContentActionSuccess('Content uploaded successfully!'));
+        getContents(courseId);
+      },
+    );
+  }
+
+  Future<void> reorderContent({
+    required String courseId,
+    required List<String> contentIds,
+  }) async {
+    emit(const ContentLoading());
+    final result = await reorderContentUseCase(
+      ReorderContentParams(courseId: courseId, contentIds: contentIds),
+    );
+    result.fold(
+      (failure) => emit(ContentError(_mapFailureToMessage(failure))),
+      (_) {
+        emit(const ContentActionSuccess('Content reordered!'));
+        getContents(courseId);
+      },
+    );
+  }
+
+  Future<void> updateContent({
+    required String courseId,
+    required String contentId,
+    String? title,
+    String? description,
+  }) async {
+    emit(const ContentLoading());
+    final result = await updateContentUseCase(
+      UpdateContentParams(
+        courseId: courseId,
+        contentId: contentId,
+        title: title,
+        description: description,
+      ),
+    );
+    result.fold(
+      (failure) => emit(ContentError(_mapFailureToMessage(failure))),
+      (_) {
+        emit(const ContentActionSuccess('Content updated!'));
+        getContents(courseId);
+      },
+    );
+  }
+
+  Future<void> deleteContent({
+    required String courseId,
+    required String contentId,
+  }) async {
+    emit(const ContentLoading());
+    final result = await deleteContentUseCase(
+      DeleteContentParams(courseId: courseId, contentId: contentId),
+    );
+    result.fold(
+      (failure) => emit(ContentError(_mapFailureToMessage(failure))),
+      (_) {
+        emit(const ContentActionSuccess('Content deleted!'));
         getContents(courseId);
       },
     );

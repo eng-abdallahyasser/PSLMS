@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
-import 'package:lms/features/instructor/content/presentation/cubit/content_cubit.dart';
+import 'package:lms/features/instructor/courses/content/presentation/cubit/content_cubit.dart';
 
 class ContentsPage extends StatefulWidget {
   final String courseId;
@@ -102,93 +102,119 @@ class _ContentsPageState extends State<ContentsPage> {
       onRefresh: () async {
         await context.read<ContentCubit>().getContents(widget.courseId);
       },
-      child: ListView.builder(
+      child: ReorderableListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: contents.length,
+        onReorder: (oldIndex, newIndex) {
+          if (newIndex > oldIndex) newIndex--;
+          final updated = List<ContentEntity>.from(contents);
+          final item = updated.removeAt(oldIndex);
+          updated.insert(newIndex, item);
+          context.read<ContentCubit>().reorderContent(
+                courseId: widget.courseId,
+                contentIds: updated.map((c) => c.id).toList(),
+              );
+        },
         itemBuilder: (context, index) {
           final content = contents[index];
-          return _buildContentCard(content);
+          return _buildContentCard(content, key: ValueKey(content.id));
         },
       ),
     );
   }
 
-  Widget _buildContentCard(ContentEntity content) {
+  Widget _buildContentCard(ContentEntity content, {Key? key}) {
     final iconData = _contentTypeIcon(content.contentType);
     final color = _contentTypeColor(content.contentType);
 
     return Card(
+      key: key,
       margin: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // TODO: Open content (play video, view document, etc.)
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: color.withAlpha(26),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(iconData, color: color, size: 28),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            // Drag handle
+            ReorderableDragStartListener(
+              index: _contentIndex(content.id),
+              child: const Icon(Icons.drag_handle, color: Colors.grey),
+            ),
+            const SizedBox(width: 8),
+            // Type icon
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: color.withAlpha(26),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+              child: Icon(iconData, color: color, size: 24),
+            ),
+            const SizedBox(width: 12),
+            // Title & meta
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    content.title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (content.description != null &&
+                      content.description!.isNotEmpty) ...[
+                    const SizedBox(height: 2),
                     Text(
-                      content.title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      maxLines: 2,
+                      content.description!,
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    if (content.description != null &&
-                        content.description!.isNotEmpty) ...[
-                      const SizedBox(height: 4),
+                  ],
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      _buildTag(content.contentType.value),
+                      const SizedBox(width: 8),
+                      Icon(Icons.storage, size: 12, color: Colors.grey[500]),
+                      const SizedBox(width: 3),
                       Text(
-                        content.description!,
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey[600],
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        content.formattedSize,
+                        style: TextStyle(fontSize: 11, color: Colors.grey[500]),
                       ),
                     ],
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        _buildTag(content.contentType.value),
-                        const SizedBox(width: 8),
-                        Icon(Icons.storage, size: 14, color: Colors.grey[500]),
-                        const SizedBox(width: 4),
-                        Text(
-                          content.formattedSize,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[500],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: Colors.grey),
-            ],
-          ),
+            ),
+            // Action buttons
+            IconButton(
+              icon: const Icon(Icons.edit_outlined, size: 20),
+              tooltip: 'Edit',
+              onPressed: () => _showEditDialog(context, content),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, size: 20),
+              tooltip: 'Delete',
+              color: Colors.red[400],
+              onPressed: () => _confirmDelete(context, content),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  int _contentIndex(String contentId) {
+    final state = context.read<ContentCubit>().state;
+    if (state is ContentLoaded) {
+      return state.contents.indexWhere((c) => c.id == contentId);
+    }
+    return 0;
   }
 
   Widget _buildTag(String label) {
@@ -223,6 +249,91 @@ class _ContentsPageState extends State<ContentsPage> {
       ContentType.document => Colors.orange,
       ContentType.pdf => Colors.red,
     };
+  }
+
+  void _showEditDialog(BuildContext context, ContentEntity content) {
+    final titleController = TextEditingController(text: content.title);
+    final descriptionController = TextEditingController(
+      text: content.description ?? '',
+    );
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit Content'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newTitle = titleController.text.trim();
+              if (newTitle.isNotEmpty) {
+                context.read<ContentCubit>().updateContent(
+                      courseId: widget.courseId,
+                      contentId: content.id,
+                      title: newTitle,
+                      description: descriptionController.text.trim(),
+                    );
+                Navigator.of(ctx).pop();
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, ContentEntity content) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Content'),
+        content: Text('Are you sure you want to delete "${content.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () {
+              context.read<ContentCubit>().deleteContent(
+                    courseId: widget.courseId,
+                    contentId: content.id,
+                  );
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showUploadDialog(BuildContext context) {

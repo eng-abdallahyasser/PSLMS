@@ -2,15 +2,15 @@ import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:lms/core/constants/app_constants.dart';
 
 class SocialAuthResult {
-  final String? accessToken;
-  final String? refreshToken;
-  final String? tempToken;
 
   const SocialAuthResult({
     this.accessToken,
     this.refreshToken,
     this.tempToken,
   });
+  final String? accessToken;
+  final String? refreshToken;
+  final String? tempToken;
 
   bool get isComplete => accessToken != null;
   bool get needsRegistration => tempToken != null;
@@ -108,13 +108,13 @@ class SocialAuthService {
       }
     }
 
-    throw SocialAuthException('No auth data found in callback');
+    throw const SocialAuthException('No auth data found in callback');
   }
 }
 
 class SocialAuthException implements Exception {
-  final String message;
   const SocialAuthException(this.message);
+  final String message;
 
   @override
   String toString() => 'SocialAuthException: $message';

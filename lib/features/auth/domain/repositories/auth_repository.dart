@@ -46,6 +46,19 @@ abstract class AuthRepository {
     required String email,
   });
 
+  Future<Either<Failure, void>> sendMobileOtp({
+    required String mobileNumber,
+    required String client,
+  });
+
+  Future<Either<Failure, UserEntity>> verifyMobileOtp({
+    required String mobileNumber,
+    required String otp,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
+  });
+
   Future<Either<Failure, void>> completeRegistration({
     required String tempToken,
     String? role,

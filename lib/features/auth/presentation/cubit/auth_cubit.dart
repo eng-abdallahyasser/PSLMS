@@ -11,8 +11,12 @@ import 'package:lms/features/auth/domain/usecases/google_sign_in_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/login_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/logout_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/register_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/forgot_password_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/reset_password_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/send_mobile_otp_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/send_otp_usecase.dart';
 import 'package:lms/features/auth/domain/usecases/verify_email_usecase.dart';
+import 'package:lms/features/auth/domain/usecases/verify_mobile_otp_usecase.dart';
 
 // ----- States -----
 
@@ -32,9 +36,9 @@ class AuthLoading extends AuthState {
 }
 
 class AuthAuthenticated extends AuthState {
-  final UserEntity user;
 
   const AuthAuthenticated(this.user);
+  final UserEntity user;
 
   @override
   List<Object?> get props => [user];
@@ -45,31 +49,55 @@ class AuthUnauthenticated extends AuthState {
 }
 
 class AuthOtpSent extends AuthState {
-  final String email;
 
   const AuthOtpSent(this.email);
+  final String email;
 
   @override
   List<Object?> get props => [email];
 }
 
 class AuthEmailVerified extends AuthState {
-  final String email;
 
   const AuthEmailVerified(this.email);
+  final String email;
 
   @override
   List<Object?> get props => [email];
 }
 
 class AuthEmailNotVerified extends AuthState {
+
+  const AuthEmailNotVerified({required this.email, required this.message});
   final String email;
   final String message;
 
-  const AuthEmailNotVerified({required this.email, required this.message});
-
   @override
   List<Object?> get props => [email, message];
+}
+
+class AuthPasswordResetSent extends AuthState {
+  const AuthPasswordResetSent();
+}
+
+class AuthPasswordResetCompleted extends AuthState {
+  const AuthPasswordResetCompleted();
+}
+
+class AuthMobileOtpSent extends AuthState {
+  const AuthMobileOtpSent(this.mobileNumber);
+  final String mobileNumber;
+
+  @override
+  List<Object?> get props => [mobileNumber];
+}
+
+class AuthMobileOtpVerified extends AuthState {
+  const AuthMobileOtpVerified(this.user);
+  final UserEntity user;
+
+  @override
+  List<Object?> get props => [user];
 }
 
 class AuthRegistrationCompleted extends AuthState {
@@ -77,9 +105,9 @@ class AuthRegistrationCompleted extends AuthState {
 }
 
 class AuthError extends AuthState {
-  final String message;
 
   const AuthError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -95,11 +123,6 @@ sealed class AuthEvent extends Equatable {
 }
 
 class LoginEvent extends AuthEvent {
-  final String email;
-  final String password;
-  final String client;
-  final String? deviceToken;
-  final DeviceInfo? deviceInfo;
 
   const LoginEvent({
     required this.email,
@@ -108,19 +131,17 @@ class LoginEvent extends AuthEvent {
     this.deviceToken,
     this.deviceInfo,
   });
+  final String email;
+  final String password;
+  final String client;
+  final String? deviceToken;
+  final DeviceInfo? deviceInfo;
 
   @override
   List<Object?> get props => [email, password, client, deviceToken, deviceInfo];
 }
 
 class RegisterEvent extends AuthEvent {
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String mobileNumber;
-  final String password;
-  final String role;
-  final String? client;
 
   const RegisterEvent({
     required this.firstName,
@@ -131,6 +152,13 @@ class RegisterEvent extends AuthEvent {
     this.role = 'learner',
     this.client,
   });
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String mobileNumber;
+  final String password;
+  final String role;
+  final String? client;
 
   @override
   List<Object?> get props => [firstName, lastName, email, mobileNumber, password, role, client];
@@ -145,60 +173,60 @@ class CheckAuthEvent extends AuthEvent {
 }
 
 class SendOtpEvent extends AuthEvent {
-  final String email;
 
   const SendOtpEvent({required this.email});
+  final String email;
 
   @override
   List<Object?> get props => [email];
 }
 
 class VerifyEmailEvent extends AuthEvent {
-  final String email;
-  final String otp;
 
   const VerifyEmailEvent({required this.email, required this.otp});
+  final String email;
+  final String otp;
 
   @override
   List<Object?> get props => [email, otp];
 }
 
 class CompleteRegistrationEvent extends AuthEvent {
-  final String tempToken;
-  final String? role;
-  final String? client;
 
   const CompleteRegistrationEvent({
     required this.tempToken,
     this.role,
     this.client,
   });
+  final String tempToken;
+  final String? role;
+  final String? client;
 
   @override
   List<Object?> get props => [tempToken, role, client];
 }
 
 class GoogleSignInEvent extends AuthEvent {
-  final String role;
-  final String client;
 
   const GoogleSignInEvent({
     this.role = 'learner',
     this.client = 'mobile',
   });
+  final String role;
+  final String client;
 
   @override
   List<Object?> get props => [role, client];
 }
 
 class FacebookSignInEvent extends AuthEvent {
-  final String role;
-  final String client;
 
   const FacebookSignInEvent({
     this.role = 'learner',
     this.client = 'mobile',
   });
+  final String role;
+  final String client;
 
   @override
   List<Object?> get props => [role, client];
@@ -207,15 +235,6 @@ class FacebookSignInEvent extends AuthEvent {
 // ----- Cubit -----
 
 class AuthCubit extends Cubit<AuthState> {
-  final LoginUseCase loginUseCase;
-  final RegisterUseCase registerUseCase;
-  final LogoutUseCase logoutUseCase;
-  final GetCurrentUserUseCase getCurrentUserUseCase;
-  final SendOtpUseCase sendOtpUseCase;
-  final VerifyEmailUseCase verifyEmailUseCase;
-  final CompleteRegistrationUseCase completeRegistrationUseCase;
-  final GoogleSignInUseCase googleSignInUseCase;
-  final FacebookSignInUseCase facebookSignInUseCase;
 
   AuthCubit({
     required this.loginUseCase,
@@ -224,10 +243,27 @@ class AuthCubit extends Cubit<AuthState> {
     required this.getCurrentUserUseCase,
     required this.sendOtpUseCase,
     required this.verifyEmailUseCase,
+    required this.forgotPasswordUseCase,
+    required this.resetPasswordUseCase,
+    required this.sendMobileOtpUseCase,
+    required this.verifyMobileOtpUseCase,
     required this.completeRegistrationUseCase,
     required this.googleSignInUseCase,
     required this.facebookSignInUseCase,
   }) : super(const AuthInitial());
+  final LoginUseCase loginUseCase;
+  final RegisterUseCase registerUseCase;
+  final LogoutUseCase logoutUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
+  final SendOtpUseCase sendOtpUseCase;
+  final VerifyEmailUseCase verifyEmailUseCase;
+  final ForgotPasswordUseCase forgotPasswordUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
+  final SendMobileOtpUseCase sendMobileOtpUseCase;
+  final VerifyMobileOtpUseCase verifyMobileOtpUseCase;
+  final CompleteRegistrationUseCase completeRegistrationUseCase;
+  final GoogleSignInUseCase googleSignInUseCase;
+  final FacebookSignInUseCase facebookSignInUseCase;
 
   Future<void> login({required String email, required String password}) async {
     emit(const AuthLoading());
@@ -297,6 +333,31 @@ class AuthCubit extends Cubit<AuthState> {
     );
   }
 
+  Future<void> forgotPassword({required String email}) async {
+    emit(const AuthLoading());
+    final result = await forgotPasswordUseCase(
+      ForgotPasswordParams(email: email),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (_) => emit(const AuthPasswordResetSent()),
+    );
+  }
+
+  Future<void> resetPassword({
+    required String token,
+    required String newPassword,
+  }) async {
+    emit(const AuthLoading());
+    final result = await resetPasswordUseCase(
+      ResetPasswordParams(token: token, newPassword: newPassword),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (_) => emit(const AuthPasswordResetCompleted()),
+    );
+  }
+
   Future<void> sendOtp({required String email}) async {
     emit(const AuthLoading());
     final result = await sendOtpUseCase(SendOtpParams(email: email));
@@ -314,6 +375,31 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold(
       (failure) => emit(AuthError(_mapFailureToMessage(failure))),
       (_) => emit(AuthEmailVerified(email)),
+    );
+  }
+
+  Future<void> sendMobileOtp({required String mobileNumber}) async {
+    emit(const AuthLoading());
+    final result = await sendMobileOtpUseCase(
+      SendMobileOtpParams(mobileNumber: mobileNumber),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (_) => emit(AuthMobileOtpSent(mobileNumber)),
+    );
+  }
+
+  Future<void> verifyMobileOtp({
+    required String mobileNumber,
+    required String otp,
+  }) async {
+    emit(const AuthLoading());
+    final result = await verifyMobileOtpUseCase(
+      VerifyMobileOtpParams(mobileNumber: mobileNumber, otp: otp),
+    );
+    result.fold(
+      (failure) => emit(AuthError(_mapFailureToMessage(failure))),
+      (user) => emit(AuthMobileOtpVerified(user)),
     );
   }
 

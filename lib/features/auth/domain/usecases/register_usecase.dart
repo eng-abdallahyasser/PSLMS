@@ -5,9 +5,9 @@ import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class RegisterUseCase {
-  final AuthRepository repository;
 
   RegisterUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, UserEntity>> call(RegisterParams params) {
     return repository.register(
@@ -23,13 +23,6 @@ class RegisterUseCase {
 }
 
 class RegisterParams extends Equatable {
-  final String firstName;
-  final String lastName;
-  final String email;
-  final String mobileNumber;
-  final String password;
-  final String role;
-  final String? client;
 
   const RegisterParams({
     required this.firstName,
@@ -40,6 +33,13 @@ class RegisterParams extends Equatable {
     this.role = 'learner',
     this.client,
   });
+  final String firstName;
+  final String lastName;
+  final String email;
+  final String mobileNumber;
+  final String password;
+  final String role;
+  final String? client;
 
   @override
   List<Object?> get props => [firstName, lastName, email, mobileNumber, password, role, client];

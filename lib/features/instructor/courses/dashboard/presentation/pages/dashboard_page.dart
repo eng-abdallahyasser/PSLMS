@@ -5,8 +5,8 @@ import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:lms/features/instructor/dashboard/domain/entities/dashboard_stats_entity.dart';
-import 'package:lms/features/instructor/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashboard_stats_entity.dart';
+import 'package:lms/features/instructor/courses/dashboard/presentation/cubit/dashboard_cubit.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

@@ -15,6 +15,26 @@ abstract class ContentRemoteDataSource {
     String? description,
   });
 
+  /// Reorder content items within a course (instructor).
+  Future<void> reorderContent({
+    required String courseId,
+    required List<String> contentIds,
+  });
+
+  /// Update a content item's metadata (instructor).
+  Future<ContentModel> updateContent({
+    required String courseId,
+    required String contentId,
+    String? title,
+    String? description,
+  });
+
+  /// Delete a content item from a course (instructor).
+  Future<void> deleteContent({
+    required String courseId,
+    required String contentId,
+  });
+
   /// Get paginated content for an enrolled course (learner).
   Future<ContentsResponse> getMyCourseContents(
     String courseId, {
@@ -30,16 +50,16 @@ abstract class ContentRemoteDataSource {
 }
 
 class ContentsResponse {
-  final List<ContentModel> data;
-  final int totalItems;
 
   const ContentsResponse({required this.data, required this.totalItems});
+  final List<ContentModel> data;
+  final int totalItems;
 }
 
 class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
-  final ApiClient apiClient;
 
   ContentRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<List<ContentModel>> getContents(String courseId) async {
@@ -68,7 +88,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(filePath),
         'title': title,
-        if (description != null) 'description': description,
+        'description': ?description,
       });
 
       final response = await apiClient.post(
@@ -116,6 +136,56 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         '/learner/my-courses/$courseId/content/$contentId',
       );
       return ContentModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<void> reorderContent({
+    required String courseId,
+    required List<String> contentIds,
+  }) async {
+    try {
+      await apiClient.patch(
+        '/instructor/courses/$courseId/content/reorder',
+        data: {'videoIds': contentIds},
+      );
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<ContentModel> updateContent({
+    required String courseId,
+    required String contentId,
+    String? title,
+    String? description,
+  }) async {
+    try {
+      final response = await apiClient.patch(
+        '/instructor/courses/$courseId/content/$contentId',
+        data: {
+          'title': ?title,
+          'description': ?description,
+        },
+      );
+      return ContentModel.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleError(e);
+    }
+  }
+
+  @override
+  Future<void> deleteContent({
+    required String courseId,
+    required String contentId,
+  }) async {
+    try {
+      await apiClient.delete(
+        '/instructor/courses/$courseId/content/$contentId',
+      );
     } on DioException catch (e) {
       throw _handleError(e);
     }

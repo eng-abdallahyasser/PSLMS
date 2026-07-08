@@ -3,10 +3,6 @@ import 'package:lms/core/theme/app_theme.dart';
 
 /// Social login button widget (Google, Apple, etc.)
 class SocialLoginButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final Color? backgroundColor;
 
   const SocialLoginButton({
     super.key,
@@ -15,6 +11,10 @@ class SocialLoginButton extends StatelessWidget {
     this.onPressed,
     this.backgroundColor,
   });
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {

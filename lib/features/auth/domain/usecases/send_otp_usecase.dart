@@ -4,9 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class SendOtpUseCase {
-  final AuthRepository repository;
 
   SendOtpUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, void>> call(SendOtpParams params) {
     return repository.sendOtp(email: params.email);
@@ -14,9 +14,9 @@ class SendOtpUseCase {
 }
 
 class SendOtpParams extends Equatable {
-  final String email;
 
   const SendOtpParams({required this.email});
+  final String email;
 
   @override
   List<Object> get props => [email];

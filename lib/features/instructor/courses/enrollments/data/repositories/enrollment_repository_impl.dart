@@ -3,10 +3,10 @@ import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
 import 'package:lms/features/shared/domain/entities/course_entity.dart';
-import 'package:lms/features/instructor/enrollments/data/datasources/enrollment_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/enrollments/data/datasources/enrollment_remote_datasource.dart';
 import 'package:lms/features/shared/domain/entities/enrollment_entity.dart';
 import 'package:lms/features/shared/domain/entities/my_course_detail_entity.dart';
-import 'package:lms/features/instructor/enrollments/domain/repositories/enrollment_repository.dart';
+import 'package:lms/features/instructor/courses/enrollments/domain/repositories/enrollment_repository.dart';
 
 class EnrollmentRepositoryImpl implements EnrollmentRepository {
   final EnrollmentRemoteDataSource remoteDataSource;

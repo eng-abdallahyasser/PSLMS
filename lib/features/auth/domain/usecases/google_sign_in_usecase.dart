@@ -5,9 +5,9 @@ import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class GoogleSignInUseCase {
-  final AuthRepository repository;
 
   GoogleSignInUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, UserEntity>> call(GoogleSignInParams params) {
     return repository.signInWithGoogle(
@@ -18,13 +18,13 @@ class GoogleSignInUseCase {
 }
 
 class GoogleSignInParams extends Equatable {
-  final String role;
-  final String client;
 
   const GoogleSignInParams({
     this.role = 'learner',
     this.client = 'mobile',
   });
+  final String role;
+  final String client;
 
   @override
   List<Object> get props => [role, client];

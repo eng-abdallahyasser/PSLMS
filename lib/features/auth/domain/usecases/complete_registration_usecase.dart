@@ -4,9 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class CompleteRegistrationUseCase {
-  final AuthRepository repository;
 
   CompleteRegistrationUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, void>> call(CompleteRegistrationParams params) {
     return repository.completeRegistration(
@@ -18,15 +18,15 @@ class CompleteRegistrationUseCase {
 }
 
 class CompleteRegistrationParams extends Equatable {
-  final String tempToken;
-  final String? role;
-  final String? client;
 
   const CompleteRegistrationParams({
     required this.tempToken,
     this.role,
     this.client,
   });
+  final String tempToken;
+  final String? role;
+  final String? client;
 
   @override
   List<Object?> get props => [tempToken, role, client];

@@ -2,25 +2,25 @@ import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
-import 'package:lms/features/instructor/content/data/datasources/content_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/content/data/datasources/content_remote_datasource.dart';
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
-import 'package:lms/features/instructor/content/domain/repositories/content_repository.dart';
+import 'package:lms/features/instructor/courses/content/domain/repositories/content_repository.dart';
 
 class ContentRepositoryImpl implements ContentRepository {
-  final ContentRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   ContentRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final ContentRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, List<ContentEntity>>> getContents(
     String courseId,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final contents = await remoteDataSource.getContents(courseId);
@@ -40,7 +40,7 @@ class ContentRepositoryImpl implements ContentRepository {
     String? description,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final content = await remoteDataSource.uploadContent(
@@ -64,7 +64,7 @@ class ContentRepositoryImpl implements ContentRepository {
     int limit = 10,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final response = await remoteDataSource.getMyCourseContents(
@@ -84,12 +84,79 @@ class ContentRepositoryImpl implements ContentRepository {
   }
 
   @override
+  Future<Either<Failure, void>> reorderContent({
+    required String courseId,
+    required List<String> contentIds,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await remoteDataSource.reorderContent(
+        courseId: courseId,
+        contentIds: contentIds,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, ContentEntity>> updateContent({
+    required String courseId,
+    required String contentId,
+    String? title,
+    String? description,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      final content = await remoteDataSource.updateContent(
+        courseId: courseId,
+        contentId: contentId,
+        title: title,
+        description: description,
+      );
+      return Right(content.toEntity());
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteContent({
+    required String courseId,
+    required String contentId,
+  }) async {
+    if (await networkInfo.isConnected == false) {
+      return const Left(NetworkFailure());
+    }
+    try {
+      await remoteDataSource.deleteContent(
+        courseId: courseId,
+        contentId: contentId,
+      );
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(
+        ServerFailure(message: e.message, statusCode: e.statusCode),
+      );
+    }
+  }
+
+  @override
   Future<Either<Failure, ContentEntity>> getMyContentDetail(
     String courseId,
     String contentId,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final content = await remoteDataSource.getMyContentDetail(

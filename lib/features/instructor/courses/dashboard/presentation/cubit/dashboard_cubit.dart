@@ -2,8 +2,8 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
-import 'package:lms/features/instructor/dashboard/domain/entities/dashboard_stats_entity.dart';
-import 'package:lms/features/instructor/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashboard_stats_entity.dart';
+import 'package:lms/features/instructor/courses/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
 
 // ----- States -----
 

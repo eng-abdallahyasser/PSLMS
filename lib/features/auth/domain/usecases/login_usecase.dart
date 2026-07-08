@@ -22,11 +22,6 @@ class LoginUseCase {
 }
 
 class LoginParams extends Equatable {
-  final String email;
-  final String password;
-  final String client;
-  final String? deviceToken;
-  final DeviceInfo? deviceInfo;
 
   const LoginParams({
     required this.email,
@@ -35,6 +30,11 @@ class LoginParams extends Equatable {
     this.deviceToken,
     this.deviceInfo,
   });
+  final String email;
+  final String password;
+  final String client;
+  final String? deviceToken;
+  final DeviceInfo? deviceInfo;
 
   @override
   List<Object?> get props => [email, password, client, deviceToken, deviceInfo];

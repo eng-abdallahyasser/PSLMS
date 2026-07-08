@@ -49,6 +49,19 @@ abstract class AuthRemoteDataSource {
     required String email,
   });
 
+  Future<void> sendMobileOtp({
+    required String mobileNumber,
+    required String client,
+  });
+
+  Future<LoginResponse> verifyMobileOtp({
+    required String mobileNumber,
+    required String otp,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
+  });
+
   Future<void> completeRegistration({
     required String tempToken,
     String? role,
@@ -76,7 +89,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'email': email,
           'password': password,
           'client': client,
-          if (deviceToken != null) 'deviceToken': deviceToken,
+          'deviceToken': ?deviceToken,
           if (deviceInfo != null) 'deviceInfo': deviceInfo.toJson(),
         },
       );
@@ -106,7 +119,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'mobileNumber': mobileNumber,
           'password': password,
           'role': role,
-          if (client != null) 'client': client,
+          'client': ?client,
         },
       );
       final data = response.data as Map<String, dynamic>;
@@ -216,6 +229,49 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
+  Future<void> sendMobileOtp({
+    required String mobileNumber,
+    required String client,
+  }) async {
+    try {
+      await apiClient.post(
+        '/auth/send-mobile-otp',
+        data: {
+          'mobileNumber': mobileNumber,
+          'client': client,
+        },
+      );
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
+  Future<LoginResponse> verifyMobileOtp({
+    required String mobileNumber,
+    required String otp,
+    required String client,
+    String? deviceToken,
+    DeviceInfo? deviceInfo,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        '/auth/verify-mobile-otp',
+        data: {
+          'mobileNumber': mobileNumber,
+          'otp': otp,
+          'client': client,
+          'deviceToken': ?deviceToken,
+          if (deviceInfo != null) 'deviceInfo': deviceInfo.toJson(),
+        },
+      );
+      return LoginResponse.fromJson(response.data as Map<String, dynamic>);
+    } on DioException catch (e) {
+      throw _handleDioError(e);
+    }
+  }
+
+  @override
   Future<void> completeRegistration({
     required String tempToken,
     String? role,
@@ -226,8 +282,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '/auth/complete-registration',
         data: {
           'tempToken': tempToken,
-          if (role != null) 'role': role,
-          if (client != null) 'client': client,
+          'role': ?role,
+          'client': ?client,
         },
       );
     } on DioException catch (e) {

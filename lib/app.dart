@@ -6,17 +6,24 @@ import 'package:lms/injection_container.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/auth/presentation/pages/login_page.dart';
+import 'package:lms/features/auth/presentation/pages/mobile_otp_page.dart';
 import 'package:lms/features/auth/presentation/pages/register_page.dart';
+import 'package:lms/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:lms/features/auth/presentation/pages/reset_password_page.dart';
 import 'package:lms/features/auth/presentation/pages/verify_email_page.dart';
 import 'package:lms/features/shared/splash/presentation/pages/splash_page.dart';
 import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.dart';
 import 'package:lms/features/instructor/courses/presentation/pages/courses_page.dart';
-import 'package:lms/features/instructor/content/presentation/cubit/content_cubit.dart';
-import 'package:lms/features/instructor/content/presentation/pages/contents_page.dart';
-import 'package:lms/features/instructor/enrollments/presentation/cubit/enrollment_cubit.dart';
-import 'package:lms/features/instructor/enrollments/presentation/pages/enrollments_page.dart';
-import 'package:lms/features/instructor/dashboard/presentation/cubit/dashboard_cubit.dart';
-import 'package:lms/features/instructor/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:lms/features/instructor/courses/content/presentation/cubit/content_cubit.dart';
+import 'package:lms/features/instructor/courses/content/presentation/pages/contents_page.dart';
+import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
+import 'package:lms/features/instructor/courses/enrollments/presentation/pages/enrollments_page.dart';
+import 'package:lms/features/instructor/courses/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:lms/features/instructor/courses/dashboard/presentation/pages/dashboard_page.dart';
+import 'package:lms/features/instructor/students/presentation/cubit/student_cubit.dart';
+import 'package:lms/features/instructor/students/presentation/pages/students_page.dart';
+import 'package:lms/features/instructor/subscriptions/presentation/cubit/subscription_cubit.dart';
+import 'package:lms/features/instructor/subscriptions/presentation/pages/subscription_page.dart';
 import 'package:lms/features/shared/profile/presentation/cubit/profile_cubit.dart';
 import 'package:lms/features/shared/profile/presentation/pages/profile_page.dart';
 
@@ -45,27 +52,55 @@ class _AppState extends State<App> {
       redirect: (context, state) {
         final authState = context.read<AuthCubit>().state;
         final location = state.matchedLocation;
+        final isAuthPage = ['/splash', '/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/mobile-otp'].contains(location);
 
+        // ====== Auth checking / splash ======
         if (authState is AuthInitial || authState is AuthLoading) {
-          final allowedRoutes = ['/splash', '/verify-email', '/login', '/register'];
-          if (!allowedRoutes.contains(location)) return '/splash';
+          if (!isAuthPage) return '/splash';
           return null;
         }
 
+        // ====== Registration OTP flow ======
+        if (authState is AuthOtpSent) {
+          if (location == '/verify-email') return null;
+          return '/verify-email';
+        }
+
+        if (authState is AuthEmailVerified) {
+          if (location == '/login') return null;
+          return '/login';
+        }
+
+        // ====== Login with unverified email ======
+        if (authState is AuthEmailNotVerified) {
+          if (location == '/verify-email') return null;
+          return '/verify-email';
+        }
+
+        // ====== Authenticated ======
         if (authState is AuthAuthenticated) {
-          if (location == '/splash' || location == '/login') {
-            return authState.user.role == UserRole.instructor
-                ? '/instructor/dashboard'
-                : '/dashboard';
+          final isInstructor = authState.user.role == UserRole.instructor;
+
+          // Redirect off auth pages to role-based dashboard
+          if (isAuthPage) {
+            return isInstructor ? '/instructor/dashboard' : '/dashboard';
           }
+
+          // Guard instructor-only routes from learners
+          if (!isInstructor &&
+              (location == '/courses' ||
+                  location.startsWith('/courses/') ||
+                  location.startsWith('/instructor/'))) {
+            return '/dashboard';
+          }
+
           return null;
         }
 
-        if (authState is AuthUnauthenticated) {
-          final publicRoutes = ['/login', '/register', '/verify-email'];
-          if (!publicRoutes.contains(location)) {
-            return '/login';
-          }
+        // ====== Unauthenticated ======
+        final publicRoutes = ['/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/mobile-otp'];
+        if (!publicRoutes.contains(location)) {
+          return '/login';
         }
 
         return null;
@@ -90,6 +125,21 @@ class _AppState extends State<App> {
           path: '/verify-email',
           name: 'verifyEmail',
           builder: (context, state) => const VerifyEmailPage(),
+        ),
+        GoRoute(
+          path: '/forgot-password',
+          name: 'forgotPassword',
+          builder: (context, state) => const ForgotPasswordPage(),
+        ),
+        GoRoute(
+          path: '/reset-password',
+          name: 'resetPassword',
+          builder: (context, state) => const ResetPasswordPage(),
+        ),
+        GoRoute(
+          path: '/mobile-otp',
+          name: 'mobileOtp',
+          builder: (context, state) => const MobileOtpPage(),
         ),
         GoRoute(
           path: '/dashboard',
@@ -121,6 +171,16 @@ class _AppState extends State<App> {
           builder: (context, state) => const DashboardPage(),
         ),
         GoRoute(
+          path: '/instructor/students',
+          name: 'instructorStudents',
+          builder: (context, state) => const StudentsPage(),
+        ),
+        GoRoute(
+          path: '/instructor/subscription',
+          name: 'instructorSubscription',
+          builder: (context, state) => const SubscriptionPage(),
+        ),
+        GoRoute(
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
@@ -144,6 +204,8 @@ class _AppState extends State<App> {
         BlocProvider(create: (_) => sl<DashboardCubit>()),
         BlocProvider(create: (_) => sl<ContentCubit>()),
         BlocProvider(create: (_) => sl<EnrollmentCubit>()),
+        BlocProvider(create: (_) => sl<StudentCubit>()),
+        BlocProvider(create: (_) => sl<SubscriptionCubit>()),
         BlocProvider(create: (_) => sl<ProfileCubit>()),
       ],
       child: BlocListener<AuthCubit, AuthState>(

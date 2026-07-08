@@ -5,9 +5,9 @@ import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class FacebookSignInUseCase {
-  final AuthRepository repository;
 
   FacebookSignInUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, UserEntity>> call(FacebookSignInParams params) {
     return repository.signInWithFacebook(
@@ -18,13 +18,13 @@ class FacebookSignInUseCase {
 }
 
 class FacebookSignInParams extends Equatable {
-  final String role;
-  final String client;
 
   const FacebookSignInParams({
     this.role = 'learner',
     this.client = 'mobile',
   });
+  final String role;
+  final String client;
 
   @override
   List<Object> get props => [role, client];
