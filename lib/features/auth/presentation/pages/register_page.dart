@@ -17,6 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -27,6 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -38,6 +40,7 @@ class _RegisterPageState extends State<RegisterPage> {
             firstName: _firstNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
             email: _emailController.text.trim(),
+            mobileNumber: _phoneController.text.trim(),
             password: _passwordController.text,
             role: _selectedRole,
           );
@@ -122,6 +125,25 @@ class _RegisterPageState extends State<RegisterPage> {
                     keyboardType: TextInputType.emailAddress,
                     validator: Validators.email,
                     prefixIcon: const Icon(Icons.email_outlined),
+                  ),
+                  const SizedBox(height: 16),
+                  // Phone Number
+                  AppTextField(
+                    label: 'Phone Number',
+                    hint: '+201234567890',
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Phone number is required';
+                      }
+                      final phoneRegex = RegExp(r'^\+[1-9]\d{1,14}$');
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Enter a valid phone number with country code (e.g., +201234567890)';
+                      }
+                      return null;
+                    },
+                    prefixIcon: const Icon(Icons.phone_outlined),
                   ),
                   const SizedBox(height: 16),
                   // Password

@@ -117,6 +117,7 @@ class RegisterEvent extends AuthEvent {
   final String firstName;
   final String lastName;
   final String email;
+  final String mobileNumber;
   final String password;
   final String role;
   final String? client;
@@ -125,13 +126,14 @@ class RegisterEvent extends AuthEvent {
     required this.firstName,
     required this.lastName,
     required this.email,
+    required this.mobileNumber,
     required this.password,
     this.role = 'learner',
     this.client,
   });
 
   @override
-  List<Object?> get props => [firstName, lastName, email, password, role, client];
+  List<Object?> get props => [firstName, lastName, email, mobileNumber, password, role, client];
 }
 
 class LogoutEvent extends AuthEvent {
@@ -256,6 +258,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String firstName,
     required String lastName,
     required String email,
+    required String mobileNumber,
     required String password,
     required String role,
   }) async {
@@ -265,6 +268,7 @@ class AuthCubit extends Cubit<AuthState> {
         firstName: firstName,
         lastName: lastName,
         email: email,
+        mobileNumber: mobileNumber,
         password: password,
         role: role,
       ),
