@@ -1,5 +1,4 @@
-import 'dart:developer' as developer;
-
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:lms/core/constants/app_constants.dart';
 import 'package:lms/core/errors/exceptions.dart';
@@ -11,6 +10,7 @@ class ApiClient {
   ApiClient({
     String? baseUrl,
     String? Function()? tokenProvider,
+    Future<String?> Function()? onTokenRefresh,
   }) {
     _dio = Dio(
       BaseOptions(
@@ -26,7 +26,7 @@ class ApiClient {
 
     _dio.interceptors.addAll([
       _AuthInterceptor(tokenProvider),
-      _ErrorInterceptor(),
+      _ErrorInterceptor(_dio, onTokenRefresh),
     ]);
   }
   late final Dio _dio;
@@ -36,9 +36,9 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    developer.log('GET $path');
+    log('GET $path');
     final response = await _dio.get<T>(path, queryParameters: queryParameters, options: options);
-    developer.log('GET $path: ${response.statusCode} ${response.data}');
+    log('GET $path: ${response.statusCode} ${response.data}');
     return response;
   }
 
@@ -48,14 +48,14 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    developer.log('POST $path');
+    log('POST $path');
     final response = await _dio.post<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
-    developer.log('POST $path: ${response.statusCode} ${response.data}');
+    log('POST $path: ${response.statusCode} ${response.data}');
     return response;
   }
 
@@ -65,14 +65,14 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    developer.log('PUT $path');
+    log('PUT $path');
     final response = await _dio.put<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
-    developer.log('PUT $path: ${response.statusCode} ${response.data}');
+    log('PUT $path: ${response.statusCode} ${response.data}');
     return response;
   }
 
@@ -82,14 +82,14 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    developer.log('PATCH $path');
+    log('PATCH $path');
     final response = await _dio.patch<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
-    developer.log('PATCH $path: ${response.statusCode} ${response.data}');
+    log('PATCH $path: ${response.statusCode} ${response.data}');
     return response;
   }
 
@@ -99,14 +99,14 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    developer.log('DELETE $path');
+    log('DELETE $path');
     final response = await _dio.delete<T>(
       path,
       data: data,
       queryParameters: queryParameters,
       options: options,
     );
-    developer.log('DELETE $path: ${response.statusCode} ${response.data}');
+    log('DELETE $path: ${response.statusCode} ${response.data}');
     return response;
   }
 }
@@ -130,10 +130,22 @@ class _AuthInterceptor extends Interceptor {
   }
 }
 
-/// Interceptor that translates DioExceptions into app-specific exceptions.
+/// Interceptor that translates DioExceptions into app-specific exceptions
+/// and handles automatic token refresh on 401/403 responses.
 class _ErrorInterceptor extends Interceptor {
+  _ErrorInterceptor(this._dio, this._refreshTokenProvider);
+
+  final Dio _dio;
+  final Future<String?> Function()? _refreshTokenProvider;
+  Future<String?>? _refreshFuture;
+
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    final path = err.requestOptions.path;
+    final statusCode = err.response?.statusCode;
+    final data = err.response?.data;
+    log('$path: $statusCode $data');
+
     switch (err.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
@@ -147,15 +159,41 @@ class _ErrorInterceptor extends Interceptor {
         );
         return;
       case DioExceptionType.badResponse:
-        final statusCode = err.response?.statusCode;
-        final message = err.response?.data?['message'] as String? ??
+        final message = data?['message'] as String? ??
             'Something went wrong';
 
         if (statusCode == 401 || statusCode == 403) {
+          // Don't retry if the failing request is the refresh endpoint itself
+          if (path.contains('/auth/refresh') || _refreshTokenProvider == null) {
+            handler.reject(
+              DioException(
+                requestOptions: err.requestOptions,
+                error: AuthException(message: message, statusCode: statusCode),
+              ),
+            );
+            return;
+          }
+
+          // Attempt token refresh — concurrent 401s share the same refresh call
+          try {
+            final newToken = await _getRefreshedToken();
+            if (newToken != null && newToken.isNotEmpty) {
+              final response = await _dio.fetch(err.requestOptions);
+              handler.resolve(response);
+              return;
+            }
+          } catch (_) {
+            // Refresh threw — fall through to reject
+          }
+
+          // Refresh failed — propagate auth error (triggers re-login)
           handler.reject(
             DioException(
               requestOptions: err.requestOptions,
-              error: AuthException(message: message, statusCode: statusCode),
+              error: AuthException(
+                message: 'Session expired',
+                statusCode: statusCode,
+              ),
             ),
           );
           return;
@@ -167,7 +205,7 @@ class _ErrorInterceptor extends Interceptor {
             error: ServerException(
               message: message,
               statusCode: statusCode,
-              data: err.response?.data,
+              data: data,
             ),
           ),
         );
@@ -176,6 +214,20 @@ class _ErrorInterceptor extends Interceptor {
       case DioExceptionType.badCertificate:
       case DioExceptionType.unknown:
         handler.next(err);
+    }
+  }
+
+  /// Ensures only one refresh call runs at a time; concurrent callers
+  /// share the same in-flight request.
+  Future<String?> _getRefreshedToken() async {
+    if (_refreshFuture != null) {
+      return _refreshFuture;
+    }
+    _refreshFuture = _refreshTokenProvider!();
+    try {
+      return await _refreshFuture;
+    } finally {
+      _refreshFuture = null;
     }
   }
 }

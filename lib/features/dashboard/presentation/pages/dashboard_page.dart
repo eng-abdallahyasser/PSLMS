@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
+import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/dashboard/presentation/cubit/dashboard_cubit.dart';
 
@@ -17,7 +19,14 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   void initState() {
     super.initState();
-    context.read<DashboardCubit>().getStats();
+    final role = _currentRole();
+    context.read<DashboardCubit>().getStats(role);
+  }
+
+  UserRole _currentRole() {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) return authState.user.role;
+    return UserRole.learner;
   }
 
   @override
@@ -50,7 +59,7 @@ class _DashboardPageState extends State<DashboardPage> {
             DashboardError(:final message) => Center(
                 child: AppErrorWidget(
                   message: message,
-                  onRetry: () => context.read<DashboardCubit>().getStats(),
+                  onRetry: () => context.read<DashboardCubit>().getStats(_currentRole()),
                 ),
               ),
           };
@@ -58,6 +67,7 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: 0,
+        role: _currentRole(),
         onTap: (index) {
           switch (index) {
             case 0:
@@ -76,7 +86,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildDashboard(DashboardStatsEntity stats) {
     return RefreshIndicator(
-      onRefresh: () => context.read<DashboardCubit>().getStats(),
+      onRefresh: () => context.read<DashboardCubit>().getStats(_currentRole()),
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -266,12 +276,12 @@ class _DashboardPageState extends State<DashboardPage> {
           Row(
             children: [
               Expanded(
-                child: _buildActionCard(
-                  icon: Icons.menu_book,
-                  label: 'Browse Courses',
-                  color: const Color(0xFF1565C0),
-                  onTap: () => context.push('/courses'),
-                ),
+                  child: _buildActionCard(
+                    icon: Icons.menu_book,
+                    label: _currentRole() == UserRole.instructor ? 'My Courses' : 'Browse Courses',
+                    color: const Color(0xFF1565C0),
+                    onTap: () => context.push('/courses'),
+                  ),
               ),
               const SizedBox(width: 12),
               Expanded(

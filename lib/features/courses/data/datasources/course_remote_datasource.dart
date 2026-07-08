@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/courses/data/models/course_model.dart';
 
 /// Pagination metadata returned by the API.
@@ -32,6 +33,7 @@ class PaginationMeta {
 
 abstract class CourseRemoteDataSource {
   Future<CoursesResponse> getCourses({
+    required UserRole role,
     int page = 1,
     int limit = 10,
     String? search,
@@ -72,6 +74,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
 
   @override
   Future<CoursesResponse> getCourses({
+    required UserRole role,
     int page = 1,
     int limit = 10,
     String? search,
@@ -89,8 +92,11 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
         queryParams['filter.visibility'] = '\$eq:$visibilityFilter';
       }
 
+      final endpoint = role == UserRole.instructor
+          ? '/instructor/courses'
+          : '/learner/courses';
       final response = await apiClient.get(
-        '/learner/courses',
+        endpoint,
         queryParameters: queryParams,
       );
       final body = response.data as Map<String, dynamic>;

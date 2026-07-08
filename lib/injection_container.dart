@@ -94,6 +94,13 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<ApiClient>(
     () => ApiClient(
       tokenProvider: () => sl<SharedPreferences>().getString(AppConstants.tokenKey),
+      onTokenRefresh: () async {
+        final refreshToken =
+            sl<SharedPreferences>().getString(AppConstants.refreshTokenKey);
+        if (refreshToken == null || refreshToken.isEmpty) return null;
+        final result = await sl<AuthRepository>().refreshToken(refreshToken);
+        return result.fold((_) => null, (token) => token);
+      },
     ),
   );
 

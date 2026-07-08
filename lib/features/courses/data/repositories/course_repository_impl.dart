@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/courses/data/datasources/course_remote_datasource.dart';
 import 'package:lms/features/courses/domain/entities/course_entity.dart';
 import 'package:lms/features/courses/domain/repositories/course_repository.dart';
@@ -17,6 +18,7 @@ class CourseRepositoryImpl implements CourseRepository {
 
   @override
   Future<Either<Failure, List<CourseEntity>>> getCourses({
+    required UserRole role,
     int page = 1,
     int limit = 10,
     String? search,
@@ -27,6 +29,7 @@ class CourseRepositoryImpl implements CourseRepository {
     }
     try {
       final response = await remoteDataSource.getCourses(
+        role: role,
         page: page,
         limit: limit,
         search: search,

@@ -170,9 +170,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(NetworkFailure());
     }
     try {
-      final newAccessToken = await remoteDataSource.refreshToken(refreshToken);
-      await localDataSource.saveToken(newAccessToken);
-      return Right(newAccessToken);
+      final response = await remoteDataSource.refreshToken(refreshToken);
+      await localDataSource.saveToken(response.accessToken);
+      await localDataSource.saveRefreshToken(response.refreshToken);
+      return Right(response.accessToken);
     } on ServerException catch (e) {
       return Left(
         ServerFailure(message: e.message, statusCode: e.statusCode),

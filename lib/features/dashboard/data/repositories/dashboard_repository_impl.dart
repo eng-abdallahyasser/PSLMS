@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/dashboard/data/datasources/dashboard_remote_datasource.dart';
 import 'package:lms/features/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/dashboard/domain/repositories/dashboard_repository.dart';
@@ -16,12 +17,32 @@ class DashboardRepositoryImpl implements DashboardRepository {
   });
 
   @override
-  Future<Either<Failure, DashboardStatsEntity>> getStats() async {
+  Future<Either<Failure, DashboardStatsEntity>> getStats(UserRole role) async {
     if (await networkInfo.isConnected == false) {
       return Left(NetworkFailure());
     }
     try {
-      final courses = await remoteDataSource.getCourses();
+      final courses = await remoteDataSource.getCourses(role: role);
+
+      if (role == UserRole.instructor) {
+        final totalCourses = courses.length;
+        final totalLessons = courses.fold<int>(
+          0,
+          (sum, c) => sum + c.lessonCount,
+        );
+        final totalDuration = courses.fold<int>(
+          0,
+          (sum, c) => sum + c.durationMinutes,
+        );
+
+        return Right(DashboardStatsEntity(
+          enrolledCourses: totalCourses,
+          completedCourses: totalCourses,
+          totalLessonsCompleted: totalLessons,
+          totalMinutesLearned: totalDuration,
+          overallProgress: totalCourses > 0 ? 100 : 0,
+        ));
+      }
 
       final enrolledCourses =
           courses.where((c) => c.isEnrolled).toList();
@@ -29,7 +50,6 @@ class DashboardRepositoryImpl implements DashboardRepository {
       final completedCount =
           enrolledCourses.where((c) => c.progress >= 100).length;
 
-      // Compute aggregate metrics from enrolled courses
       int totalLessonsCompleted = 0;
       int totalMinutesLearned = 0;
       double totalProgress = 0;

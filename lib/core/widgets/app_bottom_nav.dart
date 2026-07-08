@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.role,
   });
 
   final int currentIndex;
   final void Function(int index) onTap;
+  final UserRole? role;
 
   @override
   Widget build(BuildContext context) {
+    final isInstructor = role == UserRole.instructor;
     return Container(
       decoration: BoxDecoration(
         boxShadow: [
@@ -28,16 +32,16 @@ class AppBottomNav extends StatelessWidget {
         selectedItemColor: const Color(0xFF1565C0),
         unselectedItemColor: Colors.grey,
         onTap: onTap,
-        items: const [
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
             label: 'Dashboard',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Courses',
+            icon: const Icon(Icons.menu_book),
+            label: isInstructor ? 'Manage' : 'Courses',
           ),
-          BottomNavigationBarItem(
+          const BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
           ),

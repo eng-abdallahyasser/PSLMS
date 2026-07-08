@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/courses/domain/entities/course_entity.dart';
 import 'package:lms/features/courses/domain/usecases/create_course_usecase.dart';
 import 'package:lms/features/courses/domain/usecases/delete_course_usecase.dart';
@@ -141,6 +142,7 @@ class CourseCubit extends Cubit<CourseState> {
 
   int _currentPage = 1;
   static const int _pageSize = 10;
+  UserRole _currentRole = UserRole.learner;
 
   CourseCubit({
     required this.getCoursesUseCase,
@@ -149,7 +151,12 @@ class CourseCubit extends Cubit<CourseState> {
     required this.deleteCourseUseCase,
   }) : super(const CourseInitial());
 
+  void setRole(UserRole role) {
+    _currentRole = role;
+  }
+
   Future<void> getCourses({
+    UserRole? role,
     int page = 1,
     String? search,
     String? visibilityFilter,
@@ -158,7 +165,9 @@ class CourseCubit extends Cubit<CourseState> {
       emit(const CourseLoading());
     }
     _currentPage = page;
+    if (role != null) _currentRole = role;
     final result = await getCoursesUseCase(
+      role: _currentRole,
       page: page,
       limit: _pageSize,
       search: search,
@@ -205,7 +214,7 @@ class CourseCubit extends Cubit<CourseState> {
     );
     result.fold(
       (failure) => emit(CourseError(_mapFailureToMessage(failure))),
-      (_) => getCourses(), // Refresh list
+      (_) => getCourses(),
     );
   }
 
@@ -226,7 +235,7 @@ class CourseCubit extends Cubit<CourseState> {
     );
     result.fold(
       (failure) => emit(CourseError(_mapFailureToMessage(failure))),
-      (_) => getCourses(), // Refresh list
+      (_) => getCourses(),
     );
   }
 
@@ -235,7 +244,7 @@ class CourseCubit extends Cubit<CourseState> {
     final result = await deleteCourseUseCase(id);
     result.fold(
       (failure) => emit(CourseError(_mapFailureToMessage(failure))),
-      (_) => getCourses(), // Refresh list
+      (_) => getCourses(),
     );
   }
 

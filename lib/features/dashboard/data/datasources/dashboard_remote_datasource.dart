@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/courses/data/models/course_model.dart';
 
 abstract class DashboardRemoteDataSource {
-  /// Fetches all courses (with reasonable limit) for computing dashboard stats.
+  /// Fetches courses for computing dashboard stats.
+  /// Uses the role to select the correct endpoint.
   Future<List<CourseModel>> getCourses({
+    required UserRole role,
     int page = 1,
     int limit = 50,
   });
@@ -18,12 +21,16 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
 
   @override
   Future<List<CourseModel>> getCourses({
+    required UserRole role,
     int page = 1,
     int limit = 50,
   }) async {
     try {
+      final endpoint = role == UserRole.instructor
+          ? '/instructor/courses'
+          : '/learner/courses';
       final response = await apiClient.get(
-        '/learner/courses',
+        endpoint,
         queryParameters: {
           'page': page,
           'limit': limit,

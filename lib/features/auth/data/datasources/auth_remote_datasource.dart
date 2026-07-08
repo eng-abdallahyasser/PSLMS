@@ -1,6 +1,4 @@
 
-import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
@@ -38,7 +36,7 @@ abstract class AuthRemoteDataSource {
     required String password,
   });
 
-  Future<String> refreshToken(String refreshToken);
+  Future<LoginResponse> refreshToken(String refreshToken);
 
   Future<void> verifyEmail({
     required String email,
@@ -80,11 +78,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (deviceInfo != null) 'deviceInfo': deviceInfo.toJson(),
         },
       );
-      log(name: 'Auth Remote Data Source',  '=== Login Response ===');
-      log(name: 'Auth Remote Data Source',  'Status: ${response.statusCode}');
-      log(name: 'Auth Remote Data Source',  'Headers: ${response.headers}');
-      log(name: 'Auth Remote Data Source',  'Body: ${response.data}');
-      log(name: 'Auth Remote Data Source',  '=== End ===');
       return LoginResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e);
@@ -174,14 +167,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<String> refreshToken(String refreshToken) async {
+  Future<LoginResponse> refreshToken(String refreshToken) async {
     try {
       final response = await apiClient.post(
         '/auth/refresh',
         data: {'refreshToken': refreshToken},
       );
-      final data = response.data as Map<String, dynamic>;
-      return data['accessToken'] as String;
+      return LoginResponse.fromJson(response.data as Map<String, dynamic>);
     } on DioException catch (e) {
       throw _handleDioError(e);
     }
@@ -240,14 +232,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   ServerException _handleDioError(DioException e) {
-    log(name: 'Auth Remote Data Source','=== Dio Error ===');
-    log(name: 'Auth Remote Data Source','Type: ${e.type}');
-    log(name: 'Auth Remote Data Source','Message: ${e.message}');
-    log(name: 'Auth Remote Data Source','Underlying Error: ${e.error}');
-    log(name: 'Auth Remote Data Source','Underlying Type: ${e.error.runtimeType}');
-    log(name: 'Auth Remote Data Source','Status: ${e.response?.statusCode}');
-    log(name: 'Auth Remote Data Source','Response Data: ${e.response?.data}');
-    log(name: 'Auth Remote Data Source','=== End ===');
     final error = e.error;
     if (error is ServerException) return error;
     if (error is AuthException) {

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/errors/failures.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
 
@@ -47,9 +48,9 @@ class DashboardCubit extends Cubit<DashboardState> {
   DashboardCubit({required this.getDashboardStatsUseCase})
       : super(const DashboardInitial());
 
-  Future<void> getStats() async {
+  Future<void> getStats(UserRole role) async {
     emit(const DashboardLoading());
-    final result = await getDashboardStatsUseCase();
+    final result = await getDashboardStatsUseCase(role);
     result.fold(
       (failure) => emit(DashboardError(_mapFailureToMessage(failure))),
       (stats) => emit(DashboardLoaded(stats)),

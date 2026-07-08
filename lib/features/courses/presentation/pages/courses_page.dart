@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
+import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/courses/domain/entities/course_entity.dart';
 import 'package:lms/features/courses/presentation/cubit/course_cubit.dart';
 import 'package:lms/features/courses/presentation/widgets/course_card.dart';
@@ -17,10 +19,16 @@ class CoursesPage extends StatefulWidget {
 class _CoursesPageState extends State<CoursesPage> {
   final _scrollController = ScrollController();
 
+  UserRole _currentRole() {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is AuthAuthenticated) return authState.user.role;
+    return UserRole.learner;
+  }
+
   @override
   void initState() {
     super.initState();
-    context.read<CourseCubit>().getCourses();
+    context.read<CourseCubit>().getCourses(role: _currentRole());
     _scrollController.addListener(_onScroll);
   }
 
@@ -70,6 +78,7 @@ class _CoursesPageState extends State<CoursesPage> {
       ),
       bottomNavigationBar: AppBottomNav(
         currentIndex: 1,
+        role: _currentRole(),
         onTap: (index) {
           switch (index) {
             case 0:
