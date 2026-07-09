@@ -121,9 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        // TODO: Navigate to forgot password
-                      },
+                      onPressed: () => context.push('/forgot-password'),
                       child: const Text('Forgot Password?'),
                     ),
                   ),
@@ -151,6 +149,19 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         onPressed: () => context.go('/register'),
                         child: const Text('Sign Up'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  // Mobile OTP Login
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.phone_android, size: 16, color: Colors.grey[500]),
+                      const SizedBox(width: 6),
+                      TextButton(
+                        onPressed: () => context.push('/mobile-otp'),
+                        child: const Text('Login with Phone'),
                       ),
                     ],
                   ),

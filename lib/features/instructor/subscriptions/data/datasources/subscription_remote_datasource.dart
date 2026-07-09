@@ -61,8 +61,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   Future<List<SubscriptionPlanModel>> getPlans() async {
     try {
       final response = await apiClient.get('/instructor/subscription/plans');
-      final body = response.data as Map<String, dynamic>;
-      final dataList = (body['data'] as List<dynamic>)
+      final dataList = (response.data as List<dynamic>)
           .map((e) => SubscriptionPlanModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;
@@ -141,8 +140,7 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   Future<List<StorageAddonModel>> getStorageAddons() async {
     try {
       final response = await apiClient.get('/instructor/subscription/storage');
-      final body = response.data as Map<String, dynamic>;
-      final dataList = (body['data'] as List<dynamic>)
+      final dataList = (response.data as List<dynamic>)
           .map((e) => StorageAddonModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;

@@ -388,13 +388,11 @@ class _AssignCoursesDialogState extends State<_AssignCoursesDialog> {
                         final isSelected = _selectedIds.contains(course.id);
                         return CheckboxListTile(
                           title: Text(course.title),
-                          subtitle: course.description != null
-                              ? Text(
-                                  course.description!,
+                          subtitle: Text(
+                                  course.description,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                )
-                              : null,
+                                ),
                           value: isSelected,
                           onChanged: (checked) {
                             setState(() {

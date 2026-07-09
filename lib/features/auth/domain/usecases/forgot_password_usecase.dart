@@ -4,9 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class ForgotPasswordUseCase {
-  final AuthRepository repository;
 
   ForgotPasswordUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, void>> call(ForgotPasswordParams params) {
     return repository.forgotPassword(params.email);

@@ -4,9 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/repositories/auth_repository.dart';
 
 class ResetPasswordUseCase {
-  final AuthRepository repository;
 
   ResetPasswordUseCase(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, void>> call(ResetPasswordParams params) {
     return repository.resetPassword(
@@ -17,13 +17,13 @@ class ResetPasswordUseCase {
 }
 
 class ResetPasswordParams extends Equatable {
-  final String token;
-  final String newPassword;
 
   const ResetPasswordParams({
     required this.token,
     required this.newPassword,
   });
+  final String token;
+  final String newPassword;
 
   @override
   List<Object> get props => [token, newPassword];

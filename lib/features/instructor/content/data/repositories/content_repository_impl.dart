@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
-import 'package:lms/features/instructor/content/data/datasources/content_remote_datasource.dart';
+import 'package:lms/features/instructor/courses/content/data/datasources/content_remote_datasource.dart';
 import 'package:lms/features/instructor/courses/content/domain/repositories/content_repository.dart';
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
 

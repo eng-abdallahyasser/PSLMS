@@ -26,6 +26,16 @@ import 'package:lms/features/instructor/subscriptions/presentation/cubit/subscri
 import 'package:lms/features/instructor/subscriptions/presentation/pages/subscription_page.dart';
 import 'package:lms/features/shared/profile/presentation/cubit/profile_cubit.dart';
 import 'package:lms/features/shared/profile/presentation/pages/profile_page.dart';
+import 'package:lms/features/shared/notifications/presentation/cubit/notification_cubit.dart';
+import 'package:lms/features/shared/notifications/presentation/pages/notifications_page.dart';
+import 'package:lms/features/learner/my_courses/presentation/cubit/my_courses_cubit.dart';
+import 'package:lms/features/learner/my_courses/presentation/pages/my_courses_page.dart';
+import 'package:lms/features/learner/my_courses/presentation/pages/my_course_detail_page.dart';
+import 'package:lms/features/learner/my_courses/content/presentation/cubit/learner_content_cubit.dart';
+import 'package:lms/features/learner/instructors/presentation/cubit/instructor_cubit.dart';
+import 'package:lms/features/learner/instructors/presentation/pages/search_instructors_page.dart';
+import 'package:lms/features/learner/instructors/presentation/pages/instructor_profile_page.dart';
+import 'package:lms/features/learner/instructors/presentation/pages/my_instructors_page.dart';
 
 String _courseIdFromState(GoRouterState state) {
   return state.pathParameters['courseId'] ?? '';
@@ -88,8 +98,7 @@ class _AppState extends State<App> {
 
           // Guard instructor-only routes from learners
           if (!isInstructor &&
-              (location == '/courses' ||
-                  location.startsWith('/courses/') ||
+              (location.startsWith('/courses') && location != '/courses' ||
                   location.startsWith('/instructor/'))) {
             return '/dashboard';
           }
@@ -181,6 +190,40 @@ class _AppState extends State<App> {
           builder: (context, state) => const SubscriptionPage(),
         ),
         GoRoute(
+          path: '/my-courses',
+          name: 'myCourses',
+          builder: (context, state) => const MyCoursesPage(),
+        ),
+        GoRoute(
+          path: '/my-courses/:courseId',
+          name: 'myCourseDetail',
+          builder: (context, state) => MyCourseDetailPage(
+            courseId: state.pathParameters['courseId'] ?? '',
+          ),
+        ),
+        GoRoute(
+          path: '/search-instructors',
+          name: 'searchInstructors',
+          builder: (context, state) => const SearchInstructorsPage(),
+        ),
+        GoRoute(
+          path: '/instructors/:id',
+          name: 'instructorProfile',
+          builder: (context, state) => InstructorProfilePage(
+            instructorId: state.pathParameters['id'] ?? '',
+          ),
+        ),
+        GoRoute(
+          path: '/my-instructors',
+          name: 'myInstructors',
+          builder: (context, state) => const MyInstructorsPage(),
+        ),
+        GoRoute(
+          path: '/notifications',
+          name: 'notifications',
+          builder: (context, state) => const NotificationsPage(),
+        ),
+        GoRoute(
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
@@ -207,6 +250,10 @@ class _AppState extends State<App> {
         BlocProvider(create: (_) => sl<StudentCubit>()),
         BlocProvider(create: (_) => sl<SubscriptionCubit>()),
         BlocProvider(create: (_) => sl<ProfileCubit>()),
+        BlocProvider(create: (_) => sl<MyCoursesCubit>()),
+        BlocProvider(create: (_) => sl<LearnerContentCubit>()),
+        BlocProvider(create: (_) => sl<InstructorCubit>()),
+        BlocProvider(create: (_) => sl<NotificationCubit>()),
       ],
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {

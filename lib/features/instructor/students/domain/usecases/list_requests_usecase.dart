@@ -5,9 +5,9 @@ import 'package:lms/features/instructor/students/domain/entities/student_entity.
 import 'package:lms/features/instructor/students/domain/repositories/student_repository.dart';
 
 class ListRequestsUseCase {
-  final StudentRepository repository;
 
   ListRequestsUseCase(this.repository);
+  final StudentRepository repository;
 
   Future<Either<Failure, PaginatedStudents>> call(ListRequestsParams params) {
     return repository.listRequests(
@@ -18,10 +18,10 @@ class ListRequestsUseCase {
 }
 
 class ListRequestsParams extends Equatable {
-  final int page;
-  final int limit;
 
   const ListRequestsParams({this.page = 1, this.limit = 10});
+  final int page;
+  final int limit;
 
   @override
   List<Object> get props => [page, limit];

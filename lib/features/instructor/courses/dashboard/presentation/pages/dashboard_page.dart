@@ -273,27 +273,117 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
+          if (_currentRole() == UserRole.instructor) ...[
+            Row(
+              children: [
+                Expanded(
                   child: _buildActionCard(
                     icon: Icons.menu_book,
-                    label: _currentRole() == UserRole.instructor ? 'My Courses' : 'Browse Courses',
+                    label: 'My Courses',
                     color: const Color(0xFF1565C0),
                     onTap: () => context.push('/courses'),
                   ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildActionCard(
-                  icon: Icons.person,
-                  label: 'My Profile',
-                  color: const Color(0xFF6A1B9A),
-                  onTap: () => context.push('/profile'),
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.people,
+                    label: 'Students',
+                    color: const Color(0xFF2E7D32),
+                    onTap: () => context.push('/instructor/students'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.card_membership,
+                    label: 'Subscription',
+                    color: const Color(0xFF6A1B9A),
+                    onTap: () => context.push('/instructor/subscription'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.person,
+                    label: 'My Profile',
+                    color: const Color(0xFFE65100),
+                    onTap: () => context.push('/profile'),
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.menu_book,
+                    label: 'My Courses',
+                    color: const Color(0xFF1565C0),
+                    onTap: () => context.push('/my-courses'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.people,
+                    label: 'My Instructors',
+                    color: const Color(0xFF2E7D32),
+                    onTap: () => context.push('/my-instructors'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.search,
+                    label: 'Find Instructors',
+                    color: const Color(0xFFE65100),
+                    onTap: () => context.push('/search-instructors'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.notifications,
+                    label: 'Notifications',
+                    color: const Color(0xFF6A1B9A),
+                    onTap: () => context.push('/notifications'),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.school,
+                    label: 'Browse All',
+                    color: const Color(0xFF00695C),
+                    onTap: () => context.push('/courses'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildActionCard(
+                    icon: Icons.person,
+                    label: 'My Profile',
+                    color: const Color(0xFF6A1B9A),
+                    onTap: () => context.push('/profile'),
+                  ),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 16),
         ],
       ),
