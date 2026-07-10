@@ -26,28 +26,28 @@ class ContentLoading extends ContentState {
 }
 
 class ContentLoaded extends ContentState {
-  final List<ContentEntity> contents;
-  final String courseId;
 
   const ContentLoaded({required this.contents, required this.courseId});
+  final List<ContentEntity> contents;
+  final String courseId;
 
   @override
   List<Object?> get props => [contents, courseId];
 }
 
 class ContentActionSuccess extends ContentState {
-  final String message;
 
   const ContentActionSuccess(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class ContentError extends ContentState {
-  final String message;
 
   const ContentError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -56,11 +56,6 @@ class ContentError extends ContentState {
 // ----- Cubit -----
 
 class ContentCubit extends Cubit<ContentState> {
-  final GetCourseContentsUseCase getCourseContentsUseCase;
-  final UploadContentUseCase uploadContentUseCase;
-  final ReorderContentUseCase reorderContentUseCase;
-  final UpdateContentUseCase updateContentUseCase;
-  final DeleteContentUseCase deleteContentUseCase;
 
   ContentCubit({
     required this.getCourseContentsUseCase,
@@ -69,6 +64,11 @@ class ContentCubit extends Cubit<ContentState> {
     required this.updateContentUseCase,
     required this.deleteContentUseCase,
   }) : super(const ContentInitial());
+  final GetCourseContentsUseCase getCourseContentsUseCase;
+  final UploadContentUseCase uploadContentUseCase;
+  final ReorderContentUseCase reorderContentUseCase;
+  final UpdateContentUseCase updateContentUseCase;
+  final DeleteContentUseCase deleteContentUseCase;
 
   Future<void> getContents(String courseId) async {
     emit(const ContentLoading());

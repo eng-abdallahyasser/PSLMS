@@ -1,11 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class DashboardStatsEntity extends Equatable {
-  final int enrolledCourses;
-  final int completedCourses;
-  final int totalLessonsCompleted;
-  final int totalMinutesLearned;
-  final double overallProgress;
 
   const DashboardStatsEntity({
     this.enrolledCourses = 0,
@@ -14,6 +9,11 @@ class DashboardStatsEntity extends Equatable {
     this.totalMinutesLearned = 0,
     this.overallProgress = 0,
   });
+  final int enrolledCourses;
+  final int completedCourses;
+  final int totalLessonsCompleted;
+  final int totalMinutesLearned;
+  final double overallProgress;
 
   @override
   List<Object?> get props => [

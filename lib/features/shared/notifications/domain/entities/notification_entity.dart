@@ -1,13 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class NotificationEntity extends Equatable {
-  final String id;
-  final String title;
-  final String message;
-  final bool isRead;
-  final String? type;
-  final String? referenceId;
-  final DateTime? createdAt;
 
   const NotificationEntity({
     required this.id,
@@ -18,6 +11,13 @@ class NotificationEntity extends Equatable {
     this.referenceId,
     this.createdAt,
   });
+  final String id;
+  final String title;
+  final String message;
+  final bool isRead;
+  final String? type;
+  final String? referenceId;
+  final DateTime? createdAt;
 
   NotificationEntity copyWith({bool? isRead}) {
     return NotificationEntity(

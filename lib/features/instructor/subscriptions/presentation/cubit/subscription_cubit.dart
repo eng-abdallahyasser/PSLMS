@@ -32,51 +32,51 @@ class SubscriptionLoading extends SubscriptionState {
 }
 
 class SubscriptionLoaded extends SubscriptionState {
-  final SubscriptionEntity subscription;
-  final List<SubscriptionPlanEntity> plans;
-  final List<StorageAddonEntity> storageAddons;
 
   const SubscriptionLoaded({
     required this.subscription,
     this.plans = const [],
     this.storageAddons = const [],
   });
+  final SubscriptionEntity subscription;
+  final List<SubscriptionPlanEntity> plans;
+  final List<StorageAddonEntity> storageAddons;
 
   @override
   List<Object?> get props => [subscription, plans, storageAddons];
 }
 
 class SubscriptionCheckoutUrl extends SubscriptionState {
-  final String url;
 
   const SubscriptionCheckoutUrl(this.url);
+  final String url;
 
   @override
   List<Object?> get props => [url];
 }
 
 class SubscriptionPortalUrl extends SubscriptionState {
-  final String url;
 
   const SubscriptionPortalUrl(this.url);
+  final String url;
 
   @override
   List<Object?> get props => [url];
 }
 
 class SubscriptionActionSuccess extends SubscriptionState {
-  final String message;
 
   const SubscriptionActionSuccess(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class SubscriptionError extends SubscriptionState {
-  final String message;
 
   const SubscriptionError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -85,15 +85,6 @@ class SubscriptionError extends SubscriptionState {
 // ----- Cubit -----
 
 class SubscriptionCubit extends Cubit<SubscriptionState> {
-  final GetSubscriptionUseCase getSubscriptionUseCase;
-  final GetPlansUseCase getPlansUseCase;
-  final CreateCheckoutUseCase createCheckoutUseCase;
-  final CreatePortalUseCase createPortalUseCase;
-  final ChoosePlanUseCase choosePlanUseCase;
-  final BuyStorageUseCase buyStorageUseCase;
-  final GetStorageAddonsUseCase getStorageAddonsUseCase;
-  final RefreshSubscriptionUseCase refreshSubscriptionUseCase;
-  final CancelSubscriptionUseCase cancelSubscriptionUseCase;
 
   SubscriptionCubit({
     required this.getSubscriptionUseCase,
@@ -106,6 +97,15 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
     required this.refreshSubscriptionUseCase,
     required this.cancelSubscriptionUseCase,
   }) : super(const SubscriptionInitial());
+  final GetSubscriptionUseCase getSubscriptionUseCase;
+  final GetPlansUseCase getPlansUseCase;
+  final CreateCheckoutUseCase createCheckoutUseCase;
+  final CreatePortalUseCase createPortalUseCase;
+  final ChoosePlanUseCase choosePlanUseCase;
+  final BuyStorageUseCase buyStorageUseCase;
+  final GetStorageAddonsUseCase getStorageAddonsUseCase;
+  final RefreshSubscriptionUseCase refreshSubscriptionUseCase;
+  final CancelSubscriptionUseCase cancelSubscriptionUseCase;
 
   Future<void> loadSubscriptionData() async {
     emit(const SubscriptionLoading());

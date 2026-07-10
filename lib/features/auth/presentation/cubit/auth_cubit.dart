@@ -265,11 +265,11 @@ class AuthCubit extends Cubit<AuthState> {
   final GoogleSignInUseCase googleSignInUseCase;
   final FacebookSignInUseCase facebookSignInUseCase;
 
-  Future<void> login({required String email, required String password}) async {
+  Future<void> login({required String email, required String password, String? deviceToken}) async {
     emit(const AuthLoading());
     log('[DEBUG] Cubit login: calling loginUseCase');
     final result = await loginUseCase(
-      LoginParams(email: email, password: password),
+      LoginParams(email: email, password: password, deviceToken: deviceToken),
     );
     log('[DEBUG] Cubit login: result received, fold called');
     result.fold(

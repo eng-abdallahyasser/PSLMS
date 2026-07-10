@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 import 'package:lms/core/errors/failures.dart';
-import 'package:lms/features/instructor/students/domain/entities/student_entity.dart';
 import 'package:lms/features/instructor/students/domain/repositories/student_repository.dart';
 
 class ListRequestsUseCase {

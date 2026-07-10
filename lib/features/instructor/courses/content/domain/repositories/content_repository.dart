@@ -3,10 +3,10 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
 
 class PaginatedContents {
-  final List<ContentEntity> data;
-  final int totalItems;
 
   const PaginatedContents({required this.data, required this.totalItems});
+  final List<ContentEntity> data;
+  final int totalItems;
 }
 
 abstract class ContentRepository {

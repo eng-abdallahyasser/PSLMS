@@ -867,6 +867,46 @@
 ]
 }
 },
+"/api/admin/push-notifications/test": {
+"post": {
+"description": "Sends a test push notification to a specific user using Firebase Cloud Messaging without creating a database-backed in-app notification.",
+"operationId": "testPushNotification",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"$ref": "#/components/schemas/TestPushNotificationDto"
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Push notification successfully queued for sending."
+},
+"400": {
+"description": "Bad Request - Invalid payload."
+},
+"401": {
+"description": "Unauthorized."
+},
+"403": {
+"description": "Forbidden - Requires admin privileges."
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Test Push Notification",
+"tags": [
+"Admin Push Notifications"
+]
+}
+},
 "/api/instructor/subscription": {
 "get": {
 "description": "Returns the instructor's current subscription with usage.",
@@ -995,11 +1035,48 @@
 ]
 }
 },
+"/api/instructor/subscription/storage/plans": {
+"get": {
+"description": "Returns active storage plans available for purchase.",
+"operationId": "getStoragePlans",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Storage plans list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List storage plans (Instructor)",
+"tags": [
+"Instructor Subscriptions"
+]
+}
+},
 "/api/instructor/subscription/storage": {
 "post": {
-"description": "Creates a Stripe checkout session for a 10 GB storage add-on.",
+"description": "Creates a Stripe checkout session for a selected storage add-on plan.",
 "operationId": "buyStorage",
 "parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"type": "object",
+"properties": {
+"planId": {
+"type": "string",
+"description": "The ID of the storage plan"
+}
+}
+}
+}
+}
+},
 "responses": {
 "201": {
 "description": "Checkout URL returned"
@@ -1150,6 +1227,115 @@
 }
 ],
 "summary": "Update subscription status (Admin)",
+"tags": [
+"Admin Subscriptions"
+]
+}
+},
+"/api/admin/subscriptions/storage-plans": {
+"get": {
+"description": "Returns all storage plans. Admin only.",
+"operationId": "getStoragePlans",
+"parameters": [],
+"responses": {
+"200": {
+"description": "Storage plans list"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "List storage plans (Admin)",
+"tags": [
+"Admin Subscriptions"
+]
+},
+"post": {
+"description": "Creates a new storage plan. Admin only.",
+"operationId": "createStoragePlan",
+"parameters": [],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"type": "object",
+"properties": {
+"gigabytes": {
+"type": "number"
+},
+"pricePerGb": {
+"type": "number"
+}
+}
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "Storage plan created"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Create storage plan (Admin)",
+"tags": [
+"Admin Subscriptions"
+]
+}
+},
+"/api/admin/subscriptions/storage-plans/{id}": {
+"patch": {
+"description": "Updates an existing storage plan. Admin only.",
+"operationId": "updateStoragePlan",
+"parameters": [
+{
+"name": "id",
+"required": true,
+"in": "path",
+"schema": {
+"type": "string"
+}
+}
+],
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"type": "object",
+"properties": {
+"gigabytes": {
+"type": "number"
+},
+"pricePerGb": {
+"type": "number"
+},
+"isActive": {
+"type": "boolean"
+}
+}
+}
+}
+}
+},
+"responses": {
+"200": {
+"description": "Storage plan updated"
+}
+},
+"security": [
+{
+"bearer": []
+}
+],
+"summary": "Update storage plan (Admin)",
 "tags": [
 "Admin Subscriptions"
 ]
@@ -2967,6 +3153,36 @@
 }
 },
 "type": "object"
+},
+"TestPushNotificationDto": {
+"properties": {
+"userId": {
+"minLength": 1,
+"type": "string"
+},
+"title": {
+"minLength": 1,
+"type": "string"
+},
+"body": {
+"minLength": 1,
+"type": "string"
+},
+"type": {
+"minLength": 1,
+"type": "string"
+},
+"data": {
+"type": "object"
+}
+},
+"type": "object",
+"required": [
+"userId",
+"title",
+"body",
+"type"
+]
 },
 "CreateCheckoutSessionDto": {
 "properties": {

@@ -1,13 +1,6 @@
 import 'package:lms/features/instructor/subscriptions/domain/entities/subscription_plan_entity.dart';
 
 class SubscriptionPlanModel {
-  final String id;
-  final String name;
-  final String type;
-  final double price;
-  final String currency;
-  final List<String> features;
-  final bool isPopular;
 
   const SubscriptionPlanModel({
     required this.id,
@@ -33,6 +26,13 @@ class SubscriptionPlanModel {
       isPopular: json['isPopular'] as bool? ?? false,
     );
   }
+  final String id;
+  final String name;
+  final String type;
+  final double price;
+  final String currency;
+  final List<String> features;
+  final bool isPopular;
 
   Map<String, dynamic> toJson() => {
         'id': id,

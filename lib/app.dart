@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -88,8 +89,11 @@ class _AppState extends State<App> {
         }
 
         // ====== Authenticated ======
-        if (authState is AuthAuthenticated) {
-          final isInstructor = authState.user.role == UserRole.instructor;
+        if (authState is AuthAuthenticated || authState is AuthMobileOtpVerified) {
+          final user = authState is AuthAuthenticated
+              ? authState.user
+              : (authState as AuthMobileOtpVerified).user;
+          final isInstructor = user.role == UserRole.instructor;
 
           // Redirect off auth pages to role-based dashboard
           if (isAuthPage) {
@@ -232,6 +236,22 @@ class _AppState extends State<App> {
     );
   }
 
+  Future<void> _requestNotificationPermissions() async {
+    try {
+      final settings = await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+        provisional: false,
+      );
+      if (settings.authorizationStatus == AuthorizationStatus.denied) {
+        debugPrint('[App] Notification permission denied');
+      }
+    } catch (e) {
+      debugPrint('[App] Failed to request notification permissions: $e');
+    }
+  }
+
   @override
   void dispose() {
     _authRefreshNotifier.dispose();
@@ -258,6 +278,9 @@ class _AppState extends State<App> {
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           _authRefreshNotifier.value = !_authRefreshNotifier.value;
+          if (state is AuthAuthenticated || state is AuthMobileOtpVerified) {
+            _requestNotificationPermissions();
+          }
           if (state is AuthEmailNotVerified) {
             _router.go('/verify-email', extra: state.email);
           }

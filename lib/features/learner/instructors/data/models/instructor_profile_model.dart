@@ -6,6 +6,8 @@ class InstructorProfileModel extends InstructorProfileEntity {
     required super.firstName,
     required super.lastName,
     super.email,
+    super.mobileNumber,
+    super.createdAt,
     super.bio,
     super.avatarUrl,
     super.courseCount,
@@ -19,6 +21,10 @@ class InstructorProfileModel extends InstructorProfileEntity {
       firstName: json['firstName'] as String? ?? json['first_name'] as String? ?? '',
       lastName: json['lastName'] as String? ?? json['last_name'] as String? ?? '',
       email: json['email'] as String?,
+      mobileNumber: json['mobileNumber'] as String? ?? json['mobile_number'] as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
       bio: json['bio'] as String?,
       avatarUrl: json['avatarUrl'] as String? ?? json['avatar_url'] as String?,
       courseCount: (json['courseCount'] as num?)?.toInt() ??
@@ -35,6 +41,8 @@ class InstructorProfileModel extends InstructorProfileEntity {
       firstName: firstName,
       lastName: lastName,
       email: email,
+      mobileNumber: mobileNumber,
+      createdAt: createdAt,
       bio: bio,
       avatarUrl: avatarUrl,
       courseCount: courseCount,

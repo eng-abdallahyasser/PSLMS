@@ -23,18 +23,18 @@ class DashboardLoading extends DashboardState {
 }
 
 class DashboardLoaded extends DashboardState {
-  final DashboardStatsEntity stats;
 
   const DashboardLoaded(this.stats);
+  final DashboardStatsEntity stats;
 
   @override
   List<Object?> get props => [stats];
 }
 
 class DashboardError extends DashboardState {
-  final String message;
 
   const DashboardError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -43,10 +43,10 @@ class DashboardError extends DashboardState {
 // ----- Cubit -----
 
 class DashboardCubit extends Cubit<DashboardState> {
-  final GetDashboardStatsUseCase getDashboardStatsUseCase;
 
   DashboardCubit({required this.getDashboardStatsUseCase})
       : super(const DashboardInitial());
+  final GetDashboardStatsUseCase getDashboardStatsUseCase;
 
   Future<void> getStats(UserRole role) async {
     emit(const DashboardLoading());

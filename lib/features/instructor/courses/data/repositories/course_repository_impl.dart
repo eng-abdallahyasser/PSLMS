@@ -8,13 +8,13 @@ import 'package:lms/features/shared/domain/entities/course_entity.dart';
 import 'package:lms/features/instructor/courses/domain/repositories/course_repository.dart';
 
 class CourseRepositoryImpl implements CourseRepository {
-  final CourseRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   CourseRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final CourseRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, List<CourseEntity>>> getCourses({
@@ -25,7 +25,7 @@ class CourseRepositoryImpl implements CourseRepository {
     String? visibilityFilter,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final response = await remoteDataSource.getCourses(
@@ -46,7 +46,7 @@ class CourseRepositoryImpl implements CourseRepository {
   @override
   Future<Either<Failure, CourseEntity>> getCourseById(String id) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final course = await remoteDataSource.getCourseById(id);
@@ -66,7 +66,7 @@ class CourseRepositoryImpl implements CourseRepository {
     String? thumbnailUrl,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final course = await remoteDataSource.createCourse(
@@ -92,7 +92,7 @@ class CourseRepositoryImpl implements CourseRepository {
     String? thumbnailUrl,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final course = await remoteDataSource.updateCourse(
@@ -113,7 +113,7 @@ class CourseRepositoryImpl implements CourseRepository {
   @override
   Future<Either<Failure, void>> deleteCourse(String id) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.deleteCourse(id);

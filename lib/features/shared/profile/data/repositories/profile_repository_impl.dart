@@ -7,18 +7,18 @@ import 'package:lms/features/shared/profile/domain/entities/profile_entity.dart'
 import 'package:lms/features/shared/profile/domain/repositories/profile_repository.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
-  final ProfileRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   ProfileRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final ProfileRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, ProfileEntity>> getProfile() async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final profile = await remoteDataSource.getProfile();
@@ -40,7 +40,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     String? lastName,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final profile = await remoteDataSource.updateProfile(
@@ -61,7 +61,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
     String? mode,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.updatePreferences(lang: lang, mode: mode);
@@ -76,7 +76,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   @override
   Future<Either<Failure, String>> uploadAvatar(String filePath) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final avatarUrl = await remoteDataSource.uploadAvatar(filePath);

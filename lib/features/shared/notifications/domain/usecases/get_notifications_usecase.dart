@@ -4,9 +4,9 @@ import 'package:lms/features/shared/notifications/domain/entities/notification_e
 import 'package:lms/features/shared/notifications/domain/repositories/notification_repository.dart';
 
 class GetNotificationsUseCase {
-  final NotificationRepository repository;
 
   GetNotificationsUseCase(this.repository);
+  final NotificationRepository repository;
 
   Future<Either<Failure, List<NotificationEntity>>> call() {
     return repository.getNotifications();

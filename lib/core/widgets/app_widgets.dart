@@ -156,7 +156,7 @@ class AppPrimaryButton extends StatelessWidget {
   }
 }
 
-/// Text form field with common styling.
+/// Modern text form field with rounded outline border.
 class AppTextField extends StatelessWidget {
 
   const AppTextField({
@@ -171,6 +171,12 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.onChanged,
     this.maxLength,
+    this.maxLines = 1,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.focusNode,
+    this.autofocus = false,
+    this.enabled = true,
   });
   final String label;
   final String? hint;
@@ -182,9 +188,17 @@ class AppTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final void Function(String)? onChanged;
   final int? maxLength;
+  final int maxLines;
+  final TextInputAction? textInputAction;
+  final void Function(String)? onFieldSubmitted;
+  final FocusNode? focusNode;
+  final bool autofocus;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return TextFormField(
       controller: controller,
       validator: validator,
@@ -192,11 +206,76 @@ class AppTextField extends StatelessWidget {
       keyboardType: keyboardType,
       onChanged: onChanged,
       maxLength: maxLength,
+      maxLines: maxLines,
+      textInputAction: textInputAction,
+      onFieldSubmitted: onFieldSubmitted,
+      focusNode: focusNode,
+      autofocus: autofocus,
+      enabled: enabled,
+      style: const TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w500,
+      ),
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: prefixIcon,
+        prefixIcon: prefixIcon != null
+            ? Padding(
+                padding: const EdgeInsets.only(left: 16, right: 8),
+                child: IconTheme(
+                  data: IconThemeData(color: colorScheme.primary),
+                  child: prefixIcon!,
+                ),
+              )
+            : null,
+        prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
         suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1565C0), width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFD32F2F), width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFD32F2F), width: 2),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        labelStyle: TextStyle(
+          color: Colors.grey.shade600,
+          fontWeight: FontWeight.w500,
+        ),
+        hintStyle: TextStyle(
+          color: Colors.grey.shade400,
+          fontWeight: FontWeight.w400,
+        ),
+        errorStyle: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+        ),
+        floatingLabelStyle: TextStyle(
+          color: colorScheme.primary,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

@@ -1,10 +1,6 @@
 import 'package:lms/features/instructor/subscriptions/domain/entities/storage_addon_entity.dart';
 
 class StorageAddonModel {
-  final String id;
-  final int sizeGb;
-  final String purchasedDate;
-  final double price;
 
   const StorageAddonModel({
     required this.id,
@@ -21,6 +17,10 @@ class StorageAddonModel {
       price: (json['price'] as num?)?.toDouble() ?? 0,
     );
   }
+  final String id;
+  final int sizeGb;
+  final String purchasedDate;
+  final double price;
 
   Map<String, dynamic> toJson() => {
         'id': id,

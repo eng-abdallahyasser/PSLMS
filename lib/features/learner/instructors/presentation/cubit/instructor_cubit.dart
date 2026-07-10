@@ -28,18 +28,18 @@ class InstructorsSearchLoading extends InstructorState {
 }
 
 class InstructorsSearchLoaded extends InstructorState {
-  final List<InstructorProfileEntity> instructors;
 
   const InstructorsSearchLoaded(this.instructors);
+  final List<InstructorProfileEntity> instructors;
 
   @override
   List<Object?> get props => [instructors];
 }
 
 class InstructorsSearchError extends InstructorState {
-  final String message;
 
   const InstructorsSearchError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -50,36 +50,38 @@ class InstructorProfileLoading extends InstructorState {
 }
 
 class InstructorProfileLoaded extends InstructorState {
-  final InstructorProfileEntity instructor;
 
-  const InstructorProfileLoaded(this.instructor);
+  const InstructorProfileLoaded(this.instructor, {this.isJoinRequestInProgress = false, this.joinMessage});
+  final InstructorProfileEntity instructor;
+  final bool isJoinRequestInProgress;
+  final String? joinMessage;
 
   @override
-  List<Object?> get props => [instructor];
+  List<Object?> get props => [instructor, isJoinRequestInProgress, joinMessage];
 }
 
 class InstructorProfileError extends InstructorState {
-  final String message;
 
   const InstructorProfileError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class InstructorActionSuccess extends InstructorState {
-  final String message;
 
   const InstructorActionSuccess(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class InstructorActionError extends InstructorState {
-  final String message;
 
   const InstructorActionError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -90,18 +92,18 @@ class MyInstructorsLoading extends InstructorState {
 }
 
 class MyInstructorsLoaded extends InstructorState {
-  final List<InstructorProfileEntity> instructors;
 
   const MyInstructorsLoaded(this.instructors);
+  final List<InstructorProfileEntity> instructors;
 
   @override
   List<Object?> get props => [instructors];
 }
 
 class MyInstructorsError extends InstructorState {
-  final String message;
 
   const MyInstructorsError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -112,18 +114,18 @@ class InstructorCoursesLoading extends InstructorState {
 }
 
 class InstructorCoursesLoaded extends InstructorState {
-  final List<CourseEntity> courses;
 
   const InstructorCoursesLoaded(this.courses);
+  final List<CourseEntity> courses;
 
   @override
   List<Object?> get props => [courses];
 }
 
 class InstructorCoursesError extends InstructorState {
-  final String message;
 
   const InstructorCoursesError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -134,31 +136,24 @@ class InvitationInfoLoading extends InstructorState {
 }
 
 class InvitationInfoLoaded extends InstructorState {
-  final InvitationInfoEntity info;
 
   const InvitationInfoLoaded(this.info);
+  final InvitationInfoEntity info;
 
   @override
   List<Object?> get props => [info];
 }
 
 class InvitationInfoError extends InstructorState {
-  final String message;
 
   const InvitationInfoError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class InstructorCubit extends Cubit<InstructorState> {
-  final SearchInstructorsUseCase searchInstructorsUseCase;
-  final GetInstructorProfileUseCase getInstructorProfileUseCase;
-  final RequestToJoinUseCase requestToJoinUseCase;
-  final GetMyInstructorsUseCase getMyInstructorsUseCase;
-  final GetInstructorCoursesUseCase getInstructorCoursesUseCase;
-  final GetInvitationInfoUseCase getInvitationInfoUseCase;
-  final AcceptInvitationUseCase acceptInvitationUseCase;
 
   InstructorCubit({
     required this.searchInstructorsUseCase,
@@ -169,6 +164,13 @@ class InstructorCubit extends Cubit<InstructorState> {
     required this.getInvitationInfoUseCase,
     required this.acceptInvitationUseCase,
   }) : super(const InstructorInitial());
+  final SearchInstructorsUseCase searchInstructorsUseCase;
+  final GetInstructorProfileUseCase getInstructorProfileUseCase;
+  final RequestToJoinUseCase requestToJoinUseCase;
+  final GetMyInstructorsUseCase getMyInstructorsUseCase;
+  final GetInstructorCoursesUseCase getInstructorCoursesUseCase;
+  final GetInvitationInfoUseCase getInvitationInfoUseCase;
+  final AcceptInvitationUseCase acceptInvitationUseCase;
 
   Future<void> searchInstructors({
     required String query,
@@ -197,12 +199,25 @@ class InstructorCubit extends Cubit<InstructorState> {
   }
 
   Future<void> requestToJoin(String instructorId) async {
-    emit(const InstructorProfileLoading());
+    final currentProfile = state is InstructorProfileLoaded
+        ? (state as InstructorProfileLoaded).instructor
+        : null;
+    if (currentProfile != null) {
+      emit(InstructorProfileLoaded(currentProfile, isJoinRequestInProgress: true));
+    }
     final result = await requestToJoinUseCase(instructorId);
-    result.fold(
-      (failure) => emit(InstructorActionError(_mapFailureToMessage(failure))),
-      (_) => emit(const InstructorActionSuccess('Join request sent!')),
-    );
+    if (currentProfile != null) {
+      result.fold(
+        (failure) {
+          emit(InstructorProfileLoaded(currentProfile, joinMessage: _mapFailureToMessage(failure)));
+          emit(InstructorProfileLoaded(currentProfile));
+        },
+        (_) {
+          emit(InstructorProfileLoaded(currentProfile, joinMessage: 'Join request sent!'));
+          emit(InstructorProfileLoaded(currentProfile));
+        },
+      );
+    }
   }
 
   Future<void> getMyInstructors() async {

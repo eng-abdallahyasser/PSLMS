@@ -3,9 +3,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/shared/profile/domain/repositories/profile_repository.dart';
 
 class UpdatePreferencesUseCase {
-  final ProfileRepository repository;
 
   UpdatePreferencesUseCase(this.repository);
+  final ProfileRepository repository;
 
   Future<Either<Failure, void>> call({
     String? lang,

@@ -9,18 +9,18 @@ import 'package:lms/features/shared/domain/entities/my_course_detail_entity.dart
 import 'package:lms/features/instructor/courses/enrollments/domain/repositories/enrollment_repository.dart';
 
 class EnrollmentRepositoryImpl implements EnrollmentRepository {
-  final EnrollmentRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   EnrollmentRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final EnrollmentRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, EnrollmentEntity>> enroll(String courseId) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final enrollment = await remoteDataSource.enroll(courseId);
@@ -38,7 +38,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     int limit = 10,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final response = await remoteDataSource.getMyCourses(page: page, limit: limit);
@@ -55,7 +55,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     String courseId,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final detail = await remoteDataSource.getMyCourseDetail(courseId);
@@ -72,7 +72,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     String courseId,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final enrollments = await remoteDataSource.getEnrollments(courseId);
@@ -90,7 +90,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     String status,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.respondToEnrollment(enrollmentId, status);
@@ -108,7 +108,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
     String email,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.inviteLearner(courseId, email);
@@ -123,7 +123,7 @@ class EnrollmentRepositoryImpl implements EnrollmentRepository {
   @override
   Future<Either<Failure, void>> removeEnrollment(String enrollmentId) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.removeEnrollment(enrollmentId);

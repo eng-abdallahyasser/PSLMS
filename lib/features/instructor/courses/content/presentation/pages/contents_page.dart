@@ -5,14 +5,14 @@ import 'package:lms/features/shared/domain/entities/content_entity.dart';
 import 'package:lms/features/instructor/courses/content/presentation/cubit/content_cubit.dart';
 
 class ContentsPage extends StatefulWidget {
-  final String courseId;
-  final String courseTitle;
 
   const ContentsPage({
     super.key,
     required this.courseId,
     this.courseTitle = 'Course Content',
   });
+  final String courseId;
+  final String courseTitle;
 
   @override
   State<ContentsPage> createState() => _ContentsPageState();
@@ -265,20 +265,14 @@ class _ContentsPageState extends State<ContentsPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              AppTextField(
+                label: 'Title',
                 controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
-                ),
               ),
               const SizedBox(height: 12),
-              TextField(
+              AppTextField(
+                label: 'Description',
                 controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
                 maxLines: 3,
               ),
             ],
@@ -348,22 +342,16 @@ class _ContentsPageState extends State<ContentsPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
+              AppTextField(
+                label: 'Title',
+                hint: 'e.g. Intro Lecture',
                 controller: titleController,
-                decoration: const InputDecoration(
-                  labelText: 'Title',
-                  hintText: 'e.g. Intro Lecture',
-                  border: OutlineInputBorder(),
-                ),
               ),
               const SizedBox(height: 12),
-              TextField(
+              AppTextField(
+                label: 'Description (optional)',
+                hint: 'Brief description',
                 controller: descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
-                  hintText: 'Brief description',
-                  border: OutlineInputBorder(),
-                ),
                 maxLines: 2,
               ),
               const SizedBox(height: 12),

@@ -4,9 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class CreateCheckoutUseCase {
-  final SubscriptionRepository repository;
 
   CreateCheckoutUseCase(this.repository);
+  final SubscriptionRepository repository;
 
   Future<Either<Failure, String>> call(CreateCheckoutParams params) {
     return repository.createCheckout(
@@ -18,15 +18,15 @@ class CreateCheckoutUseCase {
 }
 
 class CreateCheckoutParams extends Equatable {
-  final String planType;
-  final String? successUrl;
-  final String? cancelUrl;
 
   const CreateCheckoutParams({
     required this.planType,
     this.successUrl,
     this.cancelUrl,
   });
+  final String planType;
+  final String? successUrl;
+  final String? cancelUrl;
 
   @override
   List<Object?> get props => [planType, successUrl, cancelUrl];

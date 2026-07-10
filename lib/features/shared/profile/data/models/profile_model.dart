@@ -2,6 +2,20 @@ import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/shared/profile/domain/entities/profile_entity.dart';
 
 class ProfileModel extends ProfileEntity {
+
+  factory ProfileModel.fromEntity(ProfileEntity entity) {
+    return ProfileModel(
+      id: entity.id,
+      email: entity.email,
+      firstName: entity.firstName,
+      lastName: entity.lastName,
+      role: entity.role,
+      avatarUrl: entity.avatarUrl,
+      lang: entity.lang,
+      mode: entity.mode,
+      createdAt: entity.createdAt,
+    );
+  }
   const ProfileModel({
     required super.id,
     required super.email,
@@ -57,20 +71,6 @@ class ProfileModel extends ProfileEntity {
       lang: lang,
       mode: mode,
       createdAt: createdAt,
-    );
-  }
-
-  factory ProfileModel.fromEntity(ProfileEntity entity) {
-    return ProfileModel(
-      id: entity.id,
-      email: entity.email,
-      firstName: entity.firstName,
-      lastName: entity.lastName,
-      role: entity.role,
-      avatarUrl: entity.avatarUrl,
-      lang: entity.lang,
-      mode: entity.mode,
-      createdAt: entity.createdAt,
     );
   }
 }

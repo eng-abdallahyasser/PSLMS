@@ -4,9 +4,9 @@ import 'package:lms/features/shared/domain/entities/course_entity.dart';
 import 'package:lms/features/instructor/courses/enrollments/domain/repositories/enrollment_repository.dart';
 
 class GetMyCoursesUseCase {
-  final EnrollmentRepository repository;
 
   GetMyCoursesUseCase(this.repository);
+  final EnrollmentRepository repository;
 
   Future<Either<Failure, List<CourseEntity>>> call({
     int page = 1,

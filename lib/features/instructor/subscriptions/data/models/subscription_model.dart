@@ -1,13 +1,6 @@
 import 'package:lms/features/instructor/subscriptions/domain/entities/subscription_entity.dart';
 
 class SubscriptionModel {
-  final String id;
-  final String planType;
-  final String status;
-  final double storageUsed;
-  final double storageLimit;
-  final String? startDate;
-  final String? endDate;
 
   const SubscriptionModel({
     required this.id,
@@ -30,6 +23,13 @@ class SubscriptionModel {
       endDate: json['endDate'] as String?,
     );
   }
+  final String id;
+  final String planType;
+  final String status;
+  final double storageUsed;
+  final double storageLimit;
+  final String? startDate;
+  final String? endDate;
 
   Map<String, dynamic> toJson() => {
         'id': id,

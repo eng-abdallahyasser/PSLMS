@@ -25,18 +25,18 @@ class ProfileLoading extends ProfileState {
 }
 
 class ProfileLoaded extends ProfileState {
-  final ProfileEntity profile;
 
   const ProfileLoaded(this.profile);
+  final ProfileEntity profile;
 
   @override
   List<Object?> get props => [profile];
 }
 
 class ProfileError extends ProfileState {
-  final String message;
 
   const ProfileError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -56,29 +56,29 @@ class GetProfileEvent extends ProfileEvent {
 }
 
 class UpdateProfileEvent extends ProfileEvent {
-  final String? firstName;
-  final String? lastName;
 
   const UpdateProfileEvent({this.firstName, this.lastName});
+  final String? firstName;
+  final String? lastName;
 
   @override
   List<Object?> get props => [firstName ?? '', lastName ?? ''];
 }
 
 class UpdatePreferencesEvent extends ProfileEvent {
-  final String? lang;
-  final String? mode;
 
   const UpdatePreferencesEvent({this.lang, this.mode});
+  final String? lang;
+  final String? mode;
 
   @override
   List<Object?> get props => [lang ?? '', mode ?? ''];
 }
 
 class UploadAvatarEvent extends ProfileEvent {
-  final String filePath;
 
   const UploadAvatarEvent({required this.filePath});
+  final String filePath;
 
   @override
   List<Object?> get props => [filePath];
@@ -87,10 +87,6 @@ class UploadAvatarEvent extends ProfileEvent {
 // ----- Cubit -----
 
 class ProfileCubit extends Cubit<ProfileState> {
-  final GetProfileUseCase getProfileUseCase;
-  final UpdateProfileUseCase updateProfileUseCase;
-  final UpdatePreferencesUseCase updatePreferencesUseCase;
-  final UploadAvatarUseCase uploadAvatarUseCase;
 
   ProfileCubit({
     required this.getProfileUseCase,
@@ -98,6 +94,10 @@ class ProfileCubit extends Cubit<ProfileState> {
     required this.updatePreferencesUseCase,
     required this.uploadAvatarUseCase,
   }) : super(const ProfileInitial());
+  final GetProfileUseCase getProfileUseCase;
+  final UpdateProfileUseCase updateProfileUseCase;
+  final UpdatePreferencesUseCase updatePreferencesUseCase;
+  final UploadAvatarUseCase uploadAvatarUseCase;
 
   Future<void> getProfile() async {
     emit(const ProfileLoading());

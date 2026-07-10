@@ -4,9 +4,9 @@ import 'package:lms/features/shared/domain/entities/content_entity.dart';
 import 'package:lms/features/instructor/courses/content/domain/repositories/content_repository.dart';
 
 class GetMyContentDetailUseCase {
-  final ContentRepository repository;
 
   GetMyContentDetailUseCase(this.repository);
+  final ContentRepository repository;
 
   Future<Either<Failure, ContentEntity>> call(
     String courseId,

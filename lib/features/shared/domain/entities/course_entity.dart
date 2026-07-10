@@ -1,13 +1,13 @@
 import 'package:equatable/equatable.dart';
 
 class InstructorEntity extends Equatable {
-  final String firstName;
-  final String lastName;
 
   const InstructorEntity({
     required this.firstName,
     required this.lastName,
   });
+  final String firstName;
+  final String lastName;
 
   String get fullName => '$firstName $lastName';
 
@@ -16,18 +16,6 @@ class InstructorEntity extends Equatable {
 }
 
 class CourseEntity extends Equatable {
-  final String id;
-  final String title;
-  final String description;
-  final String visibility;
-  final InstructorEntity? instructor;
-  final String? thumbnailUrl;
-  final int lessonCount;
-  final int durationMinutes;
-  final String difficulty;
-  final double progress;
-  final bool isEnrolled;
-  final DateTime? createdAt;
 
   const CourseEntity({
     required this.id,
@@ -43,6 +31,18 @@ class CourseEntity extends Equatable {
     this.isEnrolled = false,
     this.createdAt,
   });
+  final String id;
+  final String title;
+  final String description;
+  final String visibility;
+  final InstructorEntity? instructor;
+  final String? thumbnailUrl;
+  final int lessonCount;
+  final int durationMinutes;
+  final String difficulty;
+  final double progress;
+  final bool isEnrolled;
+  final DateTime? createdAt;
 
   CourseEntity copyWith({
     String? id,

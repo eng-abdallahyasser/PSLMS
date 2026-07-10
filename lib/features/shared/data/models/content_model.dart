@@ -1,6 +1,19 @@
 import 'package:lms/features/shared/domain/entities/content_entity.dart';
 
 class ContentModel extends ContentEntity {
+
+  factory ContentModel.fromEntity(ContentEntity entity) {
+    return ContentModel(
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      contentType: entity.contentType,
+      size: entity.size,
+      url: entity.url,
+      courseId: entity.courseId,
+      createdAt: entity.createdAt,
+    );
+  }
   const ContentModel({
     required super.id,
     required super.title,
@@ -52,19 +65,6 @@ class ContentModel extends ContentEntity {
       url: url,
       courseId: courseId,
       createdAt: createdAt,
-    );
-  }
-
-  factory ContentModel.fromEntity(ContentEntity entity) {
-    return ContentModel(
-      id: entity.id,
-      title: entity.title,
-      description: entity.description,
-      contentType: entity.contentType,
-      size: entity.size,
-      url: entity.url,
-      courseId: entity.courseId,
-      createdAt: entity.createdAt,
     );
   }
 }

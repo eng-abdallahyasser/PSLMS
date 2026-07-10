@@ -31,13 +31,6 @@ enum EnrollmentStatus {
 }
 
 class EnrollmentEntity extends Equatable {
-  final String id;
-  final EnrollmentStatus status;
-  final String courseId;
-  final String learnerId;
-  final String? learnerFirstName;
-  final String? learnerEmail;
-  final DateTime? createdAt;
 
   const EnrollmentEntity({
     required this.id,
@@ -48,6 +41,13 @@ class EnrollmentEntity extends Equatable {
     this.learnerEmail,
     this.createdAt,
   });
+  final String id;
+  final EnrollmentStatus status;
+  final String courseId;
+  final String learnerId;
+  final String? learnerFirstName;
+  final String? learnerEmail;
+  final DateTime? createdAt;
 
   @override
   List<Object?> get props => [

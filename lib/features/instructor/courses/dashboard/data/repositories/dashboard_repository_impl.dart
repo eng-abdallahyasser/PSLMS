@@ -8,18 +8,18 @@ import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashbo
 import 'package:lms/features/instructor/courses/dashboard/domain/repositories/dashboard_repository.dart';
 
 class DashboardRepositoryImpl implements DashboardRepository {
-  final DashboardRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   DashboardRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final DashboardRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, DashboardStatsEntity>> getStats(UserRole role) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final courses = await remoteDataSource.getCourses(role: role);

@@ -26,13 +26,13 @@ class CourseLoading extends CourseState {
 }
 
 class CourseLoaded extends CourseState {
-  final List<CourseEntity> courses;
-  final bool hasReachedMax;
 
   const CourseLoaded({
     required this.courses,
     this.hasReachedMax = false,
   });
+  final List<CourseEntity> courses;
+  final bool hasReachedMax;
 
   CourseLoaded copyWith({
     List<CourseEntity>? courses,
@@ -49,9 +49,9 @@ class CourseLoaded extends CourseState {
 }
 
 class CourseError extends CourseState {
-  final String message;
 
   const CourseError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -67,10 +67,6 @@ sealed class CourseEvent extends Equatable {
 }
 
 class GetCoursesEvent extends CourseEvent {
-  final int page;
-  final int limit;
-  final String? search;
-  final String? visibilityFilter;
 
   const GetCoursesEvent({
     this.page = 1,
@@ -78,6 +74,10 @@ class GetCoursesEvent extends CourseEvent {
     this.search,
     this.visibilityFilter,
   });
+  final int page;
+  final int limit;
+  final String? search;
+  final String? visibilityFilter;
 
   @override
   List<Object?> get props => [page, limit, search ?? '', visibilityFilter ?? ''];
@@ -88,10 +88,6 @@ class LoadMoreCoursesEvent extends CourseEvent {
 }
 
 class CreateCourseEvent extends CourseEvent {
-  final String title;
-  final String description;
-  final String visibility;
-  final String? thumbnailUrl;
 
   const CreateCourseEvent({
     required this.title,
@@ -99,17 +95,16 @@ class CreateCourseEvent extends CourseEvent {
     this.visibility = 'PUBLIC',
     this.thumbnailUrl,
   });
+  final String title;
+  final String description;
+  final String visibility;
+  final String? thumbnailUrl;
 
   @override
   List<Object?> get props => [title, description, visibility, thumbnailUrl ?? ''];
 }
 
 class UpdateCourseEvent extends CourseEvent {
-  final String id;
-  final String? title;
-  final String? description;
-  final String? visibility;
-  final String? thumbnailUrl;
 
   const UpdateCourseEvent({
     required this.id,
@@ -118,15 +113,20 @@ class UpdateCourseEvent extends CourseEvent {
     this.visibility,
     this.thumbnailUrl,
   });
+  final String id;
+  final String? title;
+  final String? description;
+  final String? visibility;
+  final String? thumbnailUrl;
 
   @override
   List<Object?> get props => [id, title ?? '', description ?? '', visibility ?? '', thumbnailUrl ?? ''];
 }
 
 class DeleteCourseEvent extends CourseEvent {
-  final String id;
 
   const DeleteCourseEvent({required this.id});
+  final String id;
 
   @override
   List<Object?> get props => [id];
@@ -135,6 +135,13 @@ class DeleteCourseEvent extends CourseEvent {
 // ----- Cubit -----
 
 class CourseCubit extends Cubit<CourseState> {
+
+  CourseCubit({
+    required this.getCoursesUseCase,
+    required this.createCourseUseCase,
+    required this.updateCourseUseCase,
+    required this.deleteCourseUseCase,
+  }) : super(const CourseInitial());
   final GetCoursesUseCase getCoursesUseCase;
   final CreateCourseUseCase createCourseUseCase;
   final UpdateCourseUseCase updateCourseUseCase;
@@ -143,13 +150,6 @@ class CourseCubit extends Cubit<CourseState> {
   int _currentPage = 1;
   static const int _pageSize = 10;
   UserRole _currentRole = UserRole.learner;
-
-  CourseCubit({
-    required this.getCoursesUseCase,
-    required this.createCourseUseCase,
-    required this.updateCourseUseCase,
-    required this.deleteCourseUseCase,
-  }) : super(const CourseInitial());
 
   void setRole(UserRole role) {
     _currentRole = role;

@@ -22,42 +22,42 @@ class NotificationsLoading extends NotificationState {
 }
 
 class NotificationsLoaded extends NotificationState {
-  final List<NotificationEntity> notifications;
 
   const NotificationsLoaded(this.notifications);
+  final List<NotificationEntity> notifications;
 
   @override
   List<Object?> get props => [notifications];
 }
 
 class NotificationsError extends NotificationState {
-  final String message;
 
   const NotificationsError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class NotificationsActionSuccess extends NotificationState {
-  final String message;
 
   const NotificationsActionSuccess(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class NotificationCubit extends Cubit<NotificationState> {
-  final GetNotificationsUseCase getNotificationsUseCase;
-  final MarkNotificationReadUseCase markNotificationReadUseCase;
-  final MarkAllNotificationsReadUseCase markAllNotificationsReadUseCase;
 
   NotificationCubit({
     required this.getNotificationsUseCase,
     required this.markNotificationReadUseCase,
     required this.markAllNotificationsReadUseCase,
   }) : super(const NotificationInitial());
+  final GetNotificationsUseCase getNotificationsUseCase;
+  final MarkNotificationReadUseCase markNotificationReadUseCase;
+  final MarkAllNotificationsReadUseCase markAllNotificationsReadUseCase;
 
   Future<void> getNotifications() async {
     emit(const NotificationsLoading());

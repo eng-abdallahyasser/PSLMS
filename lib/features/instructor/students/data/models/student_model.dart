@@ -12,16 +12,19 @@ class StudentModel extends StudentEntity {
   });
 
   factory StudentModel.fromJson(Map<String, dynamic> json) {
+    final studentData = json['student'] as Map<String, dynamic>?;
     return StudentModel(
       id: json['id'] as String,
-      firstName: json['firstName'] as String? ?? json['first_name'] as String? ?? '',
-      lastName: json['lastName'] as String? ?? json['last_name'] as String? ?? '',
-      email: json['email'] as String?,
+      firstName: (studentData?['firstName'] ?? studentData?['first_name'] ?? json['firstName'] ?? json['first_name'] ?? '') as String,
+      lastName: (studentData?['lastName'] ?? studentData?['last_name'] ?? json['lastName'] ?? json['last_name'] ?? '') as String,
+      email: (studentData?['email'] ?? json['email'] ?? json['invitedEmail']) as String?,
       status: _parseStatus(json['status'] as String?),
-      avatarUrl: json['avatar_url'] as String? ?? json['avatarUrl'] as String?,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
-          : null,
+      avatarUrl: (studentData?['profileImageUrl'] ?? studentData?['avatarUrl'] ?? json['avatarUrl'] ?? json['avatar_url']) as String?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : json['created_at'] != null
+              ? DateTime.parse(json['created_at'] as String)
+              : null,
     );
   }
 

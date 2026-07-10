@@ -186,9 +186,28 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Role Selector
                   DropdownButtonFormField<String>(
                     initialValue: _selectedRole,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Role',
-                      prefixIcon: Icon(Icons.school_outlined),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 8),
+                        child: Icon(Icons.school_outlined, color: Theme.of(context).colorScheme.primary),
+                      ),
+                      prefixIconConstraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFF1565C0), width: 2),
+                      ),
                     ),
                     items: const [
                       DropdownMenuItem(

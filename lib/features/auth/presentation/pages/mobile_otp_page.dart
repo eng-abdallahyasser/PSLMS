@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lms/core/utils/validators.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 
@@ -198,14 +197,14 @@ class _MobileOtpPageState extends State<MobileOtpPage> {
                             decoration: InputDecoration(
                               counterText: '',
                               filled: true,
-                              fillColor: Colors.grey[100],
+                              fillColor: Colors.white,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
+                                borderSide: BorderSide(color: Colors.grey.shade300),
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey[300]!),
+                                borderSide: BorderSide(color: Colors.grey.shade300),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),

@@ -3,17 +3,16 @@ import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
 import 'package:lms/features/instructor/students/data/datasources/student_remote_datasource.dart';
-import 'package:lms/features/instructor/students/domain/entities/student_entity.dart';
 import 'package:lms/features/instructor/students/domain/repositories/student_repository.dart';
 
 class StudentRepositoryImpl implements StudentRepository {
-  final StudentRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   StudentRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final StudentRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, void>> inviteStudent(String email) async {

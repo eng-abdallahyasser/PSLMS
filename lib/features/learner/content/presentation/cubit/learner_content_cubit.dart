@@ -22,42 +22,42 @@ class LearnerContentLoading extends LearnerContentState {
 }
 
 class LearnerContentLoaded extends LearnerContentState {
-  final List<ContentEntity> contents;
-  final String courseId;
-  final int totalItems;
 
   const LearnerContentLoaded({
     required this.contents,
     required this.courseId,
     required this.totalItems,
   });
+  final List<ContentEntity> contents;
+  final String courseId;
+  final int totalItems;
 
   @override
   List<Object?> get props => [contents, courseId, totalItems];
 }
 
 class LearnerContentError extends LearnerContentState {
-  final String message;
 
   const LearnerContentError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class LearnerContentDetailLoaded extends LearnerContentState {
-  final ContentEntity content;
 
   const LearnerContentDetailLoaded(this.content);
+  final ContentEntity content;
 
   @override
   List<Object?> get props => [content];
 }
 
 class LearnerContentDetailError extends LearnerContentState {
-  final String message;
 
   const LearnerContentDetailError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];

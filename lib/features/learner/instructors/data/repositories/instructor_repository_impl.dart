@@ -9,13 +9,13 @@ import 'package:lms/features/learner/instructors/domain/entities/invitation_info
 import 'package:lms/features/learner/instructors/domain/repositories/instructor_repository.dart';
 
 class InstructorRepositoryImpl implements InstructorRepository {
-  final InstructorRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   InstructorRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final InstructorRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, List<InstructorProfileEntity>>> searchInstructors({
@@ -24,7 +24,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
     int limit = 10,
   }) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final result = await remoteDataSource.searchInstructors(
@@ -45,7 +45,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
     String id,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final profile = await remoteDataSource.getInstructorProfile(id);
@@ -60,7 +60,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
   @override
   Future<Either<Failure, void>> requestToJoin(String instructorId) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.requestToJoin(instructorId);
@@ -75,7 +75,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
   @override
   Future<Either<Failure, List<InstructorProfileEntity>>> getMyInstructors() async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final instructors = await remoteDataSource.getMyInstructors();
@@ -92,7 +92,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
     String instructorId,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final courses = await remoteDataSource.getInstructorCourses(instructorId);
@@ -109,7 +109,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
     String token,
   ) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       final info = await remoteDataSource.getInvitationInfo(token);
@@ -124,7 +124,7 @@ class InstructorRepositoryImpl implements InstructorRepository {
   @override
   Future<Either<Failure, void>> acceptInvitation(String token) async {
     if (await networkInfo.isConnected == false) {
-      return Left(NetworkFailure());
+      return const Left(NetworkFailure());
     }
     try {
       await remoteDataSource.acceptInvitation(token);

@@ -5,9 +5,9 @@ import 'package:lms/features/shared/domain/entities/content_entity.dart';
 import 'package:lms/features/instructor/courses/content/domain/repositories/content_repository.dart';
 
 class UpdateContentUseCase {
-  final ContentRepository repository;
 
   UpdateContentUseCase(this.repository);
+  final ContentRepository repository;
 
   Future<Either<Failure, ContentEntity>> call(UpdateContentParams params) {
     return repository.updateContent(
@@ -20,10 +20,6 @@ class UpdateContentUseCase {
 }
 
 class UpdateContentParams extends Equatable {
-  final String courseId;
-  final String contentId;
-  final String? title;
-  final String? description;
 
   const UpdateContentParams({
     required this.courseId,
@@ -31,6 +27,10 @@ class UpdateContentParams extends Equatable {
     this.title,
     this.description,
   });
+  final String courseId;
+  final String contentId;
+  final String? title;
+  final String? description;
 
   @override
   List<Object?> get props => [courseId, contentId, title, description];

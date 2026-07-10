@@ -227,20 +227,14 @@ class _ProfilePageState extends State<ProfilePage> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(
+            AppTextField(
+              label: 'First Name',
               controller: firstNameController,
-              decoration: const InputDecoration(
-                labelText: 'First Name',
-                border: OutlineInputBorder(),
-              ),
             ),
             const SizedBox(height: 12),
-            TextField(
+            AppTextField(
+              label: 'Last Name',
               controller: lastNameController,
-              decoration: const InputDecoration(
-                labelText: 'Last Name',
-                border: OutlineInputBorder(),
-              ),
             ),
           ],
         ),

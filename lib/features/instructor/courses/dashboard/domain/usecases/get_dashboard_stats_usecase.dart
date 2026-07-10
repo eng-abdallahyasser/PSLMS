@@ -5,9 +5,9 @@ import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashbo
 import 'package:lms/features/instructor/courses/dashboard/domain/repositories/dashboard_repository.dart';
 
 class GetDashboardStatsUseCase {
-  final DashboardRepository repository;
 
   GetDashboardStatsUseCase(this.repository);
+  final DashboardRepository repository;
 
   Future<Either<Failure, DashboardStatsEntity>> call(UserRole role) {
     return repository.getStats(role);

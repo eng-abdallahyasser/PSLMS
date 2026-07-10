@@ -31,14 +31,6 @@ enum ContentType {
 }
 
 class ContentEntity extends Equatable {
-  final String id;
-  final String title;
-  final String? description;
-  final ContentType contentType;
-  final int size;
-  final String url;
-  final String? courseId;
-  final DateTime? createdAt;
 
   const ContentEntity({
     required this.id,
@@ -50,6 +42,14 @@ class ContentEntity extends Equatable {
     this.courseId,
     this.createdAt,
   });
+  final String id;
+  final String title;
+  final String? description;
+  final ContentType contentType;
+  final int size;
+  final String url;
+  final String? courseId;
+  final DateTime? createdAt;
 
   /// Human-readable file size string (e.g. "1.5 MB", "240 KB").
   String get formattedSize {

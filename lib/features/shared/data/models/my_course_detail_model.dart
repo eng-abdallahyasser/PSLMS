@@ -3,8 +3,6 @@ import 'package:lms/features/shared/data/models/course_model.dart';
 import 'package:lms/features/shared/domain/entities/my_course_detail_entity.dart';
 
 class MyCourseDetailModel {
-  final CourseModel course;
-  final List<ContentModel> contents;
 
   const MyCourseDetailModel({
     required this.course,
@@ -20,6 +18,8 @@ class MyCourseDetailModel {
           [],
     );
   }
+  final CourseModel course;
+  final List<ContentModel> contents;
 
   MyCourseDetailEntity toEntity() {
     return MyCourseDetailEntity(

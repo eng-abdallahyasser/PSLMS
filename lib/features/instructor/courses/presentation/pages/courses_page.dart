@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
@@ -74,22 +72,6 @@ class _CoursesPageState extends State<CoursesPage> {
                 ),
               ),
           };
-        },
-      ),
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: 1,
-        role: _currentRole(),
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              context.pop();
-              break;
-            case 1:
-              break;
-            case 2:
-              context.push('/profile');
-              break;
-          }
         },
       ),
     );

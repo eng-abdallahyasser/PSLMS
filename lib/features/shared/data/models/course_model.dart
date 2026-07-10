@@ -26,6 +26,25 @@ class InstructorModel extends InstructorEntity {
 }
 
 class CourseModel extends CourseEntity {
+
+  factory CourseModel.fromEntity(CourseEntity entity) {
+    return CourseModel(
+      id: entity.id,
+      title: entity.title,
+      description: entity.description,
+      visibility: entity.visibility,
+      instructor: entity.instructor != null
+          ? InstructorModel(firstName: entity.instructor!.firstName, lastName: entity.instructor!.lastName)
+          : null,
+      thumbnailUrl: entity.thumbnailUrl,
+      lessonCount: entity.lessonCount,
+      durationMinutes: entity.durationMinutes,
+      difficulty: entity.difficulty,
+      progress: entity.progress,
+      isEnrolled: entity.isEnrolled,
+      createdAt: entity.createdAt,
+    );
+  }
   const CourseModel({
     required super.id,
     required super.title,
@@ -99,25 +118,6 @@ class CourseModel extends CourseEntity {
       progress: progress,
       isEnrolled: isEnrolled,
       createdAt: createdAt,
-    );
-  }
-
-  factory CourseModel.fromEntity(CourseEntity entity) {
-    return CourseModel(
-      id: entity.id,
-      title: entity.title,
-      description: entity.description,
-      visibility: entity.visibility,
-      instructor: entity.instructor != null
-          ? InstructorModel(firstName: entity.instructor!.firstName, lastName: entity.instructor!.lastName)
-          : null,
-      thumbnailUrl: entity.thumbnailUrl,
-      lessonCount: entity.lessonCount,
-      durationMinutes: entity.durationMinutes,
-      difficulty: entity.difficulty,
-      progress: entity.progress,
-      isEnrolled: entity.isEnrolled,
-      createdAt: entity.createdAt,
     );
   }
 }

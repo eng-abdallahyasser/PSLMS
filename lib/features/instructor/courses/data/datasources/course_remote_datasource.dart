@@ -6,11 +6,6 @@ import 'package:lms/features/shared/data/models/course_model.dart';
 
 /// Pagination metadata returned by the API.
 class PaginationMeta {
-  final int totalItems;
-  final int itemCount;
-  final int itemsPerPage;
-  final int totalPages;
-  final int currentPage;
 
   const PaginationMeta({
     required this.totalItems,
@@ -29,6 +24,11 @@ class PaginationMeta {
       currentPage: json['currentPage'] as int? ?? json['current_page'] as int? ?? 1,
     );
   }
+  final int totalItems;
+  final int itemCount;
+  final int itemsPerPage;
+  final int totalPages;
+  final int currentPage;
 }
 
 abstract class CourseRemoteDataSource {
@@ -61,16 +61,16 @@ abstract class CourseRemoteDataSource {
 }
 
 class CoursesResponse {
-  final List<CourseModel> data;
-  final PaginationMeta meta;
 
   const CoursesResponse({required this.data, required this.meta});
+  final List<CourseModel> data;
+  final PaginationMeta meta;
 }
 
 class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
-  final ApiClient apiClient;
 
   CourseRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<CoursesResponse> getCourses({
@@ -134,7 +134,7 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
           'title': title,
           'description': description,
           'visibility': visibility,
-          if (thumbnailUrl != null) 'thumbnailUrl': thumbnailUrl,
+          'thumbnailUrl': ?thumbnailUrl,
         },
       );
       return CourseModel.fromJson(response.data as Map<String, dynamic>);

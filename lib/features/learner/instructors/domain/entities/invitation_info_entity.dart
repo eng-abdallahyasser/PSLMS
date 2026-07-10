@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class InvitationInfoEntity extends Equatable {
-  final String instructorName;
-  final String? instructorEmail;
-  final String? message;
-  final bool isExpired;
 
   const InvitationInfoEntity({
     required this.instructorName,
@@ -12,6 +8,10 @@ class InvitationInfoEntity extends Equatable {
     this.message,
     this.isExpired = false,
   });
+  final String instructorName;
+  final String? instructorEmail;
+  final String? message;
+  final bool isExpired;
 
   @override
   List<Object?> get props => [

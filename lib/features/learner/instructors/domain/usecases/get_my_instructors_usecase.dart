@@ -4,9 +4,9 @@ import 'package:lms/features/learner/instructors/domain/entities/instructor_prof
 import 'package:lms/features/learner/instructors/domain/repositories/instructor_repository.dart';
 
 class GetMyInstructorsUseCase {
-  final InstructorRepository repository;
 
   GetMyInstructorsUseCase(this.repository);
+  final InstructorRepository repository;
 
   Future<Either<Failure, List<InstructorProfileEntity>>> call() {
     return repository.getMyInstructors();

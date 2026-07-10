@@ -44,6 +44,12 @@ class _StudentsPageState extends State<StudentsPage>
         ],
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white.withOpacity(0.7),
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 15),
           tabs: const [
             Tab(text: 'Active'),
             Tab(text: 'Invited'),
@@ -89,7 +95,6 @@ class _StudentsPageState extends State<StudentsPage>
           StudentInitial() => const SizedBox.shrink(),
           StudentLoading() => const AppLoadingWidget(),
           StudentsLoaded(:final students) => _buildStudentList(students, status),
-          RequestsLoaded() => const SizedBox.shrink(),
           StudentActionSuccess() => const AppLoadingWidget(),
           StudentError(:final message) => AppErrorWidget(
               message: message,
@@ -104,13 +109,14 @@ class _StudentsPageState extends State<StudentsPage>
     return BlocBuilder<StudentCubit, StudentState>(
       builder: (context, state) {
         return switch (state) {
+          StudentInitial() => const SizedBox.shrink(),
           StudentLoading() => const AppLoadingWidget(),
-          RequestsLoaded(:final requests) => _buildRequestsList(requests),
+          StudentsLoaded(:final requests) => _buildRequestsList(requests),
+          StudentActionSuccess() => const AppLoadingWidget(),
           StudentError(:final message) => AppErrorWidget(
               message: message,
               onRetry: () => context.read<StudentCubit>().getRequests(),
             ),
-          _ => const SizedBox.shrink(),
         };
       },
     );
@@ -257,13 +263,10 @@ class _StudentsPageState extends State<StudentsPage>
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Invite Student'),
-        content: TextField(
+        content: AppTextField(
+          label: 'Email',
+          hint: 'student@example.com',
           controller: emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email',
-            hintText: 'student@example.com',
-            border: OutlineInputBorder(),
-          ),
           keyboardType: TextInputType.emailAddress,
         ),
         actions: [
@@ -331,13 +334,13 @@ class _StudentsPageState extends State<StudentsPage>
 }
 
 class _AssignCoursesDialog extends StatefulWidget {
-  final StudentEntity student;
-  final List<String> initiallyAssignedIds;
 
   const _AssignCoursesDialog({
     required this.student,
     required this.initiallyAssignedIds,
   });
+  final StudentEntity student;
+  final List<String> initiallyAssignedIds;
 
   @override
   State<_AssignCoursesDialog> createState() => _AssignCoursesDialogState();

@@ -15,6 +15,12 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
   final _searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    context.read<InstructorCubit>().searchInstructors(query: '');
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -27,6 +33,11 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
     }
   }
 
+  Future<void> _onRefresh() async {
+    final query = _searchController.text.trim();
+    await context.read<InstructorCubit>().searchInstructors(query: query);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,15 +46,13 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: TextField(
+            child: AppTextField(
+              label: 'Search',
+              hint: 'Search by name...',
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by name...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                suffixIcon: IconButton(icon: const Icon(Icons.send), onPressed: _search),
-              ),
-              onSubmitted: (_) => _search(),
+              prefixIcon: const Icon(Icons.search),
+              suffixIcon: IconButton(icon: const Icon(Icons.send), onPressed: _search),
+              onFieldSubmitted: (_) => _search(),
             ),
           ),
           Expanded(
@@ -66,24 +75,32 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
 
   Widget _buildResults(List results) {
     if (results.isEmpty) {
-      return const Center(child: Text('No instructors found'));
+      return ListView(
+        children: const [
+          SizedBox(height: 80),
+          Center(child: Text('No instructors found')),
+        ],
+      );
     }
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        final instructor = results[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: CircleAvatar(child: Text(instructor.fullName.isNotEmpty ? instructor.fullName[0].toUpperCase() : '?')),
-            title: Text(instructor.fullName),
-            subtitle: instructor.bio != null ? Text(instructor.bio!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.push('/instructors/${instructor.id}'),
-          ),
-        );
-      },
+    return RefreshIndicator(
+      onRefresh: _onRefresh,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(16),
+        itemCount: results.length,
+        itemBuilder: (context, index) {
+          final instructor = results[index];
+          return Card(
+            margin: const EdgeInsets.only(bottom: 8),
+            child: ListTile(
+              leading: CircleAvatar(child: Text(instructor.fullName.isNotEmpty ? instructor.fullName[0].toUpperCase() : '?')),
+              title: Text(instructor.fullName),
+              subtitle: instructor.bio != null ? Text(instructor.bio!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/instructors/${instructor.id}'),
+            ),
+          );
+        },
+      ),
     );
   }
 }

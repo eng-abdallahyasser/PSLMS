@@ -4,9 +4,9 @@ import 'package:lms/features/shared/profile/domain/entities/profile_entity.dart'
 import 'package:lms/features/shared/profile/domain/repositories/profile_repository.dart';
 
 class UpdateProfileUseCase {
-  final ProfileRepository repository;
 
   UpdateProfileUseCase(this.repository);
+  final ProfileRepository repository;
 
   Future<Either<Failure, ProfileEntity>> call({
     String? firstName,

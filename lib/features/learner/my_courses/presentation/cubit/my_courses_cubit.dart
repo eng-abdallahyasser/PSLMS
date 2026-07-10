@@ -22,13 +22,13 @@ class MyCoursesLoading extends MyCoursesState {
 }
 
 class MyCoursesLoaded extends MyCoursesState {
-  final List<CourseEntity> courses;
-  final bool hasReachedMax;
 
   const MyCoursesLoaded({
     required this.courses,
     this.hasReachedMax = false,
   });
+  final List<CourseEntity> courses;
+  final bool hasReachedMax;
 
   MyCoursesLoaded copyWith({
     List<CourseEntity>? courses,
@@ -45,9 +45,9 @@ class MyCoursesLoaded extends MyCoursesState {
 }
 
 class MyCoursesError extends MyCoursesState {
-  final String message;
 
   const MyCoursesError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -58,34 +58,34 @@ class MyCourseDetailLoading extends MyCoursesState {
 }
 
 class MyCourseDetailLoaded extends MyCoursesState {
-  final MyCourseDetailEntity detail;
 
   const MyCourseDetailLoaded(this.detail);
+  final MyCourseDetailEntity detail;
 
   @override
   List<Object?> get props => [detail];
 }
 
 class MyCourseDetailError extends MyCoursesState {
-  final String message;
 
   const MyCourseDetailError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class MyCoursesCubit extends Cubit<MyCoursesState> {
-  final GetMyCoursesUseCase getMyCoursesUseCase;
-  final GetMyCourseDetailUseCase getMyCourseDetailUseCase;
-
-  int _currentPage = 1;
-  static const int _pageSize = 10;
 
   MyCoursesCubit({
     required this.getMyCoursesUseCase,
     required this.getMyCourseDetailUseCase,
   }) : super(const MyCoursesInitial());
+  final GetMyCoursesUseCase getMyCoursesUseCase;
+  final GetMyCourseDetailUseCase getMyCourseDetailUseCase;
+
+  int _currentPage = 1;
+  static const int _pageSize = 10;
 
   Future<void> getMyCourses({int page = 1}) async {
     if (page == 1) {

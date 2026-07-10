@@ -4,16 +4,16 @@ import 'package:lms/features/shared/domain/entities/content_entity.dart';
 import 'package:lms/features/instructor/courses/content/domain/repositories/content_repository.dart';
 
 class PaginatedContentsResult {
-  final List<ContentEntity> data;
-  final int totalItems;
 
   const PaginatedContentsResult({required this.data, required this.totalItems});
+  final List<ContentEntity> data;
+  final int totalItems;
 }
 
 class GetMyCourseContentsUseCase {
-  final ContentRepository repository;
 
   GetMyCourseContentsUseCase(this.repository);
+  final ContentRepository repository;
 
   Future<Either<Failure, PaginatedContentsResult>> call(
     String courseId, {

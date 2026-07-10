@@ -5,9 +5,9 @@ import 'package:lms/features/shared/domain/entities/content_entity.dart';
 import 'package:lms/features/learner/my_courses/content/presentation/cubit/learner_content_cubit.dart';
 
 class MyCourseDetailPage extends StatefulWidget {
-  final String courseId;
 
   const MyCourseDetailPage({super.key, required this.courseId});
+  final String courseId;
 
   @override
   State<MyCourseDetailPage> createState() => _MyCourseDetailPageState();
@@ -59,7 +59,7 @@ class _MyCourseDetailPageState extends State<MyCourseDetailPage> {
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
-            leading: Icon(Icons.play_circle, color: Colors.blue),
+            leading: const Icon(Icons.play_circle, color: Colors.blue),
             title: Text(item.title),
             trailing: Icon(Icons.lock_open, size: 18, color: Colors.green[400]),
           ),

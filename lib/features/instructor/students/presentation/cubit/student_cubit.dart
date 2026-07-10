@@ -28,40 +28,30 @@ class StudentLoading extends StudentState {
 }
 
 class StudentsLoaded extends StudentState {
-  final List<StudentEntity> students;
-  final bool hasReachedMax;
-
   const StudentsLoaded({
     required this.students,
+    required this.requests,
     this.hasReachedMax = false,
   });
-
-  @override
-  List<Object?> get props => [students, hasReachedMax];
-}
-
-class RequestsLoaded extends StudentState {
+  final List<StudentEntity> students;
   final List<StudentEntity> requests;
-
-  const RequestsLoaded(this.requests);
+  final bool hasReachedMax;
 
   @override
-  List<Object?> get props => [requests];
+  List<Object?> get props => [students, requests, hasReachedMax];
 }
 
 class StudentActionSuccess extends StudentState {
-  final String message;
-
   const StudentActionSuccess(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class StudentError extends StudentState {
-  final String message;
-
   const StudentError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -70,6 +60,15 @@ class StudentError extends StudentState {
 // ----- Cubit -----
 
 class StudentCubit extends Cubit<StudentState> {
+  StudentCubit({
+    required this.inviteStudentUseCase,
+    required this.listStudentsUseCase,
+    required this.listRequestsUseCase,
+    required this.respondToRequestUseCase,
+    required this.removeStudentUseCase,
+    required this.assignCoursesUseCase,
+    required this.getAssignmentsUseCase,
+  }) : super(const StudentInitial());
   final InviteStudentUseCase inviteStudentUseCase;
   final ListStudentsUseCase listStudentsUseCase;
   final ListRequestsUseCase listRequestsUseCase;
@@ -81,18 +80,16 @@ class StudentCubit extends Cubit<StudentState> {
   int _currentPage = 1;
   static const int _pageSize = 10;
 
-  StudentCubit({
-    required this.inviteStudentUseCase,
-    required this.listStudentsUseCase,
-    required this.listRequestsUseCase,
-    required this.respondToRequestUseCase,
-    required this.removeStudentUseCase,
-    required this.assignCoursesUseCase,
-    required this.getAssignmentsUseCase,
-  }) : super(const StudentInitial());
-
   Future<void> getStudents({int page = 1, String? status}) async {
-    if (page == 1) emit(const StudentLoading());
+    final current = state;
+    List<StudentEntity> currentRequests = [];
+    if (current is StudentsLoaded) {
+      currentRequests = current.requests;
+    }
+
+    if (page == 1 && currentRequests.isEmpty) {
+      emit(const StudentLoading());
+    }
     _currentPage = page;
     final result = await listStudentsUseCase(
       ListStudentsParams(status: status, page: page, limit: _pageSize),
@@ -101,14 +98,21 @@ class StudentCubit extends Cubit<StudentState> {
       (failure) => emit(StudentError(_mapFailure(failure))),
       (paginated) {
         final current = state;
+        List<StudentEntity> requests = currentRequests;
+        if (current is StudentsLoaded) {
+          requests = current.requests;
+        }
+
         if (current is StudentsLoaded && page > 1) {
           emit(StudentsLoaded(
             students: [...current.students, ...paginated.data],
+            requests: requests,
             hasReachedMax: paginated.data.length < _pageSize,
           ));
         } else {
           emit(StudentsLoaded(
             students: paginated.data,
+            requests: requests,
             hasReachedMax: paginated.data.length < _pageSize,
           ));
         }
@@ -124,13 +128,36 @@ class StudentCubit extends Cubit<StudentState> {
   }
 
   Future<void> getRequests({int page = 1}) async {
-    emit(const StudentLoading());
+    final current = state;
+    List<StudentEntity> currentStudents = [];
+    bool currentHasReachedMax = false;
+    if (current is StudentsLoaded) {
+      currentStudents = current.students;
+      currentHasReachedMax = current.hasReachedMax;
+    }
+
+    if (currentStudents.isEmpty) {
+      emit(const StudentLoading());
+    }
     final result = await listRequestsUseCase(
       ListRequestsParams(page: page, limit: _pageSize),
     );
     result.fold(
       (failure) => emit(StudentError(_mapFailure(failure))),
-      (paginated) => emit(RequestsLoaded(paginated.data)),
+      (paginated) {
+        final current = state;
+        List<StudentEntity> students = currentStudents;
+        bool hasReachedMax = currentHasReachedMax;
+        if (current is StudentsLoaded) {
+          students = current.students;
+          hasReachedMax = current.hasReachedMax;
+        }
+        emit(StudentsLoaded(
+          students: students,
+          requests: paginated.data,
+          hasReachedMax: hasReachedMax,
+        ));
+      },
     );
   }
 

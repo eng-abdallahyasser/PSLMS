@@ -6,10 +6,10 @@ import 'package:lms/features/learner/instructors/data/models/instructor_profile_
 import 'package:lms/features/learner/instructors/data/models/invitation_info_model.dart';
 
 class PaginatedInstructors {
-  final List<InstructorProfileModel> data;
-  final int totalItems;
 
   const PaginatedInstructors({required this.data, required this.totalItems});
+  final List<InstructorProfileModel> data;
+  final int totalItems;
 }
 
 abstract class InstructorRemoteDataSource {
@@ -33,9 +33,9 @@ abstract class InstructorRemoteDataSource {
 }
 
 class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
-  final ApiClient apiClient;
 
   InstructorRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<PaginatedInstructors> searchInstructors({

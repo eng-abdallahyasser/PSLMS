@@ -26,27 +26,27 @@ class EnrollmentLoading extends EnrollmentState {
 }
 
 class EnrollmentLoaded extends EnrollmentState {
-  final List<EnrollmentEntity> enrollments;
 
   const EnrollmentLoaded(this.enrollments);
+  final List<EnrollmentEntity> enrollments;
 
   @override
   List<Object?> get props => [enrollments];
 }
 
 class EnrollmentActionSuccess extends EnrollmentState {
-  final String message;
 
   const EnrollmentActionSuccess(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
 }
 
 class EnrollmentError extends EnrollmentState {
-  final String message;
 
   const EnrollmentError(this.message);
+  final String message;
 
   @override
   List<Object?> get props => [message];
@@ -55,11 +55,6 @@ class EnrollmentError extends EnrollmentState {
 // ----- Cubit -----
 
 class EnrollmentCubit extends Cubit<EnrollmentState> {
-  final EnrollInCourseUseCase enrollInCourseUseCase;
-  final GetEnrollmentsUseCase getEnrollmentsUseCase;
-  final RespondToEnrollmentUseCase respondToEnrollmentUseCase;
-  final InviteLearnerUseCase inviteLearnerUseCase;
-  final RemoveEnrollmentUseCase removeEnrollmentUseCase;
 
   EnrollmentCubit({
     required this.enrollInCourseUseCase,
@@ -68,6 +63,11 @@ class EnrollmentCubit extends Cubit<EnrollmentState> {
     required this.inviteLearnerUseCase,
     required this.removeEnrollmentUseCase,
   }) : super(const EnrollmentInitial());
+  final EnrollInCourseUseCase enrollInCourseUseCase;
+  final GetEnrollmentsUseCase getEnrollmentsUseCase;
+  final RespondToEnrollmentUseCase respondToEnrollmentUseCase;
+  final InviteLearnerUseCase inviteLearnerUseCase;
+  final RemoveEnrollmentUseCase removeEnrollmentUseCase;
 
   Future<void> getEnrollments(String courseId) async {
     emit(const EnrollmentLoading());

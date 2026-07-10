@@ -4,9 +4,9 @@ import 'package:lms/features/learner/instructors/domain/entities/invitation_info
 import 'package:lms/features/learner/instructors/domain/repositories/instructor_repository.dart';
 
 class GetInvitationInfoUseCase {
-  final InstructorRepository repository;
 
   GetInvitationInfoUseCase(this.repository);
+  final InstructorRepository repository;
 
   Future<Either<Failure, InvitationInfoEntity>> call(String token) {
     return repository.getInvitationInfo(token);

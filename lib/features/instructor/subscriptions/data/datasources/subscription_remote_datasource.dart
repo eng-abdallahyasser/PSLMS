@@ -81,8 +81,8 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         '/instructor/subscription/checkout',
         data: {
           'planType': planType,
-          if (successUrl != null) 'successUrl': successUrl,
-          if (cancelUrl != null) 'cancelUrl': cancelUrl,
+          'successUrl': ?successUrl,
+          'cancelUrl': ?cancelUrl,
         },
       );
       final body = response.data as Map<String, dynamic>;
@@ -114,8 +114,8 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
         '/instructor/subscription/choose-plan',
         data: {
           'planType': planType,
-          if (successUrl != null) 'successUrl': successUrl,
-          if (cancelUrl != null) 'cancelUrl': cancelUrl,
+          'successUrl': ?successUrl,
+          'cancelUrl': ?cancelUrl,
         },
       );
       final body = response.data as Map<String, dynamic>;

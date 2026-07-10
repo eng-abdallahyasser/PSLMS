@@ -59,10 +59,12 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         queryParameters: queryParams,
       );
       final body = response.data as Map<String, dynamic>;
-      final dataList = (body['data'] as List<dynamic>)
+      final items = (body['items'] ?? body['data']) as List<dynamic>? ?? [];
+      final dataList = items
           .map((e) => StudentModel.fromJson(e as Map<String, dynamic>))
           .toList();
-      final totalItems = body['meta']?['totalItems'] as int? ??
+      final totalItems = body['meta']?['total'] as int? ??
+          body['meta']?['totalItems'] as int? ??
           body['totalItems'] as int? ??
           dataList.length;
       return StudentsResponse(data: dataList, totalItems: totalItems);
@@ -79,10 +81,12 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         queryParameters: {'page': page, 'limit': limit},
       );
       final body = response.data as Map<String, dynamic>;
-      final dataList = (body['data'] as List<dynamic>)
+      final items = (body['items'] ?? body['data']) as List<dynamic>? ?? [];
+      final dataList = items
           .map((e) => StudentModel.fromJson(e as Map<String, dynamic>))
           .toList();
-      final totalItems = body['meta']?['totalItems'] as int? ??
+      final totalItems = body['meta']?['total'] as int? ??
+          body['meta']?['totalItems'] as int? ??
           body['totalItems'] as int? ??
           dataList.length;
       return StudentsResponse(data: dataList, totalItems: totalItems);

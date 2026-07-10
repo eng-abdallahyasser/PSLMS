@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lms/core/widgets/app_bottom_nav.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:lms/features/shared/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/instructor/courses/dashboard/presentation/cubit/dashboard_cubit.dart';
 
@@ -21,6 +21,7 @@ class _DashboardPageState extends State<DashboardPage> {
     super.initState();
     final role = _currentRole();
     context.read<DashboardCubit>().getStats(role);
+    context.read<NotificationCubit>().getNotifications();
   }
 
   UserRole _currentRole() {
@@ -43,6 +44,22 @@ class _DashboardPageState extends State<DashboardPage> {
         backgroundColor: const Color(0xFF1565C0),
         foregroundColor: Colors.white,
         actions: [
+          BlocBuilder<NotificationCubit, NotificationState>(
+            builder: (context, notifState) {
+              final unreadCount = notifState is NotificationsLoaded
+                  ? notifState.notifications.where((n) => !n.isRead).length
+                  : 0;
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: unreadCount > 0,
+                  label: Text('$unreadCount'),
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                onPressed: () => context.push('/notifications'),
+                tooltip: 'Notifications',
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () => context.push('/profile'),
@@ -63,22 +80,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
           };
-        },
-      ),
-      bottomNavigationBar: AppBottomNav(
-        currentIndex: 0,
-        role: _currentRole(),
-        onTap: (index) {
-          switch (index) {
-            case 0:
-              break;
-            case 1:
-              context.push('/courses');
-              break;
-            case 2:
-              context.push('/profile');
-              break;
-          }
         },
       ),
     );
@@ -293,26 +294,13 @@ class _DashboardPageState extends State<DashboardPage> {
                     onTap: () => context.push('/instructor/students'),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
+                const SizedBox(width: 12),
                 Expanded(
                   child: _buildActionCard(
                     icon: Icons.card_membership,
                     label: 'Subscription',
                     color: const Color(0xFF6A1B9A),
                     onTap: () => context.push('/instructor/subscription'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.person,
-                    label: 'My Profile',
-                    color: const Color(0xFFE65100),
-                    onTap: () => context.push('/profile'),
                   ),
                 ),
               ],
@@ -353,32 +341,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildActionCard(
-                    icon: Icons.notifications,
-                    label: 'Notifications',
-                    color: const Color(0xFF6A1B9A),
-                    onTap: () => context.push('/notifications'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildActionCard(
                     icon: Icons.school,
                     label: 'Browse All',
                     color: const Color(0xFF00695C),
                     onTap: () => context.push('/courses'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.person,
-                    label: 'My Profile',
-                    color: const Color(0xFF6A1B9A),
-                    onTap: () => context.push('/profile'),
                   ),
                 ),
               ],

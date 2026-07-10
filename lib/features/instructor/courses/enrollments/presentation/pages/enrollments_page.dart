@@ -246,13 +246,10 @@ class _EnrollmentsPageState extends State<EnrollmentsPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Invite Learner'),
-        content: TextField(
+        content: AppTextField(
+          label: 'Email address',
+          hint: 'learner@example.com',
           controller: emailController,
-          decoration: const InputDecoration(
-            labelText: 'Email address',
-            hintText: 'learner@example.com',
-            border: OutlineInputBorder(),
-          ),
           keyboardType: TextInputType.emailAddress,
         ),
         actions: [

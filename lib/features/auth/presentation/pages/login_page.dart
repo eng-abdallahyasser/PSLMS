@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -26,11 +27,19 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _onLogin() {
+  Future<void> _onLogin() async {
     if (_formKey.currentState?.validate() ?? false) {
-      context.read<AuthCubit>().login(
+      String? deviceToken;
+      try {
+        deviceToken = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        log('[DEBUG] LoginPage: Failed to get FCM token: $e');
+      }
+      if (!mounted) return;
+      await context.read<AuthCubit>().login(
             email: _emailController.text.trim(),
             password: _passwordController.text,
+            deviceToken: deviceToken,
           );
     }
   }
