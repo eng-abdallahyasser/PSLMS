@@ -6,9 +6,9 @@ import 'package:lms/features/learner/instructors/domain/entities/instructor_prof
 import 'package:lms/features/learner/instructors/presentation/cubit/instructor_cubit.dart';
 
 class InstructorProfilePage extends StatefulWidget {
-  final String instructorId;
 
   const InstructorProfilePage({super.key, required this.instructorId});
+  final String instructorId;
 
   @override
   State<InstructorProfilePage> createState() => _InstructorProfilePageState();

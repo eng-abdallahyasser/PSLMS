@@ -3,10 +3,10 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/instructor/students/domain/entities/student_entity.dart';
 
 class PaginatedStudents {
-  final List<StudentEntity> data;
-  final int totalItems;
 
   const PaginatedStudents({required this.data, required this.totalItems});
+  final List<StudentEntity> data;
+  final int totalItems;
 }
 
 abstract class StudentRepository {

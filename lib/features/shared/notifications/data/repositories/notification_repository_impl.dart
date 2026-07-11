@@ -7,13 +7,13 @@ import 'package:lms/features/shared/notifications/domain/entities/notification_e
 import 'package:lms/features/shared/notifications/domain/repositories/notification_repository.dart';
 
 class NotificationRepositoryImpl implements NotificationRepository {
-  final NotificationRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   NotificationRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final NotificationRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, List<NotificationEntity>>> getNotifications() async {

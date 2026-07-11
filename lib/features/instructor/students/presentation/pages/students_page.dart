@@ -45,7 +45,7 @@ class _StudentsPageState extends State<StudentsPage>
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
-          unselectedLabelColor: Colors.white.withOpacity(0.7),
+          unselectedLabelColor: Colors.white.withAlpha(170),
           indicatorColor: Colors.white,
           indicatorWeight: 3,
           labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

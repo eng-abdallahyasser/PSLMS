@@ -30,9 +30,9 @@ abstract class EnrollmentRemoteDataSource {
 }
 
 class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
-  final ApiClient apiClient;
 
   EnrollmentRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<EnrollmentModel> enroll(String courseId) async {

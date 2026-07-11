@@ -3,13 +3,6 @@ import 'package:equatable/equatable.dart';
 enum StudentStatus { invited, requested, active, removed }
 
 class StudentEntity extends Equatable {
-  final String id;
-  final String firstName;
-  final String lastName;
-  final String? email;
-  final StudentStatus status;
-  final String? avatarUrl;
-  final DateTime? createdAt;
 
   const StudentEntity({
     required this.id,
@@ -20,6 +13,13 @@ class StudentEntity extends Equatable {
     this.avatarUrl,
     this.createdAt,
   });
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String? email;
+  final StudentStatus status;
+  final String? avatarUrl;
+  final DateTime? createdAt;
 
   String get fullName => '$firstName $lastName';
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lms/core/theme/app_theme.dart';
 import 'package:lms/features/shared/domain/entities/course_entity.dart';
 
 class CourseCard extends StatelessWidget {
-  final CourseEntity course;
 
   const CourseCard({super.key, required this.course});
+  final CourseEntity course;
 
   @override
   Widget build(BuildContext context) {
@@ -13,9 +14,7 @@ class CourseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          // TODO: Navigate to course detail
-        },
+        onTap: () => context.push('/courses/${course.id}/contents'),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

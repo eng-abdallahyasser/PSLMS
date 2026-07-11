@@ -3,9 +3,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class BuyStorageUseCase {
-  final SubscriptionRepository repository;
 
   BuyStorageUseCase(this.repository);
+  final SubscriptionRepository repository;
 
   Future<Either<Failure, String>> call() {
     return repository.buyStorage();

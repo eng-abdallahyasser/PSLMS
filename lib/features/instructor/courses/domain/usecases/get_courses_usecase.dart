@@ -5,9 +5,9 @@ import 'package:lms/features/shared/domain/entities/course_entity.dart';
 import 'package:lms/features/instructor/courses/domain/repositories/course_repository.dart';
 
 class GetCoursesUseCase {
-  final CourseRepository repository;
 
   GetCoursesUseCase(this.repository);
+  final CourseRepository repository;
 
   Future<Either<Failure, List<CourseEntity>>> call({
     required UserRole role,

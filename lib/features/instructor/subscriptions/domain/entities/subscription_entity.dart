@@ -1,11 +1,4 @@
 class SubscriptionEntity {
-  final String id;
-  final String planType;
-  final String status;
-  final double storageUsed;
-  final double storageLimit;
-  final DateTime? startDate;
-  final DateTime? endDate;
 
   const SubscriptionEntity({
     required this.id,
@@ -16,6 +9,13 @@ class SubscriptionEntity {
     this.startDate,
     this.endDate,
   });
+  final String id;
+  final String planType;
+  final String status;
+  final double storageUsed;
+  final double storageLimit;
+  final DateTime? startDate;
+  final DateTime? endDate;
 
   bool get isActive => status == 'active';
   bool get isFree => planType == 'free';

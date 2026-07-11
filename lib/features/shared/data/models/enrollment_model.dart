@@ -1,6 +1,18 @@
 import 'package:lms/features/shared/domain/entities/enrollment_entity.dart';
 
 class EnrollmentModel extends EnrollmentEntity {
+
+  factory EnrollmentModel.fromEntity(EnrollmentEntity entity) {
+    return EnrollmentModel(
+      id: entity.id,
+      status: entity.status,
+      courseId: entity.courseId,
+      learnerId: entity.learnerId,
+      learnerFirstName: entity.learnerFirstName,
+      learnerEmail: entity.learnerEmail,
+      createdAt: entity.createdAt,
+    );
+  }
   const EnrollmentModel({
     required super.id,
     required super.status,
@@ -60,18 +72,6 @@ class EnrollmentModel extends EnrollmentEntity {
       learnerFirstName: learnerFirstName,
       learnerEmail: learnerEmail,
       createdAt: createdAt,
-    );
-  }
-
-  factory EnrollmentModel.fromEntity(EnrollmentEntity entity) {
-    return EnrollmentModel(
-      id: entity.id,
-      status: entity.status,
-      courseId: entity.courseId,
-      learnerId: entity.learnerId,
-      learnerFirstName: entity.learnerFirstName,
-      learnerEmail: entity.learnerEmail,
-      createdAt: entity.createdAt,
     );
   }
 }

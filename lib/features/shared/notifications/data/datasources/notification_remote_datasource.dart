@@ -12,9 +12,9 @@ abstract class NotificationRemoteDataSource {
 }
 
 class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
-  final ApiClient apiClient;
 
   NotificationRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<List<NotificationModel>> getNotifications() async {
