@@ -88,7 +88,16 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
   Future<List<InstructorProfileModel>> getMyInstructors() async {
     try {
       final response = await apiClient.get('/learner/my-instructors');
-      final dataList = (response.data as List<dynamic>)
+      final rawData = response.data;
+      List<dynamic> items;
+      if (rawData is List) {
+        items = rawData;
+      } else if (rawData is Map<String, dynamic>) {
+        items = rawData['data'] as List<dynamic>? ?? [];
+      } else {
+        items = [];
+      }
+      final dataList = items
           .map((e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;

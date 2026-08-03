@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lms/core/theme/app_theme.dart';
+import 'package:lms/features/auth/domain/entities/user_entity.dart';
+import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/shared/domain/entities/course_entity.dart';
 
 class CourseCard extends StatelessWidget {
@@ -14,7 +17,16 @@ class CourseCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => context.push('/courses/${course.id}/contents'),
+        onTap: () {
+          final authState = context.read<AuthCubit>().state;
+          final isInstructor = authState is AuthAuthenticated &&
+              authState.user.role == UserRole.instructor;
+          if (isInstructor) {
+            context.push('/courses/${course.id}/contents');
+          } else {
+            context.push('/my-courses/${course.id}');
+          }
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

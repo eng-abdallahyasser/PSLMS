@@ -53,11 +53,20 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
         '/learner/my-courses',
         queryParameters: {'page': page, 'limit': limit},
       );
-      final body = response.data as Map<String, dynamic>;
-      final dataList = (body['data'] as List<dynamic>)
+      final data = response.data;
+      List<dynamic> rawData;
+      PaginationMeta meta;
+      if (data is List) {
+        rawData = data;
+        meta = const PaginationMeta(currentPage: 1, totalPages: 1, totalItems: 0, itemCount: 0, itemsPerPage: 10);
+      } else {
+        final body = data as Map<String, dynamic>;
+        rawData = body['data'] as List<dynamic>? ?? [];
+        meta = PaginationMeta.fromJson(body['meta'] as Map<String, dynamic>? ?? {});
+      }
+      final dataList = rawData
           .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
           .toList();
-      final meta = PaginationMeta.fromJson(body['meta'] as Map<String, dynamic>);
       return CoursesResponse(data: dataList, meta: meta);
     } on DioException catch (e) {
       throw _handleError(e);
