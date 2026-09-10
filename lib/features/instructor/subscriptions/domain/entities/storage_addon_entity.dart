@@ -1,8 +1,4 @@
 class StorageAddonEntity {
-  final String id;
-  final int sizeGb;
-  final DateTime purchasedDate;
-  final double price;
 
   const StorageAddonEntity({
     required this.id,
@@ -10,6 +6,10 @@ class StorageAddonEntity {
     required this.purchasedDate,
     required this.price,
   });
+  final String id;
+  final int sizeGb;
+  final DateTime purchasedDate;
+  final double price;
 
   String get formattedSize => '$sizeGb GB';
   String get formattedPrice => '\$${price.toStringAsFixed(2)}';

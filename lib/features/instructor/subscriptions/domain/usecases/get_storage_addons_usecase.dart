@@ -4,9 +4,9 @@ import 'package:lms/features/instructor/subscriptions/domain/entities/storage_ad
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class GetStorageAddonsUseCase {
-  final SubscriptionRepository repository;
 
   GetStorageAddonsUseCase(this.repository);
+  final SubscriptionRepository repository;
 
   Future<Either<Failure, List<StorageAddonEntity>>> call() {
     return repository.getStorageAddons();

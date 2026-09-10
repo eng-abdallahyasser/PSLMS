@@ -53,14 +53,34 @@ class EnrollmentRemoteDataSourceImpl implements EnrollmentRemoteDataSource {
         '/learner/my-courses',
         queryParameters: {'page': page, 'limit': limit},
       );
-      final body = response.data as Map<String, dynamic>;
-      final dataList = (body['data'] as List<dynamic>)
-          .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-      final meta = PaginationMeta.fromJson(body['meta'] as Map<String, dynamic>);
+      final data = response.data;
+      if (data is List) {
+        final dataList = data
+            .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
+            .toList();
+        return CoursesResponse(data: dataList, meta: PaginationMeta.fromJson({
+          'totalItems': dataList.length,
+          'itemCount': dataList.length,
+          'itemsPerPage': limit,
+          'totalPages': dataList.length < limit ? 1 : 1,
+          'currentPage': page,
+        }));
+      }
+      final body = data as Map<String, dynamic>;
+      final dataList = (body['data'] as List<dynamic>?)
+              ?.map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [];
+      final meta = body['meta'] != null
+          ? PaginationMeta.fromJson(body['meta'] as Map<String, dynamic>)
+          : PaginationMeta.fromJson({});
       return CoursesResponse(data: dataList, meta: meta);
     } on DioException catch (e) {
       throw _handleError(e);
+    } on TypeError catch (e) {
+      throw ServerException(message: 'Unexpected response format: ${e.toString()}', statusCode: null);
+    } on FormatException catch (e) {
+      throw ServerException(message: 'Invalid response format: ${e.toString()}', statusCode: null);
     }
   }
 

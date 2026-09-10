@@ -5,9 +5,9 @@ import 'package:lms/features/shared/domain/entities/enrollment_entity.dart';
 import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
 
 class EnrollmentsPage extends StatefulWidget {
-  final String courseId;
 
   const EnrollmentsPage({super.key, required this.courseId});
+  final String courseId;
 
   @override
   State<EnrollmentsPage> createState() => _EnrollmentsPageState();

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
+import 'package:lms/features/learner/instructors/domain/entities/instructor_profile_entity.dart';
 import 'package:lms/features/learner/instructors/presentation/cubit/instructor_cubit.dart';
 
 class SearchInstructorsPage extends StatefulWidget {
@@ -13,6 +16,8 @@ class SearchInstructorsPage extends StatefulWidget {
 
 class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
   final _searchController = TextEditingController();
+  Timer? _debounce;
+  List<InstructorProfileEntity>? _cachedResults;
 
   @override
   void initState() {
@@ -22,15 +27,22 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
 
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      context.read<InstructorCubit>().searchInstructors(query: value.trim());
+    });
+  }
+
   void _search() {
     final query = _searchController.text.trim();
-    if (query.isNotEmpty) {
-      context.read<InstructorCubit>().searchInstructors(query: query);
-    }
+    context.read<InstructorCubit>().searchInstructors(query: query);
   }
 
   Future<void> _onRefresh() async {
@@ -52,6 +64,7 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
               controller: _searchController,
               prefixIcon: const Icon(Icons.search),
               suffixIcon: IconButton(icon: const Icon(Icons.send), onPressed: _search),
+              onChanged: _onQueryChanged,
               onFieldSubmitted: (_) => _search(),
             ),
           ),
@@ -59,11 +72,17 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
             child: BlocBuilder<InstructorCubit, InstructorState>(
               builder: (context, state) {
                 return switch (state) {
+                  InstructorsSearchLoaded(:final instructors) => _showResults(instructors),
                   InstructorInitial() => const Center(child: Text('Search for instructors above')),
-                  InstructorsSearchLoading() => const AppLoadingWidget(),
-                  InstructorsSearchLoaded(:final instructors) => _buildResults(instructors),
-                  InstructorsSearchError(:final message) => Center(child: Text(message)),
-                  _ => const SizedBox.shrink(),
+                  InstructorsSearchLoading() => _cachedResults != null
+                      ? _buildResults(_cachedResults!)
+                      : const AppLoadingWidget(),
+                  InstructorsSearchError(:final message) => _cachedResults != null
+                      ? _buildResults(_cachedResults!)
+                      : Center(child: Text(message)),
+                  _ => _cachedResults != null
+                      ? _buildResults(_cachedResults!)
+                      : const Center(child: Text('Search for instructors above')),
                 };
               },
             ),
@@ -71,6 +90,11 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
         ],
       ),
     );
+  }
+
+  Widget _showResults(List results) {
+    _cachedResults = results.cast<InstructorProfileEntity>();
+    return _buildResults(_cachedResults!);
   }
 
   Widget _buildResults(List results) {

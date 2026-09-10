@@ -3,9 +3,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class CreatePortalUseCase {
-  final SubscriptionRepository repository;
 
   CreatePortalUseCase(this.repository);
+  final SubscriptionRepository repository;
 
   Future<Either<Failure, String>> call() {
     return repository.createPortal();

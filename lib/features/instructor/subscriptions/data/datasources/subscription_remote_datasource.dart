@@ -43,9 +43,9 @@ abstract class SubscriptionRemoteDataSource {
 }
 
 class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
-  final ApiClient apiClient;
 
   SubscriptionRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<SubscriptionModel> getMySubscription() async {

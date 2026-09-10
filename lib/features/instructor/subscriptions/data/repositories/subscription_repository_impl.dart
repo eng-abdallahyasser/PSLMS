@@ -9,13 +9,13 @@ import 'package:lms/features/instructor/subscriptions/domain/entities/subscripti
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class SubscriptionRepositoryImpl implements SubscriptionRepository {
-  final SubscriptionRemoteDataSource remoteDataSource;
-  final NetworkInfo networkInfo;
 
   SubscriptionRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
   });
+  final SubscriptionRemoteDataSource remoteDataSource;
+  final NetworkInfo networkInfo;
 
   @override
   Future<Either<Failure, SubscriptionEntity>> getMySubscription() async {

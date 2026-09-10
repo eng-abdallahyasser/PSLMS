@@ -4,10 +4,10 @@ import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/instructor/students/data/models/student_model.dart';
 
 class StudentsResponse {
-  final List<StudentModel> data;
-  final int totalItems;
 
   const StudentsResponse({required this.data, required this.totalItems});
+  final List<StudentModel> data;
+  final int totalItems;
 }
 
 abstract class StudentRemoteDataSource {
@@ -25,9 +25,9 @@ abstract class StudentRemoteDataSource {
 }
 
 class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
-  final ApiClient apiClient;
 
   StudentRemoteDataSourceImpl({required this.apiClient});
+  final ApiClient apiClient;
 
   @override
   Future<void> inviteStudent(String email) async {

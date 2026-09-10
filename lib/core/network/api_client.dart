@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:lms/core/constants/app_constants.dart';
@@ -47,7 +48,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log('[API] POST $path');
+    log('[API] POST $path ${_formatRequestBody(data)}'.trimRight());
     final response = await _dio.post<T>(
       path,
       data: data,
@@ -64,7 +65,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log('[API] PUT $path');
+    log('[API] PUT $path ${_formatRequestBody(data)}'.trimRight());
     final response = await _dio.put<T>(
       path,
       data: data,
@@ -81,7 +82,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log('[API] PATCH $path');
+    log('[API] PATCH $path ${_formatRequestBody(data)}'.trimRight());
     final response = await _dio.patch<T>(
       path,
       data: data,
@@ -98,7 +99,7 @@ class ApiClient {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
-    log('[API] DELETE $path');
+    log('[API] DELETE $path ${_formatRequestBody(data)}'.trimRight());
     final response = await _dio.delete<T>(
       path,
       data: data,
@@ -107,6 +108,15 @@ class ApiClient {
     );
     log('[API] DELETE $path: ${response.statusCode} ${response.data}');
     return response;
+  }
+
+  String _formatRequestBody(dynamic data) {
+    if (data == null) return '';
+    if (data is FormData) {
+      return data.fields.map((f) => '${f.key}=${f.value}').join('&');
+    }
+    if (data is Map) return jsonEncode(data);
+    return data.toString();
   }
 }
 

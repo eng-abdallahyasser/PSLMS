@@ -4,9 +4,9 @@ import 'package:lms/features/instructor/subscriptions/domain/entities/subscripti
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class GetSubscriptionUseCase {
-  final SubscriptionRepository repository;
 
   GetSubscriptionUseCase(this.repository);
+  final SubscriptionRepository repository;
 
   Future<Either<Failure, SubscriptionEntity>> call() {
     return repository.getMySubscription();

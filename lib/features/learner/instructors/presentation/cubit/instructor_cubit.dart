@@ -185,7 +185,15 @@ class InstructorCubit extends Cubit<InstructorState> {
     );
     result.fold(
       (failure) => emit(InstructorsSearchError(_mapFailureToMessage(failure))),
-      (instructors) => emit(InstructorsSearchLoaded(instructors)),
+      (instructors) {
+        final q = query.trim().toLowerCase();
+        final filtered = q.isEmpty
+            ? instructors
+            : instructors
+                .where((i) => i.fullName.toLowerCase().contains(q))
+                .toList();
+        emit(InstructorsSearchLoaded(filtered));
+      },
     );
   }
 

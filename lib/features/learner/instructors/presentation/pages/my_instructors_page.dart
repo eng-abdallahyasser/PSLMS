@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
+import 'package:lms/features/learner/instructors/domain/entities/instructor_profile_entity.dart';
 import 'package:lms/features/learner/instructors/presentation/cubit/instructor_cubit.dart';
 
 class MyInstructorsPage extends StatefulWidget {
@@ -11,6 +12,8 @@ class MyInstructorsPage extends StatefulWidget {
 }
 
 class _MyInstructorsPageState extends State<MyInstructorsPage> {
+  List<InstructorProfileEntity>? _cachedResults;
+
   @override
   void initState() {
     super.initState();
@@ -24,16 +27,25 @@ class _MyInstructorsPageState extends State<MyInstructorsPage> {
       body: BlocBuilder<InstructorCubit, InstructorState>(
         builder: (context, state) {
           return switch (state) {
-            InstructorInitial() => const SizedBox.shrink(),
-            MyInstructorsLoading() => const AppLoadingWidget(),
-            MyInstructorsLoaded(:final instructors) => _buildList(instructors),
-            MyInstructorsError(:final message) =>
-              AppErrorWidget(message: message, onRetry: () => context.read<InstructorCubit>().getMyInstructors()),
-            _ => const SizedBox.shrink(),
+            MyInstructorsLoaded(:final instructors) => _showList(instructors),
+            MyInstructorsLoading() => _cachedResults != null
+                ? _buildList(_cachedResults!)
+                : const AppLoadingWidget(),
+            MyInstructorsError(:final message) => _cachedResults != null
+                ? _buildList(_cachedResults!)
+                : AppErrorWidget(message: message, onRetry: () => context.read<InstructorCubit>().getMyInstructors()),
+            _ => _cachedResults != null
+                ? _buildList(_cachedResults!)
+                : const SizedBox.shrink(),
           };
         },
       ),
     );
+  }
+
+  Widget _showList(List instructors) {
+    _cachedResults = instructors.cast<InstructorProfileEntity>();
+    return _buildList(_cachedResults!);
   }
 
   Widget _buildList(List instructors) {

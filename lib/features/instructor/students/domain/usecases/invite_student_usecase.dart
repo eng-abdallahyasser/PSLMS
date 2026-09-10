@@ -4,9 +4,9 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/instructor/students/domain/repositories/student_repository.dart';
 
 class InviteStudentUseCase {
-  final StudentRepository repository;
 
   InviteStudentUseCase(this.repository);
+  final StudentRepository repository;
 
   Future<Either<Failure, void>> call(InviteStudentParams params) {
     return repository.inviteStudent(params.email);
@@ -14,9 +14,9 @@ class InviteStudentUseCase {
 }
 
 class InviteStudentParams extends Equatable {
-  final String email;
 
   const InviteStudentParams({required this.email});
+  final String email;
 
   @override
   List<Object> get props => [email];

@@ -299,7 +299,7 @@ class _StudentsPageState extends State<StudentsPage>
 
     if (!context.mounted) return;
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (ctx) => _AssignCoursesDialog(
         student: student,

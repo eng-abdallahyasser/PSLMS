@@ -4,9 +4,9 @@ import 'package:lms/features/instructor/subscriptions/domain/entities/subscripti
 import 'package:lms/features/instructor/subscriptions/domain/repositories/subscription_repository.dart';
 
 class RefreshSubscriptionUseCase {
-  final SubscriptionRepository repository;
 
   RefreshSubscriptionUseCase(this.repository);
+  final SubscriptionRepository repository;
 
   Future<Either<Failure, SubscriptionEntity>> call() {
     return repository.refreshSubscription();
