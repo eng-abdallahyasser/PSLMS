@@ -4,9 +4,9 @@ import 'package:lms/features/shared/domain/entities/course_entity.dart';
 import 'package:lms/features/instructor/courses/domain/repositories/course_repository.dart';
 
 class UpdateCourseUseCase {
-  final CourseRepository repository;
 
   UpdateCourseUseCase(this.repository);
+  final CourseRepository repository;
 
   Future<Either<Failure, CourseEntity>> call({
     required String id,

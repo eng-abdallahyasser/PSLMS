@@ -6,7 +6,6 @@ import 'package:lms/features/learner/instructors/data/models/instructor_profile_
 import 'package:lms/features/learner/instructors/data/models/invitation_info_model.dart';
 
 class PaginatedInstructors {
-
   const PaginatedInstructors({required this.data, required this.totalItems});
   final List<InstructorProfileModel> data;
   final int totalItems;
@@ -33,7 +32,6 @@ abstract class InstructorRemoteDataSource {
 }
 
 class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
-
   InstructorRemoteDataSourceImpl({required this.apiClient});
   final ApiClient apiClient;
 
@@ -46,11 +44,7 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
     try {
       final response = await apiClient.get(
         '/learner/instructors',
-        queryParameters: {
-          'q': query,
-          'page': page,
-          'limit': limit,
-        },
+        queryParameters: {'q': query, 'page': page, 'limit': limit},
       );
       final data = response.data;
       List<dynamic>? rawList;
@@ -60,21 +54,32 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
       } else if (data is Map<String, dynamic>) {
         body = data;
         final inner = data['data'];
-        rawList = inner is List ? inner : (inner is Map ? inner['data'] as List<dynamic>? : null);
+        rawList = inner is List
+            ? inner
+            : (inner is Map ? inner['data'] as List<dynamic>? : null);
       }
       final dataList = (rawList ?? [])
-          .map((e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
-      final totalItems = body?['meta']?['totalItems'] as int? ??
+      final totalItems =
+          body?['meta']?['totalItems'] as int? ??
           body?['totalItems'] as int? ??
           dataList.length;
       return PaginatedInstructors(data: dataList, totalItems: totalItems);
     } on DioException catch (e) {
       throw _handleError(e);
     } on TypeError catch (e) {
-      throw ServerException(message: 'Unexpected response format: ${e.toString()}', statusCode: null);
+      throw ServerException(
+        message: 'Unexpected response format: ${e.toString()}',
+        statusCode: null,
+      );
     } on FormatException catch (e) {
-      throw ServerException(message: 'Invalid response format: ${e.toString()}', statusCode: null);
+      throw ServerException(
+        message: 'Invalid response format: ${e.toString()}',
+        statusCode: null,
+      );
     }
   }
 
@@ -82,7 +87,9 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
   Future<InstructorProfileModel> getInstructorProfile(String id) async {
     try {
       final response = await apiClient.get('/learner/instructors/$id');
-      return InstructorProfileModel.fromJson(response.data as Map<String, dynamic>);
+      return InstructorProfileModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw _handleError(e);
     }
@@ -106,14 +113,22 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
           ? data
           : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
       return list
-          .map((e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>))
+          .map(
+            (e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>),
+          )
           .toList();
     } on DioException catch (e) {
       throw _handleError(e);
     } on TypeError catch (e) {
-      throw ServerException(message: 'Unexpected response format: ${e.toString()}', statusCode: null);
+      throw ServerException(
+        message: 'Unexpected response format: ${e.toString()}',
+        statusCode: null,
+      );
     } on FormatException catch (e) {
-      throw ServerException(message: 'Invalid response format: ${e.toString()}', statusCode: null);
+      throw ServerException(
+        message: 'Invalid response format: ${e.toString()}',
+        statusCode: null,
+      );
     }
   }
 
@@ -133,9 +148,15 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
     } on DioException catch (e) {
       throw _handleError(e);
     } on TypeError catch (e) {
-      throw ServerException(message: 'Unexpected response format: ${e.toString()}', statusCode: null);
+      throw ServerException(
+        message: 'Unexpected response format: ${e.toString()}',
+        statusCode: null,
+      );
     } on FormatException catch (e) {
-      throw ServerException(message: 'Invalid response format: ${e.toString()}', statusCode: null);
+      throw ServerException(
+        message: 'Invalid response format: ${e.toString()}',
+        statusCode: null,
+      );
     }
   }
 
@@ -146,7 +167,9 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
         '/learner/invitations/info',
         queryParameters: {'token': token},
       );
-      return InvitationInfoModel.fromJson(response.data as Map<String, dynamic>);
+      return InvitationInfoModel.fromJson(
+        response.data as Map<String, dynamic>,
+      );
     } on DioException catch (e) {
       throw _handleError(e);
     }

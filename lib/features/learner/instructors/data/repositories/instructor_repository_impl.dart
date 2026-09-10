@@ -84,6 +84,10 @@ class InstructorRepositoryImpl implements InstructorRepository {
       return Left(
         ServerFailure(message: e.message, statusCode: e.statusCode),
       );
+    } catch (e) {
+      return Left(
+        ServerFailure(message: e.toString()),
+      );
     }
   }
 

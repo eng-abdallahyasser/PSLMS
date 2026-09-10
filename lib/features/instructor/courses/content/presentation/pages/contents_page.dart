@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
@@ -331,66 +332,73 @@ class _ContentsPageState extends State<ContentsPage> {
   }
 
   void _showUploadDialog(BuildContext context) {
+    String? selectedFilePath;
+    String? selectedFileName;
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Upload Content'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AppTextField(
-                label: 'Title',
-                hint: 'e.g. Intro Lecture',
-                controller: titleController,
-              ),
-              const SizedBox(height: 12),
-              AppTextField(
-                label: 'Description (optional)',
-                hint: 'Brief description',
-                controller: descriptionController,
-                maxLines: 2,
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton.icon(
-                onPressed: () {
-                  // TODO: Open file picker
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('File picker not yet implemented'),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.attach_file),
-                label: const Text('Choose File'),
-              ),
-            ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Upload Content'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppTextField(
+                  label: 'Title',
+                  hint: 'e.g. Intro Lecture',
+                  controller: titleController,
+                ),
+                const SizedBox(height: 12),
+                AppTextField(
+                  label: 'Description (optional)',
+                  hint: 'Brief description',
+                  controller: descriptionController,
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final result = await FilePicker.pickFiles();
+                    if (result != null && result.files.single.path != null) {
+                      setDialogState(() {
+                        selectedFilePath = result.files.single.path;
+                        selectedFileName = result.files.single.name;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.attach_file),
+                  label: Text(
+                    selectedFileName ?? 'Choose File',
+                  ),
+                ),
+              ],
+            ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final title = titleController.text.trim();
+                if (title.isNotEmpty && selectedFilePath != null) {
+                  context.read<ContentCubit>().uploadContent(
+                        courseId: widget.courseId,
+                        filePath: selectedFilePath!,
+                        title: title,
+                        description: descriptionController.text.trim(),
+                      );
+                  Navigator.of(ctx).pop();
+                }
+              },
+              child: const Text('Upload'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final title = titleController.text.trim();
-              if (title.isNotEmpty) {
-                context.read<ContentCubit>().uploadContent(
-                      courseId: widget.courseId,
-                      filePath: '/placeholder/path',
-                      title: title,
-                      description: descriptionController.text.trim(),
-                    );
-                Navigator.of(ctx).pop();
-              }
-            },
-            child: const Text('Upload'),
-          ),
-        ],
       ),
     );
   }
