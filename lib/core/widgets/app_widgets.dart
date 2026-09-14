@@ -156,6 +156,64 @@ class AppPrimaryButton extends StatelessWidget {
   }
 }
 
+/// Circular avatar that renders a network image and falls back to initials
+/// when the image is missing or fails to load.
+class AppAvatar extends StatelessWidget {
+
+  const AppAvatar({
+    super.key,
+    required this.initials,
+    this.imageUrl,
+    this.radius = 20,
+    this.backgroundColor,
+    this.foregroundColor,
+  });
+  final String initials;
+  final String? imageUrl;
+  final double radius;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final bg = backgroundColor ?? scheme.primary.withValues(alpha: 0.1);
+    final fg = foregroundColor ?? scheme.primary;
+    final url = imageUrl;
+
+    final fallback = Center(
+      child: Text(
+        initials,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: radius * 0.8,
+          color: fg,
+        ),
+      ),
+    );
+
+    if (url == null || url.isEmpty) {
+      return CircleAvatar(radius: radius, backgroundColor: bg, child: fallback);
+    }
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: bg,
+      child: ClipOval(
+        child: Image.network(
+          url,
+          width: radius * 2,
+          height: radius * 2,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => fallback,
+          loadingBuilder: (context, child, progress) =>
+              progress == null ? child : fallback,
+        ),
+      ),
+    );
+  }
+}
+
 /// Modern text form field with rounded outline border.
 class AppTextField extends StatelessWidget {
 

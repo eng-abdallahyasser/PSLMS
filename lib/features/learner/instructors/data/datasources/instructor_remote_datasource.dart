@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/shared/data/models/course_model.dart';
@@ -42,33 +41,25 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
     int limit = 10,
   }) async {
     try {
-      final response = await apiClient.get(
+      final body = await apiClient.get(
         '/learner/instructors',
         queryParameters: {'q': query, 'page': page, 'limit': limit},
       );
-      final data = response.data;
-      List<dynamic>? rawList;
-      Map<String, dynamic>? body;
-      if (data is List) {
-        rawList = data;
-      } else if (data is Map<String, dynamic>) {
-        body = data;
-        final inner = data['data'];
-        rawList = inner is List
-            ? inner
-            : (inner is Map ? inner['data'] as List<dynamic>? : null);
-      }
+      final inner = body['data'];
+      final rawList = inner is List
+          ? inner
+          : (inner is Map ? inner['data'] as List<dynamic>? : null);
       final dataList = (rawList ?? [])
           .map(
             (e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>),
           )
           .toList();
       final totalItems =
-          body?['meta']?['totalItems'] as int? ??
-          body?['totalItems'] as int? ??
+          body['meta']?['totalItems'] as int? ??
+          body['totalItems'] as int? ??
           dataList.length;
       return PaginatedInstructors(data: dataList, totalItems: totalItems);
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     } on TypeError catch (e) {
       throw ServerException(
@@ -87,10 +78,8 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
   Future<InstructorProfileModel> getInstructorProfile(String id) async {
     try {
       final response = await apiClient.get('/learner/instructors/$id');
-      return InstructorProfileModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
+      return InstructorProfileModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -99,7 +88,7 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
   Future<void> requestToJoin(String instructorId) async {
     try {
       await apiClient.post('/learner/instructors/$instructorId/join');
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -107,17 +96,14 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
   @override
   Future<List<InstructorProfileModel>> getMyInstructors() async {
     try {
-      final response = await apiClient.get('/learner/my-instructors');
-      final data = response.data;
-      final list = data is List
-          ? data
-          : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
+      final data = await apiClient.get('/learner/my-instructors');
+      final list = data['data'] as List<dynamic>? ?? [];
       return list
           .map(
             (e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>),
           )
           .toList();
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     } on TypeError catch (e) {
       throw ServerException(
@@ -135,17 +121,14 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
   @override
   Future<List<CourseModel>> getInstructorCourses(String instructorId) async {
     try {
-      final response = await apiClient.get(
+      final data = await apiClient.get(
         '/learner/my-instructors/$instructorId/courses',
       );
-      final data = response.data;
-      final list = data is List
-          ? data
-          : (data as Map<String, dynamic>)['data'] as List<dynamic>? ?? [];
+      final list = data['data'] as List<dynamic>? ?? [];
       return list
           .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
           .toList();
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     } on TypeError catch (e) {
       throw ServerException(
@@ -167,10 +150,8 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
         '/learner/invitations/info',
         queryParameters: {'token': token},
       );
-      return InvitationInfoModel.fromJson(
-        response.data as Map<String, dynamic>,
-      );
-    } on DioException catch (e) {
+      return InvitationInfoModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -182,23 +163,15 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
         '/learner/invitations/accept',
         queryParameters: {'token': token},
       );
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    final error = e.error;
-    if (error is ServerException) return error;
-    if (error is AuthException) {
-      return ServerException(
-        message: error.message,
-        statusCode: error.statusCode,
-      );
-    }
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

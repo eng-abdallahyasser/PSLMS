@@ -76,13 +76,10 @@ class _InstructorProfilePageState extends State<InstructorProfilePage> {
         children: [
           // Avatar & Name Section
           Center(
-            child: CircleAvatar(
+            child: AppAvatar(
+              imageUrl: profile.avatarUrl,
+              initials: profile.fullName.isNotEmpty ? profile.fullName[0].toUpperCase() : '?',
               radius: 50,
-              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
-              child: Text(
-                profile.fullName.isNotEmpty ? profile.fullName[0].toUpperCase() : '?',
-                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
-              ),
             ),
           ),
           const SizedBox(height: 16),

@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/shared/data/models/content_model.dart';
@@ -64,15 +63,14 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
   @override
   Future<List<ContentModel>> getContents(String courseId) async {
     try {
-      final response = await apiClient.get(
+      final body = await apiClient.get(
         '/instructor/courses/$courseId/content',
       );
-      final body = response.data as Map<String, dynamic>;
       final dataList = (body['data'] as List<dynamic>)
           .map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -85,19 +83,17 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     String? description,
   }) async {
     try {
-      final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(filePath),
-        'title': title,
-        'description': ?description,
-      });
-
-      final response = await apiClient.post(
+      final body = await apiClient.uploadFile(
         '/instructor/courses/$courseId/content',
-        data: formData,
-        // Dio auto-detects FormData and sets multipart/form-data with boundary
+        filePath: filePath,
+        fieldName: 'file',
+        fields: {
+          'title': title,
+          'description': ?description,
+        },
       );
-      return ContentModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return ContentModel.fromJson(body);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -109,11 +105,10 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
     int limit = 10,
   }) async {
     try {
-      final response = await apiClient.get(
+      final body = await apiClient.get(
         '/learner/my-courses/$courseId/content',
         queryParameters: {'page': page, 'limit': limit},
       );
-      final body = response.data as Map<String, dynamic>;
       final dataList = (body['data'] as List<dynamic>)
           .map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
           .toList();
@@ -121,7 +116,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           body['totalItems'] as int? ??
           dataList.length;
       return ContentsResponse(data: dataList, totalItems: totalItems);
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -135,8 +130,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       final response = await apiClient.get(
         '/learner/my-courses/$courseId/content/$contentId',
       );
-      return ContentModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return ContentModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -151,7 +146,7 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
         '/instructor/courses/$courseId/content/reorder',
         data: {'videoIds': contentIds},
       );
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -171,8 +166,8 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
           'description': ?description,
         },
       );
-      return ContentModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return ContentModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -186,23 +181,15 @@ class ContentRemoteDataSourceImpl implements ContentRemoteDataSource {
       await apiClient.delete(
         '/instructor/courses/$courseId/content/$contentId',
       );
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    final error = e.error;
-    if (error is ServerException) return error;
-    if (error is AuthException) {
-      return ServerException(
-        message: error.message,
-        statusCode: error.statusCode,
-      );
-    }
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

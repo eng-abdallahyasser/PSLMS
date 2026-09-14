@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/errors/failures.dart';
 import 'package:lms/core/network/network_info.dart';
+import 'package:lms/core/theme/theme_controller.dart';
 import 'package:lms/features/shared/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:lms/features/shared/profile/domain/entities/profile_entity.dart';
 import 'package:lms/features/shared/profile/domain/repositories/profile_repository.dart';
@@ -11,9 +12,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl({
     required this.remoteDataSource,
     required this.networkInfo,
+    required this.themeController,
   });
   final ProfileRemoteDataSource remoteDataSource;
   final NetworkInfo networkInfo;
+  final ThemeController themeController;
 
   @override
   Future<Either<Failure, ProfileEntity>> getProfile() async {
@@ -22,6 +25,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
     try {
       final profile = await remoteDataSource.getProfile();
+      themeController.applyFromPreferences(
+        mode: profile.mode,
+        lang: profile.lang,
+      );
       return Right(profile.toEntity());
     } on ServerException catch (e) {
       return Left(
@@ -65,6 +72,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
     }
     try {
       await remoteDataSource.updatePreferences(lang: lang, mode: mode);
+      themeController.applyFromPreferences(
+        mode: mode,
+        lang: lang,
+      );
       return const Right(null);
     } on ServerException catch (e) {
       return Left(

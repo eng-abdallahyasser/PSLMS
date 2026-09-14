@@ -116,7 +116,10 @@ class _SearchInstructorsPageState extends State<SearchInstructorsPage> {
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              leading: CircleAvatar(child: Text(instructor.fullName.isNotEmpty ? instructor.fullName[0].toUpperCase() : '?')),
+              leading: AppAvatar(
+                imageUrl: instructor.avatarUrl,
+                initials: instructor.fullName.isNotEmpty ? instructor.fullName[0].toUpperCase() : '?',
+              ),
               title: Text(instructor.fullName),
               subtitle: instructor.bio != null ? Text(instructor.bio!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,
               trailing: const Icon(Icons.chevron_right),

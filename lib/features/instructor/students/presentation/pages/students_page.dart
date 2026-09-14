@@ -154,14 +154,12 @@ class _StudentsPageState extends State<StudentsPage>
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: CircleAvatar(
+              leading: AppAvatar(
+                imageUrl: student.avatarUrl,
+                initials: student.fullName.isNotEmpty
+                    ? student.fullName[0].toUpperCase()
+                    : '?',
                 backgroundColor: Colors.blue[100],
-                child: Text(
-                  student.fullName.isNotEmpty
-                      ? student.fullName[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
               ),
               title: Text(student.fullName),
               subtitle: student.email != null ? Text(student.email!) : null,
@@ -214,14 +212,12 @@ class _StudentsPageState extends State<StudentsPage>
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
-              leading: CircleAvatar(
+              leading: AppAvatar(
+                imageUrl: request.avatarUrl,
+                initials: request.fullName.isNotEmpty
+                    ? request.fullName[0].toUpperCase()
+                    : '?',
                 backgroundColor: Colors.orange[100],
-                child: Text(
-                  request.fullName.isNotEmpty
-                      ? request.fullName[0].toUpperCase()
-                      : '?',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
               ),
               title: Text(request.fullName),
               subtitle: request.email != null ? Text(request.email!) : null,

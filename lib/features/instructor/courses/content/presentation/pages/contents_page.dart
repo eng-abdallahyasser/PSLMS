@@ -361,11 +361,11 @@ class _ContentsPageState extends State<ContentsPage> {
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () async {
-                    final result = await FilePicker.pickFiles();
-                    if (result != null && result.files.single.path != null) {
+                    final files = await FilePicker.pickFiles();
+                    if (files.isNotEmpty && files.single.path != null) {
                       setDialogState(() {
-                        selectedFilePath = result.files.single.path;
-                        selectedFileName = result.files.single.name;
+                        selectedFilePath = files.single.path;
+                        selectedFileName = files.single.name;
                       });
                     }
                   },

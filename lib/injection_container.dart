@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lms/core/constants/app_constants.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/core/network/network_info.dart';
+import 'package:lms/core/theme/theme_controller.dart';
 import 'package:lms/features/auth/data/datasources/auth_local_datasource.dart';
 import 'package:lms/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:lms/features/auth/data/repositories/auth_repository_impl.dart';
@@ -123,16 +124,20 @@ Future<void> initDependencies() async {
 
   // API Client — token read dynamically from SharedPreferences
   sl.registerLazySingleton<ApiClient>(
-    () => ApiClient(
-      tokenProvider: () => sl<SharedPreferences>().getString(AppConstants.tokenKey),
-      onTokenRefresh: () async {
+    () {
+      final client = ApiClient();
+      client.setTokenProvider(
+        () => sl<SharedPreferences>().getString(AppConstants.tokenKey),
+      );
+      client.onTokenRefresh = () async {
         final refreshToken =
             sl<SharedPreferences>().getString(AppConstants.refreshTokenKey);
         if (refreshToken == null || refreshToken.isEmpty) return null;
         final result = await sl<AuthRepository>().refreshToken(refreshToken);
         return result.fold((_) => null, (token) => token);
-      },
-    ),
+      };
+      return client;
+    },
   );
 
   // Network Info
@@ -608,6 +613,11 @@ Future<void> initDependencies() async {
 
   // ===== Profile Feature =====
 
+  // App-level theme/preferences sync
+  sl.registerLazySingleton<ThemeController>(
+    () => ThemeController(sl<SharedPreferences>()),
+  );
+
   // Data source
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(apiClient: sl<ApiClient>()),
@@ -618,6 +628,7 @@ Future<void> initDependencies() async {
     () => ProfileRepositoryImpl(
       remoteDataSource: sl<ProfileRemoteDataSource>(),
       networkInfo: sl<NetworkInfo>(),
+      themeController: sl<ThemeController>(),
     ),
   );
 

@@ -4,26 +4,59 @@ import 'package:go_router/go_router.dart';
 import 'package:lms/core/theme/app_theme.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
+import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.dart';
 import 'package:lms/features/shared/domain/entities/course_entity.dart';
 
-class CourseCard extends StatelessWidget {
+class CourseCard extends StatefulWidget {
 
   const CourseCard({super.key, required this.course});
   final CourseEntity course;
 
   @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
+  bool _isEnrolling = false;
+
+  CourseEntity get course => widget.course;
+
+  Future<void> _enroll() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final cubit = context.read<EnrollmentCubit>();
+    if (_isEnrolling) return;
+    setState(() => _isEnrolling = true);
+    final resultFuture =
+        cubit.stream.skipWhile((s) => s is EnrollmentLoading).first;
+    await cubit.enroll(course.id);
+    final result = await resultFuture;
+    if (mounted) {
+      final message = switch (result) {
+        EnrollmentActionSuccess(:final message) => message,
+        EnrollmentError(:final message) => message,
+        _ => 'Failed to enroll',
+      };
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+      await context.read<CourseCubit>().getCourses(role: UserRole.learner);
+      setState(() => _isEnrolling = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    final isInstructor = authState is AuthAuthenticated &&
+        authState.user.role == UserRole.instructor;
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          final authState = context.read<AuthCubit>().state;
-          final isInstructor = authState is AuthAuthenticated &&
-              authState.user.role == UserRole.instructor;
           if (isInstructor) {
             context.push('/courses/${course.id}/contents');
-          } else {
+          } else if (course.isEnrolled) {
             context.push('/my-courses/${course.id}');
           }
         },
@@ -121,6 +154,30 @@ class CourseCard extends StatelessWidget {
                         backgroundColor: Colors.grey[200],
                         color: AppTheme.primaryColor,
                         minHeight: 6,
+                      ),
+                    ),
+                  ],
+                  // Enroll Button
+                  if (!isInstructor && !course.isEnrolled) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: _isEnrolling ? null : _enroll,
+                        icon: _isEnrolling
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.add),
+                        label: Text(_isEnrolling ? 'Enrolling...' : 'Enroll'),
+                        style: ElevatedButton.styleFrom(
+                          minimumSize: const Size(double.infinity, 44),
+                        ),
                       ),
                     ),
                   ],

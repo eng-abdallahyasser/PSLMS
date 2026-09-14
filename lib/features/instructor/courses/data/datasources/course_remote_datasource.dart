@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
@@ -99,13 +98,13 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
         endpoint,
         queryParameters: queryParams,
       );
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       final dataList = (body['data'] as List<dynamic>)
           .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
           .toList();
       final meta = PaginationMeta.fromJson(body['meta'] as Map<String, dynamic>);
       return CoursesResponse(data: dataList, meta: meta);
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -114,8 +113,8 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   Future<CourseModel> getCourseById(String id) async {
     try {
       final response = await apiClient.get('/learner/courses/$id');
-      return CourseModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return CourseModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -137,8 +136,8 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
           'thumbnailUrl': ?thumbnailUrl,
         },
       );
-      return CourseModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return CourseModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -159,8 +158,8 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
       if (thumbnailUrl != null) data['thumbnailUrl'] = thumbnailUrl;
 
       final response = await apiClient.patch('/instructor/courses/$id', data: data);
-      return CourseModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return CourseModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -169,16 +168,15 @@ class CourseRemoteDataSourceImpl implements CourseRemoteDataSource {
   Future<void> deleteCourse(String id) async {
     try {
       await apiClient.delete('/instructor/courses/$id');
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    if (e.error is ServerException) return e.error as ServerException;
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

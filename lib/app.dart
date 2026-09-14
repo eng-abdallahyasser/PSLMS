@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lms/core/theme/app_theme.dart';
+import 'package:lms/core/theme/theme_controller.dart';
 import 'package:lms/injection_container.dart';
+import 'package:lms/features/learner/instructors/presentation/pages/invitation_page.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/auth/presentation/pages/login_page.dart';
@@ -228,6 +230,13 @@ class _AppState extends State<App> {
           builder: (context, state) => const NotificationsPage(),
         ),
         GoRoute(
+          path: '/invitation',
+          name: 'invitation',
+          builder: (context, state) => InvitationPage(
+            token: state.uri.queryParameters['token'] ?? '',
+          ),
+        ),
+        GoRoute(
           path: '/profile',
           name: 'profile',
           builder: (context, state) => const ProfilePage(),
@@ -285,11 +294,16 @@ class _AppState extends State<App> {
             _router.go('/verify-email', extra: state.email);
           }
         },
-        child: MaterialApp.router(
-          title: 'LMS',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          routerConfig: _router,
+        child: ValueListenableBuilder<ThemePreferences>(
+          valueListenable: sl<ThemeController>(),
+          builder: (context, preferences, _) => MaterialApp.router(
+            title: 'LMS',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: preferences.mode,
+            routerConfig: _router,
+          ),
         ),
       ),
     );

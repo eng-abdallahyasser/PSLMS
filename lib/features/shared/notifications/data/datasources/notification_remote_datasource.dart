@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/shared/notifications/data/models/notification_model.dart';
@@ -19,12 +18,12 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   @override
   Future<List<NotificationModel>> getNotifications() async {
     try {
-      final response = await apiClient.get('/notifications');
-      final dataList = (response.data as List<dynamic>)
+      final response = await apiClient.getList('/notifications');
+      final dataList = (response)
           .map((e) => NotificationModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -33,7 +32,7 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   Future<void> markAsRead(String id) async {
     try {
       await apiClient.patch('/notifications/$id/read');
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -42,23 +41,15 @@ class NotificationRemoteDataSourceImpl implements NotificationRemoteDataSource {
   Future<void> markAllAsRead() async {
     try {
       await apiClient.post('/notifications/read-all');
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    final error = e.error;
-    if (error is ServerException) return error;
-    if (error is AuthException) {
-      return ServerException(
-        message: error.message,
-        statusCode: error.statusCode,
-      );
-    }
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

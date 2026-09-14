@@ -6,7 +6,8 @@ class AppConstants {
   static const String appVersion = '1.0.0';
 
   // API
-  static const String baseUrl = 'https://lms-production-1a72.up.railway.app/api';
+  static const String baseDomain = 'https://lms-production-1a72.up.railway.app';
+  static const String baseUrl = '$baseDomain/api';
   static const Duration apiTimeout = Duration(seconds: 30);
   static const String apiVersion = 'v1';
 

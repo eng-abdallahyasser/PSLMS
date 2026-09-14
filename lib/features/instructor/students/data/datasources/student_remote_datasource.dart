@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/instructor/students/data/models/student_model.dart';
@@ -36,7 +35,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         '/instructor/students/invite',
         data: {'email': email},
       );
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -58,7 +57,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         '/instructor/students',
         queryParameters: queryParams,
       );
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       final items = (body['items'] ?? body['data']) as List<dynamic>? ?? [];
       final dataList = items
           .map((e) => StudentModel.fromJson(e as Map<String, dynamic>))
@@ -68,7 +67,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
           body['totalItems'] as int? ??
           dataList.length;
       return StudentsResponse(data: dataList, totalItems: totalItems);
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -80,7 +79,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         '/instructor/students/requests',
         queryParameters: {'page': page, 'limit': limit},
       );
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       final items = (body['items'] ?? body['data']) as List<dynamic>? ?? [];
       final dataList = items
           .map((e) => StudentModel.fromJson(e as Map<String, dynamic>))
@@ -90,7 +89,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
           body['totalItems'] as int? ??
           dataList.length;
       return StudentsResponse(data: dataList, totalItems: totalItems);
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -102,7 +101,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         '/instructor/students/requests/$requestId/respond',
         data: {'action': action},
       );
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -111,7 +110,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
   Future<void> removeStudent(String studentId) async {
     try {
       await apiClient.delete('/instructor/students/$studentId');
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -123,7 +122,7 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
         '/instructor/students/$studentId/assign',
         data: {'courseIds': courseIds},
       );
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -133,22 +132,20 @@ class StudentRemoteDataSourceImpl implements StudentRemoteDataSource {
     try {
       final response =
           await apiClient.get('/instructor/students/$studentId/assignments');
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       final dataList = (body['data'] as List<dynamic>? ?? body['courseIds'] as List<dynamic>? ?? [])
           .map((e) => e as String)
           .toList();
       return dataList;
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    final error = e.error;
-    if (error is ServerException) return error;
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

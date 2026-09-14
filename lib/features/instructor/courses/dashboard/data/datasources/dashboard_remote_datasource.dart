@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
@@ -36,28 +35,20 @@ class DashboardRemoteDataSourceImpl implements DashboardRemoteDataSource {
           'limit': limit,
         },
       );
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       final dataList = (body['data'] as List<dynamic>)
           .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    final error = e.error;
-    if (error is ServerException) return error;
-    if (error is AuthException) {
-      return ServerException(
-        message: error.message,
-        statusCode: error.statusCode,
-      );
-    }
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

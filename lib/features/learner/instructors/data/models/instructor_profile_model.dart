@@ -1,3 +1,4 @@
+import 'package:lms/core/utils/avatar_url.dart';
 import 'package:lms/features/learner/instructors/domain/entities/instructor_profile_entity.dart';
 
 class InstructorProfileModel extends InstructorProfileEntity {
@@ -26,7 +27,12 @@ class InstructorProfileModel extends InstructorProfileEntity {
           ? DateTime.parse(json['createdAt'] as String)
           : null,
       bio: json['bio'] as String?,
-      avatarUrl: json['avatarUrl'] as String? ?? json['avatar_url'] as String?,
+      avatarUrl: AvatarUrl.resolve(
+        json['profileImageUrl'] as String? ??
+            json['profile_image_url'] as String? ??
+            json['avatarUrl'] as String? ??
+            json['avatar_url'] as String?,
+      ),
       courseCount: (json['courseCount'] as num?)?.toInt() ??
           (json['course_count'] as num?)?.toInt(),
       studentCount: (json['studentCount'] as num?)?.toInt() ??

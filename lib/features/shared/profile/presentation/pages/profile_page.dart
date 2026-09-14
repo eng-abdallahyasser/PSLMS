@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -75,25 +77,48 @@ class _ProfilePageState extends State<ProfilePage> {
         const SizedBox(height: 24),
         // Avatar
         Center(
-          child: CircleAvatar(
-            radius: 50,
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            child: avatarUrl != null
-                ? ClipOval(
-                    child: Image.network(
-                      avatarUrl,
-                      fit: BoxFit.cover,
-                      width: 100,
-                      height: 100,
-                    ),
-                  )
-                : Text(
-                    profile.initials.isNotEmpty ? profile.initials : 'U',
-                    style: TextStyle(
-                      fontSize: 40,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+          child: GestureDetector(
+            onTap: _pickAndUploadAvatar,
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.15),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
+                  child: AppAvatar(
+                    imageUrl: avatarUrl,
+                    initials: profile.initials.isNotEmpty
+                        ? profile.initials
+                        : 'U',
+                    radius: 50,
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 2),
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: const Icon(
+                    Icons.photo_camera,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -214,6 +239,24 @@ class _ProfilePageState extends State<ProfilePage> {
         _buildVersionFooter(),
       ],
     );
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    if (kIsWeb) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Avatar upload is not supported on web yet'),
+        ),
+      );
+      return;
+    }
+    final file = await FilePicker.pickFile(
+      type: FileType.image,
+    );
+    final path = file?.path;
+    if (path == null) return; // User cancelled
+    if (!mounted) return;
+    await context.read<ProfileCubit>().uploadAvatar(path);
   }
 
   void _showEditProfileDialog(BuildContext context, ProfileEntity profile) {

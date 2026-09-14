@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
+import 'package:lms/features/shared/notifications/domain/entities/notification_entity.dart';
 import 'package:lms/features/shared/notifications/presentation/cubit/notification_cubit.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -65,9 +67,20 @@ class _NotificationsPageState extends State<NotificationsPage> {
         itemCount: notifications.length,
         itemBuilder: (context, index) {
           final notification = notifications[index];
+          final referenceId = notification.referenceId;
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
+              onTap: () {
+                if (_isInvitation(notification) &&
+                    referenceId != null &&
+                    referenceId.isNotEmpty) {
+                  context.push('/invitation?token=$referenceId');
+                }
+                if (!notification.isRead) {
+                  context.read<NotificationCubit>().markAsRead(notification.id);
+                }
+              },
               leading: CircleAvatar(
                 backgroundColor: notification.isRead ? Colors.grey[200] : Colors.blue[100],
                 child: Icon(
@@ -88,5 +101,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
         },
       ),
     );
+  }
+
+  bool _isInvitation(NotificationEntity notification) {
+    final type = (notification.type ?? '').toLowerCase();
+    final title = notification.title.toLowerCase();
+    final body = notification.message.toLowerCase();
+    return type.contains('invit') ||
+        title.contains('invit') ||
+        body.contains('invit');
   }
 }

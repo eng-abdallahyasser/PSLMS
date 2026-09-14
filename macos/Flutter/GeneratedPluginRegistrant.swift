@@ -7,7 +7,7 @@ import Foundation
 
 import connectivity_plus
 import desktop_webview_window
-import file_picker
+import file_picker_darwin
 import firebase_core
 import firebase_messaging
 import flutter_web_auth_2

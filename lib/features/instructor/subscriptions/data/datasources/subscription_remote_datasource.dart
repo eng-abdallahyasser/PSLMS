@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/instructor/subscriptions/data/models/subscription_model.dart';
@@ -51,8 +50,8 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   Future<SubscriptionModel> getMySubscription() async {
     try {
       final response = await apiClient.get('/instructor/subscription');
-      return SubscriptionModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return SubscriptionModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -60,12 +59,12 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<List<SubscriptionPlanModel>> getPlans() async {
     try {
-      final response = await apiClient.get('/instructor/subscription/plans');
-      final dataList = (response.data as List<dynamic>)
+      final response = await apiClient.getList('/instructor/subscription/plans');
+      final dataList = (response)
           .map((e) => SubscriptionPlanModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -85,9 +84,9 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
           'cancelUrl': ?cancelUrl,
         },
       );
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       return body['url'] as String? ?? body['checkoutUrl'] as String? ?? '';
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -96,9 +95,9 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   Future<String> createPortal() async {
     try {
       final response = await apiClient.post('/instructor/subscription/portal');
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       return body['url'] as String? ?? body['portalUrl'] as String? ?? '';
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -118,9 +117,9 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
           'cancelUrl': ?cancelUrl,
         },
       );
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       return body['url'] as String? ?? body['checkoutUrl'] as String? ?? '';
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -129,9 +128,9 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   Future<String> buyStorage() async {
     try {
       final response = await apiClient.post('/instructor/subscription/storage');
-      final body = response.data as Map<String, dynamic>;
+      final body = response;
       return body['url'] as String? ?? body['checkoutUrl'] as String? ?? '';
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -139,12 +138,12 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   @override
   Future<List<StorageAddonModel>> getStorageAddons() async {
     try {
-      final response = await apiClient.get('/instructor/subscription/storage');
-      final dataList = (response.data as List<dynamic>)
+      final response = await apiClient.getList('/instructor/subscription/storage');
+      final dataList = (response)
           .map((e) => StorageAddonModel.fromJson(e as Map<String, dynamic>))
           .toList();
       return dataList;
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -154,8 +153,8 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
     try {
       final response =
           await apiClient.post('/instructor/subscription/refresh-subscription');
-      return SubscriptionModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
+      return SubscriptionModel.fromJson(response);
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
@@ -164,23 +163,15 @@ class SubscriptionRemoteDataSourceImpl implements SubscriptionRemoteDataSource {
   Future<void> cancelSubscription() async {
     try {
       await apiClient.post('/instructor/subscription/cancel');
-    } on DioException catch (e) {
+    } on ApiException catch (e) {
       throw _handleError(e);
     }
   }
 
-  ServerException _handleError(DioException e) {
-    final error = e.error;
-    if (error is ServerException) return error;
-    if (error is AuthException) {
-      return ServerException(
-        message: error.message,
-        statusCode: error.statusCode,
-      );
-    }
+  ServerException _handleError(ApiException e) {
     return ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
+      message: e.message,
+      statusCode: e.statusCode,
     );
   }
 }

@@ -73,9 +73,10 @@ class _MyInstructorsPageState extends State<MyInstructorsPage> {
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             child: ListTile(
-              leading: CircleAvatar(
+              leading: AppAvatar(
+                imageUrl: instructor.avatarUrl,
+                initials: instructor.fullName.isNotEmpty ? instructor.fullName[0].toUpperCase() : '?',
                 backgroundColor: Colors.green[100],
-                child: Text(instructor.fullName.isNotEmpty ? instructor.fullName[0].toUpperCase() : '?'),
               ),
               title: Text(instructor.fullName),
               subtitle: instructor.bio != null ? Text(instructor.bio!, maxLines: 1, overflow: TextOverflow.ellipsis) : null,

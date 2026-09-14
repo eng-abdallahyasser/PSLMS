@@ -46,7 +46,7 @@ dependencies:
   dartz: ^0.10.1
 
   # Networking
-  dio: ^5.7.0
+  http: ^1.2.2
   internet_connection_checker: ^3.0.1
 
   # Local Storage
@@ -62,8 +62,7 @@ dependencies:
   url_launcher: ^6.3.2
   firebase_messaging: ^16.4.1
   intl: ^0.20.3
-  file_picker: ^12.0.0-beta
-
+  file_picker: ^12.3.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

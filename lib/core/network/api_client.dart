@@ -1,251 +1,359 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'package:dio/dio.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart' as http_io;
 import 'package:lms/core/constants/app_constants.dart';
-import 'package:lms/core/errors/exceptions.dart';
 
 class ApiClient {
+  String _baseUrl = AppConstants.baseUrl;
 
-  ApiClient({
-    String? baseUrl,
-    String? Function()? tokenProvider,
-    Future<String?> Function()? onTokenRefresh,
-  }) {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: baseUrl ?? AppConstants.baseUrl,
-        connectTimeout: AppConstants.apiTimeout,
-        receiveTimeout: AppConstants.apiTimeout,
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
+  String get baseUrl => _baseUrl;
+
+  void setBaseUrl(String url) => _baseUrl = url;
+
+  late final http.Client _client = http_io.IOClient(
+    HttpClient()
+      ..connectionTimeout = const Duration(seconds: 15)
+      ..idleTimeout = const Duration(seconds: 15),
+  );
+
+  String? Function()? _tokenProvider;
+  String _languageCode = 'ar';
+
+  Future<String?> Function()? onTokenRefresh;
+  bool _isRefreshing = false;
+  Completer<bool>? _refreshCompleter;
+
+  void setTokenProvider(String? Function()? tokenProvider) {
+    _tokenProvider = tokenProvider;
+  }
+
+  void setLanguageCode(String code) {
+    _languageCode = code;
+  }
+
+  String? get _token => _tokenProvider?.call();
+
+  Map<String, String> get _headers {
+    final headers = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept-Language': _languageCode,
+    };
+    final token = _token;
+    if (token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
+  Uri _buildUri(String path, [Map<String, dynamic>? queryParameters]) {
+    final url = Uri.parse('$baseUrl$path');
+    if (queryParameters == null || queryParameters.isEmpty) return url;
+    return url.replace(
+      queryParameters: queryParameters.map(
+        (k, v) => MapEntry(k, v?.toString() ?? ''),
       ),
     );
-
-    _dio.interceptors.addAll([
-      _AuthInterceptor(tokenProvider),
-      _ErrorInterceptor(_dio, onTokenRefresh),
-    ]);
-  }
-  late final Dio _dio;
-
-  Future<Response<T>> get<T>(
-    String path, {
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
-    log('[API] GET $path');
-    final response = await _dio.get<T>(path, queryParameters: queryParameters, options: options);
-    log('[API] GET $path: ${response.statusCode} ${response.data}');
-    return response;
   }
 
-  Future<Response<T>> post<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
-    log('[API] POST $path ${_formatRequestBody(data)}'.trimRight());
-    final response = await _dio.post<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
-    log('[API] POST $path: ${response.statusCode} ${response.data}');
-    return response;
+  bool _isAuthPath(String path) => path.startsWith('/auth/');
+
+  Future<bool> _handleRefresh() async {
+    if (_isRefreshing && _refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+    _isRefreshing = true;
+    _refreshCompleter = Completer<bool>();
+    try {
+      final newToken = await onTokenRefresh?.call();
+      final ok = newToken != null && newToken.isNotEmpty;
+      _refreshCompleter!.complete(ok);
+      return ok;
+    } catch (e) {
+      _refreshCompleter!.complete(false);
+      return false;
+    } finally {
+      _isRefreshing = false;
+      _refreshCompleter = null;
+    }
   }
 
-  Future<Response<T>> put<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
-    log('[API] PUT $path ${_formatRequestBody(data)}'.trimRight());
-    final response = await _dio.put<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
-    log('[API] PUT $path: ${response.statusCode} ${response.data}');
-    return response;
+  Future<http.Response> _retryRequest(http.Request request) async {
+    final retriedRequest = http.Request(request.method, request.url);
+    retriedRequest.headers.addAll(_headers);
+    if (request.body.isNotEmpty) {
+      retriedRequest.body = request.body;
+    }
+    final streamedResponse = await _client.send(retriedRequest);
+    return http.Response.fromStream(streamedResponse);
   }
 
-  Future<Response<T>> patch<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
-    log('[API] PATCH $path ${_formatRequestBody(data)}'.trimRight());
-    final response = await _dio.patch<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
-    log('[API] PATCH $path: ${response.statusCode} ${response.data}');
-    return response;
-  }
-
-  Future<Response<T>> delete<T>(
-    String path, {
-    dynamic data,
-    Map<String, dynamic>? queryParameters,
-    Options? options,
-  }) async {
-    log('[API] DELETE $path ${_formatRequestBody(data)}'.trimRight());
-    final response = await _dio.delete<T>(
-      path,
-      data: data,
-      queryParameters: queryParameters,
-      options: options,
-    );
-    log('[API] DELETE $path: ${response.statusCode} ${response.data}');
-    return response;
+  Map<String, String> _mergeHeaders(Map<String, String>? extra) {
+    if (extra == null || extra.isEmpty) return _headers;
+    return <String, String>{..._headers, ...extra};
   }
 
   String _formatRequestBody(dynamic data) {
     if (data == null) return '';
-    if (data is FormData) {
-      return data.fields.map((f) => '${f.key}=${f.value}').join('&');
-    }
     if (data is Map) return jsonEncode(data);
     return data.toString();
   }
+
+  Future<Map<String, dynamic>> get(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    log('[API] GET $path');
+    final url = _buildUri(path, queryParameters);
+    final request = http.Request('GET', url);
+    request.headers.addAll(_headers);
+    final streamedResponse = await _client.send(request);
+    var response = await http.Response.fromStream(streamedResponse);
+    log('[API] GET $path: ${response.statusCode} ${response.body}');
+
+    if (response.statusCode == 401 &&
+        onTokenRefresh != null &&
+        !_isAuthPath(path)) {
+      final refreshed = await _handleRefresh();
+      if (refreshed) {
+        response = await _retryRequest(request);
+        log('[API] GET $path (retry): ${response.statusCode} ${response.body}');
+      }
+    }
+    return _handleResponse(response);
+  }
+    Future<List<dynamic>> getList(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    log('[API] GET $path');
+    final url = _buildUri(path, queryParameters);
+    final request = http.Request('GET', url);
+    request.headers.addAll(_headers);
+    final streamedResponse = await _client.send(request);
+    var response = await http.Response.fromStream(streamedResponse);
+    log('[API] GET $path: ${response.statusCode} ${response.body}');
+
+    if (response.statusCode == 401 &&
+        onTokenRefresh != null &&
+        !_isAuthPath(path)) {
+      final refreshed = await _handleRefresh();
+      if (refreshed) {
+        response = await _retryRequest(request);
+        log('[API] GET $path (retry): ${response.statusCode} ${response.body}');
+      }
+    }
+    return _handleListResponse(response);
+  }
+
+  Future<Map<String, dynamic>> post(
+    String path, {
+    dynamic data,
+    Map<String, String>? headers,
+    bool skipAuthRefresh = false,
+  }) async {
+    log('[API] POST $path: ${_formatRequestBody(data)}');
+    final url = _buildUri(path);
+    final request = http.Request('POST', url);
+    request.headers.addAll(_mergeHeaders(headers));
+    if (data != null) request.body = _formatRequestBody(data);
+    final streamedResponse = await _client.send(request);
+    var response = await http.Response.fromStream(streamedResponse);
+    log('[API] POST $path: ${response.statusCode} ${response.body}');
+
+    if (!skipAuthRefresh &&
+        response.statusCode == 401 &&
+        onTokenRefresh != null &&
+        !_isAuthPath(path)) {
+      final refreshed = await _handleRefresh();
+      if (refreshed) {
+        response = await _retryRequest(request);
+        log('[API] POST $path (retry): ${response.statusCode} ${response.body}');
+      }
+    }
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> patch(
+    String path, {
+    dynamic data,
+    Map<String, String>? headers,
+  }) async {
+    log('[API] PATCH $path: ${_formatRequestBody(data)}');
+    final url = _buildUri(path);
+    final request = http.Request('PATCH', url);
+    request.headers.addAll(_mergeHeaders(headers));
+    if (data != null) request.body = _formatRequestBody(data);
+    final streamedResponse = await _client.send(request);
+    var response = await http.Response.fromStream(streamedResponse);
+    log('[API] PATCH $path: ${response.statusCode} ${response.body}');
+
+    if (response.statusCode == 401 &&
+        onTokenRefresh != null &&
+        !_isAuthPath(path)) {
+      final refreshed = await _handleRefresh();
+      if (refreshed) {
+        response = await _retryRequest(request);
+        log('[API] PATCH $path (retry): ${response.statusCode} ${response.body}');
+      }
+    }
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> delete(
+    String path, {
+    dynamic data,
+  }) async {
+    log('[API] DELETE $path: ${_formatRequestBody(data)}');
+    final url = _buildUri(path);
+    final request = http.Request('DELETE', url);
+    request.headers.addAll(_headers);
+    if (data != null) request.body = _formatRequestBody(data);
+    final streamedResponse = await _client.send(request);
+    var response = await http.Response.fromStream(streamedResponse);
+    log('[API] DELETE $path: ${response.statusCode} ${response.body}');
+
+    if (response.statusCode == 401 &&
+        onTokenRefresh != null &&
+        !_isAuthPath(path)) {
+      final refreshed = await _handleRefresh();
+      if (refreshed) {
+        response = await _retryRequest(request);
+        log('[API] DELETE $path (retry): ${response.statusCode} ${response.body}');
+      }
+    }
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> uploadFile(
+    String path, {
+    required String filePath,
+    String fieldName = 'file',
+    String method = 'POST',
+    Map<String, String>? fields,
+    Map<String, String>? headers,
+  }) async {
+    log('[API] UPLOAD $path: $filePath');
+    final request = http.MultipartRequest(
+      method,
+      _buildUri(path),
+    );
+    request.headers.addAll(_mergeHeaders(headers));
+    if (fields != null) request.fields.addAll(fields);
+    request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
+    final streamedResponse = await _client.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
+    log('[API] UPLOAD $path: ${response.statusCode} ${response.body}');
+    return _handleResponse(response);
+  }
+
+  Map<String, dynamic> _handleResponse(http.Response response) {
+    final data = response.body.isNotEmpty
+        ? jsonDecode(response.body) as Map<String, dynamic>
+        : <String, dynamic>{};
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return data;
+    }
+
+    throw ApiException.fromEnvelope(data, response.statusCode);
+  }
+
+  List<dynamic> _handleListResponse(http.Response response) {
+    final data = response.body.isNotEmpty
+        ? jsonDecode(response.body) as List<dynamic>
+        : <dynamic>[];
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      return data;
+    }
+
+    final message = data.isNotEmpty && data.first is Map
+        ? (data.first as Map<String, dynamic>)['message'] as String?
+        : 'Request failed (${response.statusCode})';
+    throw ApiException(
+      message ?? 'Request failed (${response.statusCode})',
+      response.statusCode,
+    );
+  }
 }
 
-class _AuthInterceptor extends Interceptor {
+class ApiException implements Exception {
+  final String message;
+  final int statusCode;
+  final String? code;
+  final String? error;
+  final String? requiredAction;
+  final String? actionRoute;
+  final List<String>? availableActions;
+  final String? conflictId;
+  final String? projectedAvailableAt;
+  final List<ApiFieldError>? fieldErrors;
+  final String? phoneVerificationUserId;
 
-  _AuthInterceptor(this._tokenProvider);
-  final String? Function()? _tokenProvider;
+  ApiException(
+    this.message,
+    this.statusCode, {
+    this.code,
+    this.error,
+    this.requiredAction,
+    this.actionRoute,
+    this.availableActions,
+    this.conflictId,
+    this.projectedAvailableAt,
+    this.fieldErrors,
+    this.phoneVerificationUserId,
+  });
 
-  @override
-  void onRequest(
-    RequestOptions options,
-    RequestInterceptorHandler handler,
+  factory ApiException.fromEnvelope(
+    Map<String, dynamic> json,
+    int statusCode,
   ) {
-    final token = _tokenProvider?.call();
-    if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = 'Bearer $token';
-    }
-    handler.next(options);
+    final message =
+        json['message'] as String? ?? 'Request failed ($statusCode)';
+    final errors = json['errors'] as List<dynamic>?;
+    final availableActions = json['availableActions'] as List<dynamic>?;
+    final verification = json['verification'] as Map<String, dynamic>?;
+    return ApiException(
+      message,
+      statusCode,
+      code: json['code'] as String?,
+      error: json['error'] as String?,
+      requiredAction: json['requiredAction'] as String?,
+      actionRoute: json['actionRoute'] as String?,
+      availableActions: availableActions?.whereType<String>().toList(),
+      conflictId: json['conflictId'] as String?,
+      projectedAvailableAt: json['projectedAvailableAt'] as String?,
+      phoneVerificationUserId:
+          verification?['userId'] as String? ?? json['userId'] as String?,
+      fieldErrors: errors
+          ?.map((e) => ApiFieldError.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
   }
-}
 
-class _ErrorInterceptor extends Interceptor {
-  _ErrorInterceptor(this._dio, this._refreshTokenProvider);
+  bool get isPhoneNotVerified => code == 'AUTH_PHONE_NOT_VERIFIED';
 
-  final Dio _dio;
-  final Future<String?> Function()? _refreshTokenProvider;
-  Completer<String?>? _refreshCompleter;
+  bool get hasRequiredAction =>
+      requiredAction != null && requiredAction!.isNotEmpty;
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) async {
-    final path = err.requestOptions.path;
-    final statusCode = err.response?.statusCode;
-    final data = err.response?.data;
-    log('[API] $path: $statusCode $data');
+  String toString() => message;
+}
 
-    switch (err.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-      case DioExceptionType.connectionError:
-        handler.reject(
-          DioException(
-            requestOptions: err.requestOptions,
-            error: const NetworkException(),
-          ),
-        );
-        return;
-      case DioExceptionType.badResponse:
-        final message = data?['message'] as String? ?? 'Something went wrong';
-        final errorCode = data?['errorCode'] as String?;
+class ApiFieldError {
+  final String field;
+  final List<String> messages;
 
-        log('[DEBUG] onError path=$path status=$statusCode hadToken=${err.requestOptions.headers.containsKey("Authorization")} authHeader=${err.requestOptions.headers['Authorization']}');
+  const ApiFieldError({required this.field, required this.messages});
 
-        if (statusCode == 401 || statusCode == 403) {
-          final isAuthPath = path.startsWith('/auth/');
-          log('[DEBUG] 401/403 branch: isAuthPath=$isAuthPath refreshProvider=${_refreshTokenProvider != null} retried=${err.requestOptions.extra['_retried']}');
-          if (isAuthPath || _refreshTokenProvider == null) {
-            log('[DEBUG] Rejecting immediately with AuthException: message=$message errorCode=$errorCode');
-            handler.reject(
-              DioException(
-                requestOptions: err.requestOptions,
-                error: AuthException(message: message, statusCode: statusCode, errorCode: errorCode),
-              ),
-            );
-            return;
-          }
-
-          if (err.requestOptions.extra['_retried'] == true) {
-            handler.reject(
-              DioException(
-                requestOptions: err.requestOptions,
-                error: const AuthException(message: 'Session expired', statusCode: 401),
-              ),
-            );
-            return;
-          }
-
-          try {
-            final newToken = await _getRefreshedToken();
-            if (newToken != null && newToken.isNotEmpty) {
-              err.requestOptions.extra['_retried'] = true;
-              final response = await _dio.fetch(err.requestOptions);
-              handler.resolve(response);
-              return;
-            }
-          } catch (_) {
-          }
-
-          handler.reject(
-            DioException(
-              requestOptions: err.requestOptions,
-              error: const AuthException(message: 'Session expired', statusCode: 401),
-            ),
-          );
-          return;
-        }
-
-        handler.reject(
-          DioException(
-            requestOptions: err.requestOptions,
-            error: ServerException(
-              message: message,
-              statusCode: statusCode,
-              data: data,
-            ),
-          ),
-        );
-        return;
-      case DioExceptionType.cancel:
-      case DioExceptionType.badCertificate:
-      case DioExceptionType.unknown:
-        handler.next(err);
-    }
-  }
-
-  Future<String?> _getRefreshedToken() async {
-    if (_refreshCompleter != null) {
-      return _refreshCompleter!.future;
-    }
-    _refreshCompleter = Completer<String?>();
-    try {
-      final token = await _refreshTokenProvider!();
-      _refreshCompleter!.complete(token);
-      return token;
-    } catch (e) {
-      _refreshCompleter!.complete(null);
-      rethrow;
-    } finally {
-      _refreshCompleter = null;
-    }
+  factory ApiFieldError.fromJson(Map<String, dynamic> json) {
+    final messages = json['messages'] as List<dynamic>?;
+    return ApiFieldError(
+      field: json['field'] as String? ?? '',
+      messages: messages?.whereType<String>().toList() ?? const [],
+    );
   }
 }

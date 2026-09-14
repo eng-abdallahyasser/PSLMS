@@ -1,4 +1,5 @@
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
+import 'package:lms/core/utils/avatar_url.dart';
 import 'package:lms/features/shared/profile/domain/entities/profile_entity.dart';
 
 class ProfileModel extends ProfileEntity {
@@ -37,7 +38,12 @@ class ProfileModel extends ProfileEntity {
       role: json['role'] != null
           ? UserRole.fromString(json['role'] as String)
           : UserRole.learner,
-      avatarUrl: json['avatar_url'] as String? ?? json['avatarUrl'] as String?,
+      avatarUrl: AvatarUrl.resolve(
+        json['profileImageUrl'] as String? ??
+            json['profile_image_url'] as String? ??
+            json['avatar_url'] as String? ??
+            json['avatarUrl'] as String?,
+      ),
       lang: json['lang'] as String? ?? 'en',
       mode: json['mode'] as String? ?? 'light',
       createdAt: json['created_at'] != null

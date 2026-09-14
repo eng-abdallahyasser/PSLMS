@@ -1,3 +1,4 @@
+import 'package:lms/core/utils/avatar_url.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
@@ -32,7 +33,12 @@ class UserModel extends UserEntity {
       role: json['role'] != null
           ? UserRole.fromString(json['role'] as String)
           : UserRole.learner,
-      avatarUrl: json['avatar_url'] as String? ?? json['avatarUrl'] as String?,
+      avatarUrl: AvatarUrl.resolve(
+        json['profileImageUrl'] as String? ??
+            json['profile_image_url'] as String? ??
+            json['avatar_url'] as String? ??
+            json['avatarUrl'] as String?,
+      ),
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,

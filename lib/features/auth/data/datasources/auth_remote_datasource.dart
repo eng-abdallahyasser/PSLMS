@@ -1,6 +1,5 @@
 
 import 'dart:developer';
-import 'package:dio/dio.dart';
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
 import 'package:lms/features/auth/data/models/device_info_model.dart';
@@ -93,9 +92,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (deviceInfo != null) 'deviceInfo': deviceInfo.toJson(),
         },
       );
-      return LoginResponse.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+      return LoginResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -122,7 +121,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'client': ?client,
         },
       );
-      final data = response.data as Map<String, dynamic>;
+      final data = response;
       return UserModel(
         id: data['id'] as String? ?? '',
         email: data['email'] as String? ?? email,
@@ -132,8 +131,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             ? UserRole.fromString(data['role'] as String)
             : UserRole.fromString(role),
       );
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -141,9 +140,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> getCurrentUser() async {
     try {
       final response = await apiClient.get('/profile/me');
-      return UserModel.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+      return UserModel.fromJson(response);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -151,8 +150,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> logout() async {
     try {
       await apiClient.post('/auth/logout');
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -160,8 +159,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> forgotPassword(String email) async {
     try {
       await apiClient.post('/auth/forgot-password', data: {'email': email});
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -178,8 +177,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'newPassword': password,
         },
       );
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -189,10 +188,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final response = await apiClient.post(
         '/auth/refresh',
         data: {'refreshToken': refreshToken},
+        skipAuthRefresh: true,
       );
-      return LoginResponse.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+      return LoginResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -209,8 +209,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'otp': otp,
         },
       );
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -223,8 +223,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '/auth/send-otp',
         data: {'email': email},
       );
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -241,8 +241,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'client': client,
         },
       );
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -265,9 +265,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           if (deviceInfo != null) 'deviceInfo': deviceInfo.toJson(),
         },
       );
-      return LoginResponse.fromJson(response.data as Map<String, dynamic>);
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+      return LoginResponse.fromJson(response);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
@@ -286,20 +286,20 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'client': ?client,
         },
       );
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    } on ApiException catch (e) {
+      throw _handleError(e);
     }
   }
 
-  Never _handleDioError(DioException e) {
-    final error = e.error;
-    log('[DEBUG] _handleDioError: errorType=${error.runtimeType} message=${error is AuthException ? error.message : error is ServerException ? error.message : e.message}');
-    if (error is ServerException) throw error;
-    if (error is AuthException) throw error;
-    if (error is NetworkException) throw error;
-    throw ServerException(
-      message: e.message ?? 'An unexpected error occurred',
-      statusCode: e.response?.statusCode,
-    );
+  Never _handleError(ApiException e) {
+    log('[DEBUG] _handleError: message=${e.message} statusCode=${e.statusCode} errorCode=${e.code}');
+    if (e.statusCode == 401 || e.statusCode == 403) {
+      throw AuthException(
+        message: e.message,
+        statusCode: e.statusCode,
+        errorCode: e.code,
+      );
+    }
+    throw ServerException(message: e.message, statusCode: e.statusCode);
   }
 }
