@@ -45,6 +45,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, ProfileEntity>> updateProfile({
     String? firstName,
     String? lastName,
+    String? mobileNumber,
+    String? universityId,
+    String? faculty,
+    String? department,
+    String? year,
   }) async {
     if (await networkInfo.isConnected == false) {
       return const Left(NetworkFailure());
@@ -53,6 +58,11 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final profile = await remoteDataSource.updateProfile(
         firstName: firstName,
         lastName: lastName,
+        mobileNumber: mobileNumber,
+        universityId: universityId,
+        faculty: faculty,
+        department: department,
+        year: year,
       );
       return Right(profile.toEntity());
     } on ServerException catch (e) {

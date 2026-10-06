@@ -34,10 +34,11 @@ class StorageRemoteDataSourceImpl implements StorageRemoteDataSource {
   @override
   Future<List<StoragePlan>> getPlans() async {
     try {
-      final response = await apiClient.get('/instructor/storage/plans');
-      final data = response['data'] ?? response;
-      return (data as List<dynamic>)
-          .map((e) => StoragePlan.fromJson(e as Map<String, dynamic>))
+      // `/storage/plans` returns a plain JSON array (not an envelope).
+      final data = await apiClient.getList('/instructor/storage/plans');
+      return data
+          .whereType<Map<String, dynamic>>()
+          .map(StoragePlan.fromJson)
           .toList();
     } on ApiException catch (e) {
       throw _handleError(e);

@@ -9,6 +9,11 @@ abstract class ProfileRemoteDataSource {
   Future<ProfileModel> updateProfile({
     String? firstName,
     String? lastName,
+    String? mobileNumber,
+    String? universityId,
+    String? faculty,
+    String? department,
+    String? year,
   });
 
   Future<void> updatePreferences({
@@ -39,11 +44,21 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<ProfileModel> updateProfile({
     String? firstName,
     String? lastName,
+    String? mobileNumber,
+    String? universityId,
+    String? faculty,
+    String? department,
+    String? year,
   }) async {
     try {
       final body = <String, dynamic>{};
       if (firstName != null) body['firstName'] = firstName;
       if (lastName != null) body['lastName'] = lastName;
+      if (mobileNumber != null) body['mobileNumber'] = mobileNumber;
+      if (universityId != null) body['universityId'] = universityId;
+      if (faculty != null) body['faculty'] = faculty;
+      if (department != null) body['department'] = department;
+      if (year != null) body['year'] = year;
 
       final response = await apiClient.patch('/profile/me', data: body);
       return ProfileModel.fromJson(response);

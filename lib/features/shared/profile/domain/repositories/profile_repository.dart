@@ -8,6 +8,11 @@ abstract class ProfileRepository {
   Future<Either<Failure, ProfileEntity>> updateProfile({
     String? firstName,
     String? lastName,
+    String? mobileNumber,
+    String? universityId,
+    String? faculty,
+    String? department,
+    String? year,
   });
 
   Future<Either<Failure, void>> updatePreferences({

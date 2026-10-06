@@ -75,14 +75,17 @@ class _FakeStorageRemoteDataSource implements StorageRemoteDataSource {
 class _StubApiClient extends ApiClient {
   _StubApiClient({
     this.getResponses = const {},
+    this.getListResponses = const {},
     this.postResponse,
     this.postError,
   });
 
   final Map<String, Map<String, dynamic>> getResponses;
+  final Map<String, List<dynamic>> getListResponses;
   final Map<String, dynamic>? postResponse;
   final ApiException? postError;
   final List<String> getCalls = [];
+  final List<String> getListCalls = [];
   final List<String> postCalls = [];
   final List<dynamic> postData = [];
 
@@ -93,8 +96,24 @@ class _StubApiClient extends ApiClient {
     Map<String, String>? headers,
     bool skipAuthRefresh = false,
   }) async {
+    if (path == '/instructor/storage/plans') {
+      // Regression guard: this endpoint returns a plain JSON array and
+      // must go through getList() — `get()` would crash decoding it.
+      throw StateError('storage/plans must be fetched via getList()');
+    }
     getCalls.add(path);
     return getResponses[path]!;
+  }
+
+  @override
+  Future<List<dynamic>> getList(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+    Map<String, String>? headers,
+    bool skipAuthRefresh = false,
+  }) async {
+    getListCalls.add(path);
+    return getListResponses[path] ?? const [];
   }
 
   @override
@@ -151,29 +170,105 @@ void main() {
       expect(usage.usedPercentage, closeTo(20, 0.01));
     });
 
-    test('getPlans handles envelope and plain array', () async {
-      final client = _StubApiClient(getResponses: {
-        '/instructor/storage/plans': {
-          'data': [
-            {
-              'id': 'plan-1',
-              'name': '50 GB',
-              'nameAr': '٥٠ جيجا',
-              'gigabytes': 50,
-              'price': 100,
-              'durationDays': 90,
-            },
-          ],
-        },
+    test(
+        'getPlans uses getList and parses the live plain-array payload '
+        '(string prices)', () async {
+      // Real payload captured from the live API (2026-10-06):
+      // GET /instructor/storage/plans → 200 [ {...}, ... ]
+      final client = _StubApiClient(getListResponses: {
+        '/instructor/storage/plans': const [
+          {
+            'id': 'f24f2ee4-6d71-4c7f-8b6d-1e484641641c',
+            'createdAt': '2026-09-16T12:18:14.722Z',
+            'updatedAt': '2026-09-16T12:18:14.722Z',
+            'deletedAt': null,
+            'name': '10 GB Expansion',
+            'nameAr': 'باقة توسعة 10 جيجابايت',
+            'gigabytes': 10,
+            'price': '150.00',
+            'currency': 'egp',
+            'durationDays': 90,
+            'isActive': true,
+          },
+          {
+            'id': '1ec7f88b-c5de-482f-80e7-49e2c5125ad5',
+            'createdAt': '2026-09-16T12:18:15.168Z',
+            'updatedAt': '2026-09-16T12:18:15.168Z',
+            'deletedAt': null,
+            'name': '25 GB Expansion',
+            'nameAr': 'باقة توسعة 25 جيجابايت',
+            'gigabytes': 25,
+            'price': '320.00',
+            'currency': 'egp',
+            'durationDays': 90,
+            'isActive': true,
+          },
+          {
+            'id': 'a2ba72e9-5c9b-4580-a3ed-78a486add1d6',
+            'createdAt': '2026-09-16T12:18:15.457Z',
+            'updatedAt': '2026-09-16T12:18:15.457Z',
+            'deletedAt': null,
+            'name': '50 GB Expansion',
+            'nameAr': 'باقة توسعة 50 جيجابايت',
+            'gigabytes': 50,
+            'price': '550.00',
+            'currency': 'egp',
+            'durationDays': 90,
+            'isActive': true,
+          },
+          {
+            'id': '208cb9a3-d75e-46ac-b92d-7c68a68c87b8',
+            'createdAt': '2026-09-16T12:18:15.717Z',
+            'updatedAt': '2026-09-16T12:18:15.717Z',
+            'deletedAt': null,
+            'name': '100 GB Expansion',
+            'nameAr': 'باقة توسعة 100 جيجابايت',
+            'gigabytes': 100,
+            'price': '950.00',
+            'currency': 'egp',
+            'durationDays': 90,
+            'isActive': true,
+          },
+        ],
       });
       final ds = StorageRemoteDataSourceImpl(apiClient: client);
 
       final plans = await ds.getPlans();
 
-      expect(plans, hasLength(1));
-      expect(plans.first.id, 'plan-1');
-      expect(plans.first.gigabytes, 50);
-      expect(plans.first.price, 100);
+      // Regression guard: plans must go through getList (the stub throws
+      // StateError if `get()` is used for this path).
+      expect(client.getListCalls, contains('/instructor/storage/plans'));
+      expect(client.getCalls, isNot(contains('/instructor/storage/plans')));
+      expect(plans, hasLength(4));
+      expect(plans.map((p) => p.gigabytes), [10, 25, 50, 100]);
+      expect(plans.map((p) => p.price), [150.0, 320.0, 550.0, 950.0]);
+      expect(plans.first.name, '10 GB Expansion');
+      expect(plans.first.nameAr, 'باقة توسعة 10 جيجابايت');
+      expect(plans.first.durationDays, 90);
+      expect(plans.every((p) => p.isActive), isTrue);
+    });
+
+    test('getUsage parses the live payload keys', () async {
+      // Real payload: GET /instructor/storage/usage → 200
+      final client = _StubApiClient(getResponses: {
+        '/instructor/storage/usage': const {
+          'totalStorageBytes': 0,
+          'baseStorageBytes': 5368709120,
+          'activeSubscriptionBytes': 0,
+          'addonStorageBytes': 0,
+          'effectiveStorageBytes': 5368709120,
+          'percentageUsed': 0,
+          'activeSubscriptions': <dynamic>[],
+        },
+      });
+      final ds = StorageRemoteDataSourceImpl(apiClient: client);
+
+      final usage = await ds.getUsage();
+
+      expect(usage.quotaBytes, 5368709120);
+      expect(usage.usedBytes, 0);
+      expect(usage.activeSubscriptions, 0);
+      expect(usage.usedPercentage, 0);
     });
 
     test('subscribe posts planId and parses checkoutUrl', () async {
@@ -222,6 +317,27 @@ void main() {
       expect(revenue.grossRevenue, 1200.5);
       expect(revenue.totalCommission, 120.5);
       expect(revenue.netRevenue, 1080.0);
+    });
+
+    test('getRevenue parses money serialized as strings', () async {
+      final client = _StubApiClient(getResponses: {
+        '/instructor/revenue': const {
+          'totalSales': '12',
+          'grossRevenue': '1200.50',
+          'totalCommission': '120.50',
+          'netRevenue': '1080.00',
+          'currency': 'egp',
+        },
+      });
+      final ds = StorageRemoteDataSourceImpl(apiClient: client);
+
+      final revenue = await ds.getRevenue();
+
+      expect(revenue.totalSales, 12);
+      expect(revenue.grossRevenue, 1200.5);
+      expect(revenue.totalCommission, 120.5);
+      expect(revenue.netRevenue, 1080.0);
+      expect(revenue.currency, 'egp');
     });
   });
 

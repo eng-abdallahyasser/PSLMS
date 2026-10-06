@@ -11,10 +11,20 @@ class UpdateProfileUseCase {
   Future<Either<Failure, ProfileEntity>> call({
     String? firstName,
     String? lastName,
+    String? mobileNumber,
+    String? universityId,
+    String? faculty,
+    String? department,
+    String? year,
   }) {
     return repository.updateProfile(
       firstName: firstName,
       lastName: lastName,
+      mobileNumber: mobileNumber,
+      universityId: universityId,
+      faculty: faculty,
+      department: department,
+      year: year,
     );
   }
 }

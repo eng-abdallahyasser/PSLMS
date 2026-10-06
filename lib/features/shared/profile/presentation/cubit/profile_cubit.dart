@@ -26,11 +26,25 @@ class ProfileLoading extends ProfileState {
 
 class ProfileLoaded extends ProfileState {
 
-  const ProfileLoaded(this.profile);
+  const ProfileLoaded(
+    this.profile, {
+    this.saving = false,
+    this.notice,
+    this.noticeIsError = false,
+  });
   final ProfileEntity profile;
 
+  /// True while an action (edit/preferences/avatar) is in flight — the page
+  /// stays interactive and shows small inline indicators instead of a
+  /// full-screen spinner.
+  final bool saving;
+
+  /// One-shot success/error message for the last action.
+  final String? notice;
+  final bool noticeIsError;
+
   @override
-  List<Object?> get props => [profile];
+  List<Object?> get props => [profile, saving, notice ?? '', noticeIsError];
 }
 
 class ProfileError extends ProfileState {
@@ -57,12 +71,33 @@ class GetProfileEvent extends ProfileEvent {
 
 class UpdateProfileEvent extends ProfileEvent {
 
-  const UpdateProfileEvent({this.firstName, this.lastName});
+  const UpdateProfileEvent({
+    this.firstName,
+    this.lastName,
+    this.mobileNumber,
+    this.universityId,
+    this.faculty,
+    this.department,
+    this.year,
+  });
   final String? firstName;
   final String? lastName;
+  final String? mobileNumber;
+  final String? universityId;
+  final String? faculty;
+  final String? department;
+  final String? year;
 
   @override
-  List<Object?> get props => [firstName ?? '', lastName ?? ''];
+  List<Object?> get props => [
+        firstName ?? '',
+        lastName ?? '',
+        mobileNumber ?? '',
+        universityId ?? '',
+        faculty ?? '',
+        department ?? '',
+        year ?? '',
+      ];
 }
 
 class UpdatePreferencesEvent extends ProfileEvent {
@@ -99,11 +134,24 @@ class ProfileCubit extends Cubit<ProfileState> {
   final UpdatePreferencesUseCase updatePreferencesUseCase;
   final UploadAvatarUseCase uploadAvatarUseCase;
 
-  Future<void> getProfile() async {
-    emit(const ProfileLoading());
+  Future<void> getProfile() => _fetch(showBlockingSpinner: true);
+
+  /// Re-fetch keeping current content visible (pull-to-refresh).
+  Future<void> refresh() => _fetch(showBlockingSpinner: false);
+
+  Future<void> _fetch({required bool showBlockingSpinner}) async {
+    if (showBlockingSpinner) emit(const ProfileLoading());
     final result = await getProfileUseCase();
     result.fold(
-      (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
+      (failure) {
+        final message = _mapFailureToMessage(failure);
+        final current = state;
+        if (current case ProfileLoaded(:final profile)) {
+          emit(ProfileLoaded(profile, notice: message, noticeIsError: true));
+        } else {
+          emit(ProfileError(message));
+        }
+      },
       (profile) => emit(ProfileLoaded(profile)),
     );
   }
@@ -111,42 +159,58 @@ class ProfileCubit extends Cubit<ProfileState> {
   Future<void> updateProfile({
     String? firstName,
     String? lastName,
+    String? mobileNumber,
+    String? universityId,
+    String? faculty,
+    String? department,
+    String? year,
   }) async {
-    emit(const ProfileLoading());
+    final previous = _currentOrNull();
+    if (previous case ProfileLoaded(:final profile)) {
+      // Optimistic — keep the dialog values visible while saving.
+      emit(ProfileLoaded(
+        profile.copyWith(
+          firstName: firstName,
+          lastName: lastName,
+          mobileNumber: mobileNumber,
+          universityId: universityId,
+          faculty: faculty,
+          department: department,
+          year: year,
+        ),
+        saving: true,
+      ));
+    }
     final result = await updateProfileUseCase(
       firstName: firstName,
       lastName: lastName,
+      mobileNumber: mobileNumber,
+      universityId: universityId,
+      faculty: faculty,
+      department: department,
+      year: year,
     );
-    result.fold(
-      (failure) => emit(ProfileError(_mapFailureToMessage(failure))),
-      (profile) => emit(ProfileLoaded(profile)),
+    await result.fold(
+      (failure) async => _revert(previous, _mapFailureToMessage(failure)),
+      (profile) async => emit(ProfileLoaded(profile, notice: 'Profile updated')),
     );
   }
 
   Future<void> uploadAvatar(String filePath) async {
-    final currentState = state;
-    emit(const ProfileLoading());
+    final previous = _currentOrNull();
+    if (previous case ProfileLoaded(:final profile)) {
+      emit(ProfileLoaded(profile, saving: true));
+    }
     final result = await uploadAvatarUseCase(filePath);
-    result.fold(
-      (failure) {
-        emit(ProfileError(_mapFailureToMessage(failure)));
-        if (currentState case ProfileLoaded(:final profile)) {
-          emit(ProfileLoaded(profile));
-        }
-      },
-      (avatarUrl) {
-        if (currentState case ProfileLoaded(:final profile)) {
-          emit(ProfileLoaded(ProfileEntity(
-            id: profile.id,
-            email: profile.email,
-            firstName: profile.firstName,
-            lastName: profile.lastName,
-            role: profile.role,
-            avatarUrl: avatarUrl,
-            lang: profile.lang,
-            mode: profile.mode,
-            createdAt: profile.createdAt,
-          )));
+    await result.fold(
+      (failure) async => _revert(previous, _mapFailureToMessage(failure)),
+      (avatarUrl) async {
+        final current = _currentOrNull();
+        if (current case ProfileLoaded(:final profile)) {
+          emit(ProfileLoaded(
+            profile.copyWith(avatarUrl: avatarUrl),
+            notice: 'Profile photo updated',
+          ));
         }
       },
     );
@@ -156,31 +220,41 @@ class ProfileCubit extends Cubit<ProfileState> {
     String? lang,
     String? mode,
   }) async {
-    final currentState = state;
-    if (currentState case ProfileLoaded(:final profile)) {
-      // Optimistic update
-      emit(ProfileLoaded(ProfileEntity(
-        id: profile.id,
-        email: profile.email,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        role: profile.role,
-        avatarUrl: profile.avatarUrl,
-        lang: lang ?? profile.lang,
-        mode: mode ?? profile.mode,
-        createdAt: profile.createdAt,
-      )));
+    final previous = _currentOrNull();
+    if (previous case ProfileLoaded(:final profile)) {
+      // Optimistic update.
+      emit(ProfileLoaded(
+        profile.copyWith(lang: lang, mode: mode),
+        saving: true,
+      ));
     }
     final result = await updatePreferencesUseCase(lang: lang, mode: mode);
-    result.fold(
-      (failure) {
-        // Revert on failure — re-fetch profile
-        getProfile();
-      },
-      (_) {
-        // Success — UI already updated optimistically
+    await result.fold(
+      (failure) async => _revert(previous, _mapFailureToMessage(failure)),
+      (_) async {
+        final current = _currentOrNull();
+        if (current case ProfileLoaded(:final profile)) {
+          emit(ProfileLoaded(profile, notice: 'Preferences saved'));
+        }
       },
     );
+  }
+
+  ProfileLoaded? _currentOrNull() {
+    final current = state;
+    return current is ProfileLoaded ? current : null;
+  }
+
+  void _revert(ProfileLoaded? previous, String errorMessage) {
+    if (previous != null) {
+      emit(ProfileLoaded(
+        previous.profile,
+        notice: errorMessage,
+        noticeIsError: true,
+      ));
+    } else {
+      emit(ProfileError(errorMessage));
+    }
   }
 
   String _mapFailureToMessage(Failure failure) {

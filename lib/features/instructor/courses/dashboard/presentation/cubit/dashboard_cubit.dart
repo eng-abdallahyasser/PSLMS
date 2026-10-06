@@ -54,8 +54,12 @@ class DashboardCubit extends Cubit<DashboardState> {
   final GetDashboardStatsUseCase getDashboardStatsUseCase;
   final GetRevenueUseCase? getRevenueUseCase;
 
-  Future<void> getStats(UserRole role) async {
-    emit(const DashboardLoading());
+  /// Fetches dashboard stats. With [silent] the current content stays
+  /// visible while refreshing (used by pull-to-refresh).
+  Future<void> getStats(UserRole role, {bool silent = false}) async {
+    if (!silent || state is! DashboardLoaded) {
+      emit(const DashboardLoading());
+    }
     final result = await getDashboardStatsUseCase(role);
     result.fold(
       (failure) => emit(DashboardError(_mapFailureToMessage(failure))),

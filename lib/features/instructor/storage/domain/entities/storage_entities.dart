@@ -1,3 +1,19 @@
+/// Tolerant numeric parsing — the API serializes some numbers (money,
+/// sizes) as JSON strings (e.g. `"price":"150.00"`) and others as numbers.
+double _asDouble(dynamic value) {
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value) ?? 0;
+  return 0;
+}
+
+int _asInt(dynamic value) {
+  if (value is num) return value.toInt();
+  if (value is String) {
+    return int.tryParse(value) ?? (double.tryParse(value)?.toInt() ?? 0);
+  }
+  return 0;
+}
+
 class StorageUsage {
   const StorageUsage({
     required this.quotaBytes,
@@ -13,14 +29,19 @@ class StorageUsage {
       quotaBytes <= 0 ? 0 : (usedBytes / quotaBytes * 100).clamp(0, 100);
 
   factory StorageUsage.fromJson(Map<String, dynamic> json) {
-    final quota = (json['effectiveQuotaBytes'] ??
+    // Live payload keys: effectiveStorageBytes / totalStorageBytes /
+    // percentageUsed (older/alternate keys kept as fallbacks).
+    final quota = (json['effectiveStorageBytes'] ??
+            json['effectiveQuotaBytes'] ??
             json['quotaBytes'] ??
             json['totalBytes'] ??
             json['quota'])
         as num?;
-    final used =
-        (json['usedBytes'] ?? json['used'] ?? json['usedStorageBytes'])
-            as num?;
+    final used = (json['totalStorageBytes'] ??
+            json['usedBytes'] ??
+            json['used'] ??
+            json['usedStorageBytes'])
+        as num?;
     final subs = json['activeSubscriptions'];
     return StorageUsage(
       quotaBytes: quota?.toInt() ?? 0,
@@ -58,10 +79,12 @@ class StoragePlan {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       nameAr: json['nameAr'] as String?,
-      gigabytes: (json['gigabytes'] as num?)?.toInt() ?? 0,
-      price: (json['price'] as num?)?.toDouble() ?? 0,
+      gigabytes: _asInt(json['gigabytes']),
+      price: _asDouble(json['price']),
       currency: json['currency'] as String? ?? 'EGP',
-      durationDays: (json['durationDays'] as num?)?.toInt() ?? 90,
+      durationDays: _asInt(json['durationDays']) == 0
+          ? 90
+          : _asInt(json['durationDays']),
       isActive: json['isActive'] as bool? ?? true,
     );
   }
@@ -100,26 +123,21 @@ class RevenueSummary {
   final String currency;
 
   factory RevenueSummary.fromJson(Map<String, dynamic> json) {
-    final sales = (json['totalSales'] ??
-        json['salesCount'] ??
-        json['totalOrders']) as num?;
     return RevenueSummary(
-      totalSales: sales?.toInt() ?? 0,
-      grossRevenue: ((json['grossRevenue'] ??
-              json['totalRevenue'] ??
-              json['gross']) as num?)
-          ?.toDouble() ??
-          0,
-      totalCommission: ((json['totalCommission'] ??
-              json['commission'] ??
-              json['platformCommission']) as num?)
-          ?.toDouble() ??
-          0,
-      netRevenue: ((json['netRevenue'] ??
-              json['netEarnings'] ??
-              json['net']) as num?)
-          ?.toDouble() ??
-          0,
+      totalSales: _asInt(
+        json['totalSales'] ?? json['salesCount'] ?? json['totalOrders'],
+      ),
+      grossRevenue: _asDouble(
+        json['grossRevenue'] ?? json['totalRevenue'] ?? json['gross'],
+      ),
+      totalCommission: _asDouble(
+        json['totalCommission'] ??
+            json['commission'] ??
+            json['platformCommission'],
+      ),
+      netRevenue: _asDouble(
+        json['netRevenue'] ?? json['netEarnings'] ?? json['net'],
+      ),
       currency: json['currency'] as String? ?? 'EGP',
     );
   }
