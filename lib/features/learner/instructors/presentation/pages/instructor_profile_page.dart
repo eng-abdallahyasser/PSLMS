@@ -28,13 +28,6 @@ class _InstructorProfilePageState extends State<InstructorProfilePage> {
       body: BlocConsumer<InstructorCubit, InstructorState>(
         listener: (context, state) {
           switch (state) {
-            case InstructorProfileLoaded(:final joinMessage, :final isJoinRequestInProgress)
-                when joinMessage != null && !isJoinRequestInProgress:
-              ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  SnackBar(content: Text(joinMessage), backgroundColor: joinMessage == 'Join request sent!' ? Colors.green : Colors.red),
-                );
             case InstructorActionSuccess(:final message):
               ScaffoldMessenger.of(context)
                 ..hideCurrentSnackBar()
@@ -55,8 +48,8 @@ class _InstructorProfilePageState extends State<InstructorProfilePage> {
           return switch (state) {
             InstructorInitial() => const SizedBox.shrink(),
             InstructorProfileLoading() => const AppLoadingWidget(),
-            InstructorProfileLoaded(:final instructor, :final isJoinRequestInProgress) =>
-              _buildProfile(instructor, isJoining: isJoinRequestInProgress),
+            InstructorProfileLoaded(:final instructor) =>
+              _buildProfile(instructor),
             InstructorProfileError(:final message) =>
               AppErrorWidget(message: message, onRetry: () => context.read<InstructorCubit>().getInstructorProfile(widget.instructorId)),
             _ => const SizedBox.shrink(),
@@ -66,7 +59,7 @@ class _InstructorProfilePageState extends State<InstructorProfilePage> {
     );
   }
 
-  Widget _buildProfile(InstructorProfileEntity profile, {required bool isJoining}) {
+  Widget _buildProfile(InstructorProfileEntity profile) {
     final theme = Theme.of(context);
 
     return RefreshIndicator(
@@ -158,30 +151,6 @@ class _InstructorProfilePageState extends State<InstructorProfilePage> {
               ),
             ),
           ],
-
-          const SizedBox(height: 32),
-
-          // Join Button
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: isJoining
-                  ? null
-                  : () => context.read<InstructorCubit>().requestToJoin(widget.instructorId),
-              icon: isJoining
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                    )
-                  : const Icon(Icons.person_add),
-              label: Text(isJoining ? 'Sending Request...' : 'Request to Join'),
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ),
         ],
       ),
     );

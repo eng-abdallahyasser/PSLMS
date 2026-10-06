@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:lms/core/theme/app_theme.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
 import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.dart';
+import 'package:lms/features/learner/purchases/presentation/cubit/purchase_cubit.dart';
 import 'package:lms/features/shared/domain/entities/course_entity.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CourseCard extends StatefulWidget {
 
@@ -24,22 +25,39 @@ class _CourseCardState extends State<CourseCard> {
 
   Future<void> _enroll() async {
     final messenger = ScaffoldMessenger.of(context);
-    final cubit = context.read<EnrollmentCubit>();
+    final cubit = context.read<PurchaseCubit>();
     if (_isEnrolling) return;
     setState(() => _isEnrolling = true);
-    final resultFuture =
-        cubit.stream.skipWhile((s) => s is EnrollmentLoading).first;
-    await cubit.enroll(course.id);
+    final resultFuture = cubit.stream.skipWhile((s) => s is PurchaseLoading).first;
+    await cubit.purchase(course.id);
     final result = await resultFuture;
     if (mounted) {
-      final message = switch (result) {
-        EnrollmentActionSuccess(:final message) => message,
-        EnrollmentError(:final message) => message,
-        _ => 'Failed to enroll',
-      };
-      messenger.hideCurrentSnackBar();
-      messenger.showSnackBar(SnackBar(content: Text(message)));
-      await context.read<CourseCubit>().getCourses(role: UserRole.learner);
+      switch (result) {
+        case PurchaseCheckoutRequired(:final checkoutUrl):
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(
+            const SnackBar(
+              content: Text('Opening secure checkout...'),
+            ),
+          );
+          await launchUrl(
+            Uri.parse(checkoutUrl),
+            mode: LaunchMode.externalApplication,
+          );
+        case PurchaseEnrolled(:final message):
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(SnackBar(content: Text(message)));
+          await context.read<CourseCubit>().getCourses(role: UserRole.learner);
+        case PurchaseError(:final message):
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(SnackBar(content: Text(message)));
+        default:
+          messenger.hideCurrentSnackBar();
+          messenger.showSnackBar(
+            const SnackBar(content: Text('Failed to enroll')),
+          );
+      }
+      cubit.reset();
       setState(() => _isEnrolling = false);
     }
   }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -250,7 +251,12 @@ class AuthCubit extends Cubit<AuthState> {
     required this.completeRegistrationUseCase,
     required this.googleSignInUseCase,
     required this.facebookSignInUseCase,
-  }) : super(const AuthInitial());
+    Stream<void>? sessionExpiredStream,
+  }) : super(const AuthInitial()) {
+    _sessionExpiredSub = sessionExpiredStream?.listen((_) {
+      emit(const AuthUnauthenticated());
+    });
+  }
   final LoginUseCase loginUseCase;
   final RegisterUseCase registerUseCase;
   final LogoutUseCase logoutUseCase;
@@ -264,6 +270,13 @@ class AuthCubit extends Cubit<AuthState> {
   final CompleteRegistrationUseCase completeRegistrationUseCase;
   final GoogleSignInUseCase googleSignInUseCase;
   final FacebookSignInUseCase facebookSignInUseCase;
+  StreamSubscription<void>? _sessionExpiredSub;
+
+  @override
+  Future<void> close() {
+    _sessionExpiredSub?.cancel();
+    return super.close();
+  }
 
   Future<void> login({required String email, required String password, String? deviceToken}) async {
     emit(const AuthLoading());
@@ -297,6 +310,10 @@ class AuthCubit extends Cubit<AuthState> {
     required String mobileNumber,
     required String password,
     required String role,
+    required String universityId,
+    required String faculty,
+    required String department,
+    String? year,
   }) async {
     emit(const AuthLoading());
     final result = await registerUseCase(
@@ -307,6 +324,10 @@ class AuthCubit extends Cubit<AuthState> {
         mobileNumber: mobileNumber,
         password: password,
         role: role,
+        universityId: universityId,
+        faculty: faculty,
+        department: department,
+        year: year,
       ),
     );
     result.fold(

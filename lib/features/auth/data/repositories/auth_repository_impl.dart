@@ -68,6 +68,10 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String role,
     String? client,
+    required String universityId,
+    required String faculty,
+    required String department,
+    String? year,
   }) async {
     if (await networkInfo.isConnected == false) {
       return const Left(NetworkFailure());
@@ -81,6 +85,10 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         role: role,
         client: client,
+        universityId: universityId,
+        faculty: faculty,
+        department: department,
+        year: year,
       );
       await localDataSource.cacheUser(userModel);
       return Right(userModel.toEntity());

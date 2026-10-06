@@ -1,8 +1,6 @@
 import 'package:lms/core/errors/exceptions.dart';
 import 'package:lms/core/network/api_client.dart';
-import 'package:lms/features/shared/data/models/course_model.dart';
 import 'package:lms/features/learner/instructors/data/models/instructor_profile_model.dart';
-import 'package:lms/features/learner/instructors/data/models/invitation_info_model.dart';
 
 class PaginatedInstructors {
   const PaginatedInstructors({required this.data, required this.totalItems});
@@ -18,16 +16,6 @@ abstract class InstructorRemoteDataSource {
   });
 
   Future<InstructorProfileModel> getInstructorProfile(String id);
-
-  Future<void> requestToJoin(String instructorId);
-
-  Future<List<InstructorProfileModel>> getMyInstructors();
-
-  Future<List<CourseModel>> getInstructorCourses(String instructorId);
-
-  Future<InvitationInfoModel> getInvitationInfo(String token);
-
-  Future<void> acceptInvitation(String token);
 }
 
 class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
@@ -79,90 +67,6 @@ class InstructorRemoteDataSourceImpl implements InstructorRemoteDataSource {
     try {
       final response = await apiClient.get('/learner/instructors/$id');
       return InstructorProfileModel.fromJson(response);
-    } on ApiException catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  @override
-  Future<void> requestToJoin(String instructorId) async {
-    try {
-      await apiClient.post('/learner/instructors/$instructorId/join');
-    } on ApiException catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  @override
-  Future<List<InstructorProfileModel>> getMyInstructors() async {
-    try {
-      final data = await apiClient.get('/learner/my-instructors');
-      final list = data['data'] as List<dynamic>? ?? [];
-      return list
-          .map(
-            (e) => InstructorProfileModel.fromJson(e as Map<String, dynamic>),
-          )
-          .toList();
-    } on ApiException catch (e) {
-      throw _handleError(e);
-    } on TypeError catch (e) {
-      throw ServerException(
-        message: 'Unexpected response format: ${e.toString()}',
-        statusCode: null,
-      );
-    } on FormatException catch (e) {
-      throw ServerException(
-        message: 'Invalid response format: ${e.toString()}',
-        statusCode: null,
-      );
-    }
-  }
-
-  @override
-  Future<List<CourseModel>> getInstructorCourses(String instructorId) async {
-    try {
-      final data = await apiClient.get(
-        '/learner/my-instructors/$instructorId/courses',
-      );
-      final list = data['data'] as List<dynamic>? ?? [];
-      return list
-          .map((e) => CourseModel.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } on ApiException catch (e) {
-      throw _handleError(e);
-    } on TypeError catch (e) {
-      throw ServerException(
-        message: 'Unexpected response format: ${e.toString()}',
-        statusCode: null,
-      );
-    } on FormatException catch (e) {
-      throw ServerException(
-        message: 'Invalid response format: ${e.toString()}',
-        statusCode: null,
-      );
-    }
-  }
-
-  @override
-  Future<InvitationInfoModel> getInvitationInfo(String token) async {
-    try {
-      final response = await apiClient.get(
-        '/learner/invitations/info',
-        queryParameters: {'token': token},
-      );
-      return InvitationInfoModel.fromJson(response);
-    } on ApiException catch (e) {
-      throw _handleError(e);
-    }
-  }
-
-  @override
-  Future<void> acceptInvitation(String token) async {
-    try {
-      await apiClient.get(
-        '/learner/invitations/accept',
-        queryParameters: {'token': token},
-      );
     } on ApiException catch (e) {
       throw _handleError(e);
     }

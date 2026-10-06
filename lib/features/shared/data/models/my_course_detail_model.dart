@@ -10,11 +10,15 @@ class MyCourseDetailModel {
   });
 
   factory MyCourseDetailModel.fromJson(Map<String, dynamic> json) {
+    // Detail may be wrapped in a purchase record: `{...purchase, course: {...}}`.
+    final nested = json['course'];
+    final courseJson = nested is Map<String, dynamic> ? nested : json;
     return MyCourseDetailModel(
-      course: CourseModel.fromJson(json),
-      contents: (json['contents'] as List<dynamic>?)
-              ?.map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
-              .toList() ??
+      course: CourseModel.fromJson(courseJson),
+      contents: (json['contents'] as List<dynamic>? ??
+              courseJson['contents'] as List<dynamic>?)
+          ?.map((e) => ContentModel.fromJson(e as Map<String, dynamic>))
+          .toList() ??
           [],
     );
   }

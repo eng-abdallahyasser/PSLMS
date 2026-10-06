@@ -24,6 +24,10 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String role,
     String? client,
+    required String universityId,
+    required String faculty,
+    required String department,
+    String? year,
   });
 
   Future<UserModel> getCurrentUser();
@@ -107,6 +111,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String role,
     String? client,
+    required String universityId,
+    required String faculty,
+    required String department,
+    String? year,
   }) async {
     try {
       final response = await apiClient.post(
@@ -118,7 +126,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'mobileNumber': mobileNumber,
           'password': password,
           'role': role,
-          'client': ?client,
+          'client': client ?? 'mobile',
+          'universityId': universityId,
+          'faculty': faculty,
+          'department': department,
+          'year': ?year,
         },
       );
       final data = response;
@@ -293,13 +305,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   Never _handleError(ApiException e) {
     log('[DEBUG] _handleError: message=${e.message} statusCode=${e.statusCode} errorCode=${e.code}');
+    final fieldMessages = e.fieldErrors
+            ?.expand((f) => f.messages)
+            .where((m) => m.isNotEmpty)
+            .toList() ??
+        [];
+    final message = fieldMessages.isNotEmpty
+        ? fieldMessages.join('\n')
+        : e.message;
     if (e.statusCode == 401 || e.statusCode == 403) {
       throw AuthException(
-        message: e.message,
+        message: message,
         statusCode: e.statusCode,
         errorCode: e.code,
       );
     }
-    throw ServerException(message: e.message, statusCode: e.statusCode);
+    throw ServerException(message: message, statusCode: e.statusCode);
   }
 }

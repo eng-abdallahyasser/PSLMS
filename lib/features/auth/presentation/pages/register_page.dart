@@ -4,6 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:lms/core/utils/validators.dart';
 import 'package:lms/core/widgets/app_widgets.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:lms/features/shared/universities/data/datasources/universities_remote_datasource.dart';
+import 'package:lms/features/shared/universities/data/models/university_model.dart';
+import 'package:lms/injection_container.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -23,6 +26,34 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _obscurePassword = true;
   String _selectedRole = 'learner';
 
+  List<UniversityModel> _universities = [];
+  bool _loadingUniversities = true;
+  UniversityModel? _selectedUniversity;
+  FacultyModel? _selectedFaculty;
+  DepartmentModel? _selectedDepartment;
+  YearModel? _selectedYear;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUniversities();
+  }
+
+  Future<void> _loadUniversities() async {
+    try {
+      final list =
+          await sl<UniversitiesRemoteDataSource>().getUniversities();
+      if (!mounted) return;
+      setState(() {
+        _universities = list;
+        _loadingUniversities = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _loadingUniversities = false);
+    }
+  }
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -36,6 +67,17 @@ class _RegisterPageState extends State<RegisterPage> {
 
   void _onRegister() {
     if (_formKey.currentState?.validate() ?? false) {
+      if (_selectedUniversity == null ||
+          _selectedFaculty == null ||
+          _selectedDepartment == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select university, faculty and department'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
       context.read<AuthCubit>().register(
             firstName: _firstNameController.text.trim(),
             lastName: _lastNameController.text.trim(),
@@ -43,6 +85,10 @@ class _RegisterPageState extends State<RegisterPage> {
             mobileNumber: _phoneController.text.trim(),
             password: _passwordController.text,
             role: _selectedRole,
+            universityId: _selectedUniversity?.id ?? '',
+            faculty: _selectedFaculty?.name ?? '',
+            department: _selectedDepartment?.name ?? '',
+            year: _selectedYear?.name,
           );
     }
   }
@@ -181,6 +227,66 @@ class _RegisterPageState extends State<RegisterPage> {
                       return null;
                     },
                     prefixIcon: const Icon(Icons.lock_outlined),
+                  ),
+                  const SizedBox(height: 16),
+                  // University
+                  DropdownButtonFormField<UniversityModel>(
+                    initialValue: _selectedUniversity,
+                    decoration: InputDecoration(
+                      labelText: _loadingUniversities
+                          ? 'University (loading...)'
+                          : 'University',
+                    ),
+                    items: _universities
+                        .map((u) => DropdownMenuItem(value: u, child: Text(u.name)))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedUniversity = value;
+                        _selectedFaculty = null;
+                        _selectedDepartment = null;
+                        _selectedYear = null;
+                      });
+                    },
+                    validator: (value) => value == null ? 'Select a university' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  // Faculty
+                  DropdownButtonFormField<FacultyModel>(
+                    initialValue: _selectedFaculty,
+                    decoration: const InputDecoration(labelText: 'Faculty'),
+                    items: (_selectedUniversity?.faculties ?? const [])
+                        .map((f) => DropdownMenuItem(value: f, child: Text(f.name)))
+                        .toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedFaculty = value;
+                        _selectedDepartment = null;
+                        _selectedYear = null;
+                      });
+                    },
+                    validator: (value) => value == null ? 'Select a faculty' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  // Department
+                  DropdownButtonFormField<DepartmentModel>(
+                    initialValue: _selectedDepartment,
+                    decoration: const InputDecoration(labelText: 'Department'),
+                    items: (_selectedFaculty?.departments ?? const [])
+                        .map((d) => DropdownMenuItem(value: d, child: Text(d.name)))
+                        .toList(),
+                    onChanged: (value) => setState(() => _selectedDepartment = value),
+                    validator: (value) => value == null ? 'Select a department' : null,
+                  ),
+                  const SizedBox(height: 16),
+                  // Year (optional)
+                  DropdownButtonFormField<YearModel>(
+                    initialValue: _selectedYear,
+                    decoration: const InputDecoration(labelText: 'Year (optional)'),
+                    items: (_selectedFaculty?.years ?? const [])
+                        .map((y) => DropdownMenuItem(value: y, child: Text(y.name)))
+                        .toList(),
+                    onChanged: (value) => setState(() => _selectedYear = value),
                   ),
                   const SizedBox(height: 16),
                   // Role Selector

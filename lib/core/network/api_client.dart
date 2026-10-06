@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http_io;
 import 'package:lms/core/constants/app_constants.dart';
+import 'package:lms/core/models/paginated_result.dart';
 
 class ApiClient {
   String _baseUrl = AppConstants.baseUrl;
@@ -25,6 +26,7 @@ class ApiClient {
   Future<String?> Function()? onTokenRefresh;
   bool _isRefreshing = false;
   Completer<bool>? _refreshCompleter;
+  DateTime? _lastRefreshFailure;
 
   void setTokenProvider(String? Function()? tokenProvider) {
     _tokenProvider = tokenProvider;
@@ -64,14 +66,25 @@ class ApiClient {
     if (_isRefreshing && _refreshCompleter != null) {
       return _refreshCompleter!.future;
     }
+    if (_lastRefreshFailure != null &&
+        DateTime.now().difference(_lastRefreshFailure!) <
+            const Duration(seconds: 5)) {
+      return false;
+    }
     _isRefreshing = true;
     _refreshCompleter = Completer<bool>();
     try {
       final newToken = await onTokenRefresh?.call();
       final ok = newToken != null && newToken.isNotEmpty;
+      if (ok) {
+        _lastRefreshFailure = null;
+      } else {
+        _lastRefreshFailure = DateTime.now();
+      }
       _refreshCompleter!.complete(ok);
       return ok;
     } catch (e) {
+      _lastRefreshFailure = DateTime.now();
       _refreshCompleter!.complete(false);
       return false;
     } finally {
@@ -146,6 +159,82 @@ class ApiClient {
       }
     }
     return _handleListResponse(response);
+  }
+
+  Future<PaginatedResult<Map<String, dynamic>>> getPaged(
+    String path, {
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    final response = await _sendGet(path, queryParameters);
+    return _handlePagedResponse(response);
+  }
+
+  Future<http.Response> _sendGet(
+    String path,
+    Map<String, dynamic>? queryParameters,
+  ) async {
+    log('[API] GET $path');
+    final url = _buildUri(path, queryParameters);
+    final request = http.Request('GET', url);
+    request.headers.addAll(_headers);
+    final streamedResponse = await _client.send(request);
+    var response = await http.Response.fromStream(streamedResponse);
+    log('[API] GET $path: ${response.statusCode} ${response.body}');
+
+    if (response.statusCode == 401 &&
+        onTokenRefresh != null &&
+        !_isAuthPath(path)) {
+      final refreshed = await _handleRefresh();
+      if (refreshed) {
+        response = await _retryRequest(request);
+        log('[API] GET $path (retry): ${response.statusCode} ${response.body}');
+      }
+    }
+    return response;
+  }
+
+  PaginatedResult<Map<String, dynamic>> _handlePagedResponse(
+    http.Response response,
+  ) {
+    final decoded =
+        response.body.isNotEmpty ? jsonDecode(response.body) : null;
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (decoded is Map<String, dynamic>) {
+        final data = decoded['data'];
+        final meta = decoded['meta'];
+        return PaginatedResult<Map<String, dynamic>>(
+          items: data is List
+              ? data.whereType<Map<String, dynamic>>().toList()
+              : <Map<String, dynamic>>[],
+          meta: meta is Map<String, dynamic>
+              ? PageMeta.fromJson(meta)
+              : const PageMeta(),
+        );
+      }
+      if (decoded is List) {
+        return PaginatedResult<Map<String, dynamic>>(
+          items: decoded.whereType<Map<String, dynamic>>().toList(),
+          meta: PageMeta(
+            itemsPerPage: decoded.length,
+            totalItems: decoded.length,
+            totalPages: 1,
+          ),
+        );
+      }
+      return const PaginatedResult<Map<String, dynamic>>(
+        items: [],
+        meta: PageMeta(),
+      );
+    }
+
+    if (decoded is Map<String, dynamic>) {
+      throw ApiException.fromEnvelope(decoded, response.statusCode);
+    }
+    throw ApiException(
+      'Request failed (${response.statusCode})',
+      response.statusCode,
+    );
   }
 
   Future<Map<String, dynamic>> post(
@@ -262,19 +351,30 @@ class ApiClient {
   }
 
   List<dynamic> _handleListResponse(http.Response response) {
-    final data = response.body.isNotEmpty
-        ? jsonDecode(response.body) as List<dynamic>
-        : <dynamic>[];
+    final decoded = response.body.isNotEmpty ? jsonDecode(response.body) : null;
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return data;
+      if (decoded is List) return decoded;
+      if (decoded is Map && decoded['data'] is List) {
+        return decoded['data'] as List<dynamic>;
+      }
+      return <dynamic>[];
     }
 
-    final message = data.isNotEmpty && data.first is Map
-        ? (data.first as Map<String, dynamic>)['message'] as String?
-        : 'Request failed (${response.statusCode})';
+    if (decoded is Map<String, dynamic>) {
+      throw ApiException.fromEnvelope(decoded, response.statusCode);
+    }
+    if (decoded is List && decoded.isNotEmpty && decoded.first is Map) {
+      final first = decoded.first as Map<String, dynamic>;
+      throw ApiException(
+        first['message'] as String? ??
+            'Request failed (${response.statusCode})',
+        response.statusCode,
+        code: first['errorCode'] as String? ?? first['code'] as String?,
+      );
+    }
     throw ApiException(
-      message ?? 'Request failed (${response.statusCode})',
+      'Request failed (${response.statusCode})',
       response.statusCode,
     );
   }
@@ -319,7 +419,7 @@ class ApiException implements Exception {
     return ApiException(
       message,
       statusCode,
-      code: json['code'] as String?,
+      code: json['errorCode'] as String? ?? json['code'] as String?,
       error: json['error'] as String?,
       requiredAction: json['requiredAction'] as String?,
       actionRoute: json['actionRoute'] as String?,
@@ -351,9 +451,16 @@ class ApiFieldError {
 
   factory ApiFieldError.fromJson(Map<String, dynamic> json) {
     final messages = json['messages'] as List<dynamic>?;
+    final message = json['message'] as String?;
+    final constraints = json['constraints'] as Map<String, dynamic>?;
+    final collected = <String>[
+      ...?messages?.whereType<String>(),
+      ?message,
+      ...?constraints?.values.whereType<String>(),
+    ];
     return ApiFieldError(
-      field: json['field'] as String? ?? '',
-      messages: messages?.whereType<String>().toList() ?? const [],
+      field: json['field'] as String? ?? json['property'] as String? ?? '',
+      messages: collected,
     );
   }
 }

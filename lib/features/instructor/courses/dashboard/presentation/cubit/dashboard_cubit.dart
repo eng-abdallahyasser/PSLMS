@@ -4,6 +4,8 @@ import 'package:lms/core/errors/failures.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/instructor/courses/dashboard/domain/usecases/get_dashboard_stats_usecase.dart';
+import 'package:lms/features/instructor/storage/domain/entities/storage_entities.dart';
+import 'package:lms/features/instructor/storage/domain/usecases/get_revenue_usecase.dart';
 
 // ----- States -----
 
@@ -24,11 +26,12 @@ class DashboardLoading extends DashboardState {
 
 class DashboardLoaded extends DashboardState {
 
-  const DashboardLoaded(this.stats);
+  const DashboardLoaded(this.stats, {this.revenue});
   final DashboardStatsEntity stats;
+  final RevenueSummary? revenue;
 
   @override
-  List<Object?> get props => [stats];
+  List<Object?> get props => [stats, revenue];
 }
 
 class DashboardError extends DashboardState {
@@ -44,16 +47,26 @@ class DashboardError extends DashboardState {
 
 class DashboardCubit extends Cubit<DashboardState> {
 
-  DashboardCubit({required this.getDashboardStatsUseCase})
-      : super(const DashboardInitial());
+  DashboardCubit({
+    required this.getDashboardStatsUseCase,
+    this.getRevenueUseCase,
+  }) : super(const DashboardInitial());
   final GetDashboardStatsUseCase getDashboardStatsUseCase;
+  final GetRevenueUseCase? getRevenueUseCase;
 
   Future<void> getStats(UserRole role) async {
     emit(const DashboardLoading());
     final result = await getDashboardStatsUseCase(role);
     result.fold(
       (failure) => emit(DashboardError(_mapFailureToMessage(failure))),
-      (stats) => emit(DashboardLoaded(stats)),
+      (stats) async {
+        RevenueSummary? revenue;
+        if (role == UserRole.instructor && getRevenueUseCase != null) {
+          final revenueResult = await getRevenueUseCase!();
+          revenueResult.fold((_) {}, (r) => revenue = r);
+        }
+        emit(DashboardLoaded(stats, revenue: revenue));
+      },
     );
   }
 

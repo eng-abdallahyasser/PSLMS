@@ -20,6 +20,10 @@ abstract class AuthRepository {
     required String password,
     required String role,
     String? client,
+    required String universityId,
+    required String faculty,
+    required String department,
+    String? year,
   });
 
   Future<Either<Failure, UserEntity>> getCurrentUser();

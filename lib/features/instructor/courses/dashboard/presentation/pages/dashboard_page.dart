@@ -7,6 +7,7 @@ import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/shared/notifications/presentation/cubit/notification_cubit.dart';
 import 'package:lms/features/instructor/courses/dashboard/domain/entities/dashboard_stats_entity.dart';
 import 'package:lms/features/instructor/courses/dashboard/presentation/cubit/dashboard_cubit.dart';
+import 'package:lms/features/instructor/storage/domain/entities/storage_entities.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -72,7 +73,8 @@ class _DashboardPageState extends State<DashboardPage> {
           return switch (state) {
             DashboardInitial() => const SizedBox.shrink(),
             DashboardLoading() => const AppLoadingWidget(),
-            DashboardLoaded(:final stats) => _buildDashboard(stats),
+            DashboardLoaded(:final stats, :final revenue) =>
+              _buildDashboard(stats, revenue),
             DashboardError(:final message) => Center(
                 child: AppErrorWidget(
                   message: message,
@@ -85,7 +87,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildDashboard(DashboardStatsEntity stats) {
+  Widget _buildDashboard(DashboardStatsEntity stats, RevenueSummary? revenue) {
     return RefreshIndicator(
       onRefresh: () => context.read<DashboardCubit>().getStats(_currentRole()),
       child: ListView(
@@ -266,6 +268,10 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
           const SizedBox(height: 24),
+          if (revenue != null) ...[
+            _buildRevenueCard(revenue),
+            const SizedBox(height: 24),
+          ],
           // Quick Actions
           Text(
             'Quick Actions',
@@ -288,19 +294,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildActionCard(
-                    icon: Icons.people,
-                    label: 'Students',
-                    color: const Color(0xFF2E7D32),
-                    onTap: () => context.push('/instructor/students'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.card_membership,
-                    label: 'Subscription',
+                    icon: Icons.storage,
+                    label: 'Storage & Billing',
                     color: const Color(0xFF6A1B9A),
-                    onTap: () => context.push('/instructor/subscription'),
+                    onTap: () => context.push('/instructor/storage'),
                   ),
                 ),
               ],
@@ -317,19 +314,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(
-                  child: _buildActionCard(
-                    icon: Icons.people,
-                    label: 'My Instructors',
-                    color: const Color(0xFF2E7D32),
-                    onTap: () => context.push('/my-instructors'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
                 Expanded(
                   child: _buildActionCard(
                     icon: Icons.search,
@@ -352,6 +336,76 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
           const SizedBox(height: 16),
         ],
+      ),
+    );
+  }
+
+  Widget _buildRevenueCard(RevenueSummary revenue) {
+    Widget row(String label, String value, {bool bold = false}) {
+      final style = bold
+          ? Theme.of(context)
+              .textTheme
+              .bodyLarge
+              ?.copyWith(fontWeight: FontWeight.w600)
+          : Theme.of(context).textTheme.bodyMedium;
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [Text(label, style: style), Text(value, style: style)],
+        ),
+      );
+    }
+
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.payments_outlined,
+                    color: Color(0xFF2E7D32),
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Revenue',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            row('Sales', '${revenue.totalSales}'),
+            row(
+              'Gross revenue',
+              '${revenue.grossRevenue.toStringAsFixed(2)} ${revenue.currency}',
+            ),
+            row(
+              'Platform commission',
+              '-${revenue.totalCommission.toStringAsFixed(2)} ${revenue.currency}',
+            ),
+            const Divider(),
+            row(
+              'Net revenue',
+              '${revenue.netRevenue.toStringAsFixed(2)} ${revenue.currency}',
+              bold: true,
+            ),
+          ],
+        ),
       ),
     );
   }

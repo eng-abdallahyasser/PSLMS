@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:lms/core/theme/app_theme.dart';
 import 'package:lms/core/theme/theme_controller.dart';
 import 'package:lms/injection_container.dart';
-import 'package:lms/features/learner/instructors/presentation/pages/invitation_page.dart';
 import 'package:lms/features/auth/domain/entities/user_entity.dart';
 import 'package:lms/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:lms/features/auth/presentation/pages/login_page.dart';
@@ -19,14 +18,11 @@ import 'package:lms/features/instructor/courses/presentation/cubit/course_cubit.
 import 'package:lms/features/instructor/courses/presentation/pages/courses_page.dart';
 import 'package:lms/features/instructor/courses/content/presentation/cubit/content_cubit.dart';
 import 'package:lms/features/instructor/courses/content/presentation/pages/contents_page.dart';
-import 'package:lms/features/instructor/courses/enrollments/presentation/cubit/enrollment_cubit.dart';
-import 'package:lms/features/instructor/courses/enrollments/presentation/pages/enrollments_page.dart';
+import 'package:lms/features/learner/purchases/presentation/cubit/purchase_cubit.dart';
 import 'package:lms/features/instructor/courses/dashboard/presentation/cubit/dashboard_cubit.dart';
 import 'package:lms/features/instructor/courses/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:lms/features/instructor/students/presentation/cubit/student_cubit.dart';
-import 'package:lms/features/instructor/students/presentation/pages/students_page.dart';
-import 'package:lms/features/instructor/subscriptions/presentation/cubit/subscription_cubit.dart';
-import 'package:lms/features/instructor/subscriptions/presentation/pages/subscription_page.dart';
+import 'package:lms/features/instructor/storage/presentation/cubit/storage_cubit.dart';
+import 'package:lms/features/instructor/storage/presentation/pages/storage_page.dart';
 import 'package:lms/features/shared/profile/presentation/cubit/profile_cubit.dart';
 import 'package:lms/features/shared/profile/presentation/pages/profile_page.dart';
 import 'package:lms/features/shared/notifications/presentation/cubit/notification_cubit.dart';
@@ -38,7 +34,6 @@ import 'package:lms/features/learner/my_courses/content/presentation/cubit/learn
 import 'package:lms/features/learner/instructors/presentation/cubit/instructor_cubit.dart';
 import 'package:lms/features/learner/instructors/presentation/pages/search_instructors_page.dart';
 import 'package:lms/features/learner/instructors/presentation/pages/instructor_profile_page.dart';
-import 'package:lms/features/learner/instructors/presentation/pages/my_instructors_page.dart';
 
 String _courseIdFromState(GoRouterState state) {
   return state.pathParameters['courseId'] ?? '';
@@ -174,26 +169,14 @@ class _AppState extends State<App> {
           ),
         ),
         GoRoute(
-          path: '/courses/:courseId/enrollments',
-          name: 'enrollments',
-          builder: (context, state) => EnrollmentsPage(
-            courseId: _courseIdFromState(state),
-          ),
-        ),
-        GoRoute(
           path: '/instructor/dashboard',
           name: 'instructorDashboard',
           builder: (context, state) => const DashboardPage(),
         ),
         GoRoute(
-          path: '/instructor/students',
-          name: 'instructorStudents',
-          builder: (context, state) => const StudentsPage(),
-        ),
-        GoRoute(
-          path: '/instructor/subscription',
-          name: 'instructorSubscription',
-          builder: (context, state) => const SubscriptionPage(),
+          path: '/instructor/storage',
+          name: 'instructorStorage',
+          builder: (context, state) => const StoragePage(),
         ),
         GoRoute(
           path: '/my-courses',
@@ -220,21 +203,9 @@ class _AppState extends State<App> {
           ),
         ),
         GoRoute(
-          path: '/my-instructors',
-          name: 'myInstructors',
-          builder: (context, state) => const MyInstructorsPage(),
-        ),
-        GoRoute(
           path: '/notifications',
           name: 'notifications',
           builder: (context, state) => const NotificationsPage(),
-        ),
-        GoRoute(
-          path: '/invitation',
-          name: 'invitation',
-          builder: (context, state) => InvitationPage(
-            token: state.uri.queryParameters['token'] ?? '',
-          ),
         ),
         GoRoute(
           path: '/profile',
@@ -275,9 +246,8 @@ class _AppState extends State<App> {
         BlocProvider(create: (_) => sl<CourseCubit>()),
         BlocProvider(create: (_) => sl<DashboardCubit>()),
         BlocProvider(create: (_) => sl<ContentCubit>()),
-        BlocProvider(create: (_) => sl<EnrollmentCubit>()),
-        BlocProvider(create: (_) => sl<StudentCubit>()),
-        BlocProvider(create: (_) => sl<SubscriptionCubit>()),
+        BlocProvider(create: (_) => sl<PurchaseCubit>()),
+        BlocProvider(create: (_) => sl<StorageCubit>()),
         BlocProvider(create: (_) => sl<ProfileCubit>()),
         BlocProvider(create: (_) => sl<MyCoursesCubit>()),
         BlocProvider(create: (_) => sl<LearnerContentCubit>()),

@@ -18,6 +18,10 @@ class RegisterUseCase {
       password: params.password,
       role: params.role,
       client: params.client,
+      universityId: params.universityId,
+      faculty: params.faculty,
+      department: params.department,
+      year: params.year,
     );
   }
 }
@@ -31,7 +35,11 @@ class RegisterParams extends Equatable {
     required this.mobileNumber,
     required this.password,
     this.role = 'learner',
-    this.client,
+    this.client = 'mobile',
+    required this.universityId,
+    required this.faculty,
+    required this.department,
+    this.year,
   });
   final String firstName;
   final String lastName;
@@ -40,7 +48,11 @@ class RegisterParams extends Equatable {
   final String password;
   final String role;
   final String? client;
+  final String universityId;
+  final String faculty;
+  final String department;
+  final String? year;
 
   @override
-  List<Object?> get props => [firstName, lastName, email, mobileNumber, password, role, client];
+  List<Object?> get props => [firstName, lastName, email, mobileNumber, password, role, client, universityId, faculty, department, year];
 }

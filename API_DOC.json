@@ -1,3397 +1,3569 @@
 {
-"openapi": "3.0.0",
-"paths": {
-"/api": {
-"get": {
-"description": "Returns API health status.",
-"operationId": "getHealthCheck",
-"parameters": [],
-"responses": {
-"200": {
-"description": "API is healthy"
-}
-},
-"summary": "Health check",
-"tags": [
-"Health"
-]
-}
-},
-"/api/auth/register": {
-"post": {
-"description": "Creates a new user account with email and password.",
-"operationId": "register",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/RegisterDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "User registered successfully"
-},
-"400": {
-"description": "Validation failed or email already exists"
-}
-},
-"summary": "Register a new user",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/login": {
-"post": {
-"description": "Authenticates a user and returns JWT tokens.",
-"operationId": "login",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/LoginDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Login successful, returns tokens"
-},
-"401": {
-"description": "Invalid credentials"
-}
-},
-"summary": "Login with credentials",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/verify-email": {
-"post": {
-"description": "Verifies user email using OTP code.",
-"operationId": "verifyEmail",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/VerifyEmailDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Email verified successfully"
-},
-"400": {
-"description": "Invalid or expired OTP"
-}
-},
-"summary": "Verify email address",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/send-otp": {
-"post": {
-"description": "Sends a 6-digit OTP code to the provided email address.",
-"operationId": "sendOtp",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/SendOtpDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "OTP sent successfully"
-},
-"429": {
-"description": "Rate limit exceeded"
-}
-},
-"summary": "Send OTP to email",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/send-mobile-otp": {
-"post": {
-"description": "Sends a 6-digit OTP code to the provided mobile number.",
-"operationId": "sendMobileOtp",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/SendMobileOtpDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Mobile OTP sent successfully"
-},
-"429": {
-"description": "Rate limit exceeded"
-}
-},
-"summary": "Send Mobile OTP",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/verify-mobile-otp": {
-"post": {
-"description": "Verifies mobile OTP and returns JWT tokens.",
-"operationId": "verifyMobileOtp",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/VerifyMobileOtpDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Mobile OTP verified successfully, returns tokens"
-},
-"400": {
-"description": "Invalid or expired OTP"
-}
-},
-"summary": "Verify mobile OTP and login",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/forgot-password": {
-"post": {
-"description": "Sends a password reset link to the user's email.",
-"operationId": "forgotPassword",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/ForgotPasswordDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Reset email sent if account exists"
-}
-},
-"summary": "Request password reset",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/reset-password": {
-"post": {
-"description": "Resets the user password using a reset token.",
-"operationId": "resetPassword",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/ResetPasswordDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Password reset successfully"
-},
-"400": {
-"description": "Invalid or expired token"
-}
-},
-"summary": "Reset password",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/refresh": {
-"post": {
-"description": "Exchanges a refresh token for a new access token.",
-"operationId": "refresh",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/RefreshTokenDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Tokens refreshed successfully"
-},
-"401": {
-"description": "Invalid or expired refresh token"
-}
-},
-"summary": "Refresh access token",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/logout": {
-"post": {
-"description": "Invalidates the user's refresh token.",
-"operationId": "logout",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Logged out successfully"
-},
-"401": {
-"description": "Unauthorized"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Logout user",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/google": {
-"get": {
-"description": "Redirects user to Google OAuth consent screen.",
-"operationId": "googleAuth",
-"parameters": [
-{
-"name": "role",
-"required": false,
-"in": "query",
-"schema": {
-"type": "string",
-"enum": [
-"admin",
-"instructor",
-"learner"
-]
-}
-},
-{
-"name": "client",
-"required": false,
-"in": "query",
-"schema": {
-"type": "string",
-"enum": [
-"web",
-"mobile"
-]
-}
-},
-{
-"required": false,
-"name": "role",
-"in": "query",
-"schema": {
-"type": "string"
-}
-},
-{
-"required": false,
-"name": "client",
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": ""
-},
-"302": {
-"description": "Redirect to Google"
-}
-},
-"summary": "Google OAuth login",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/google/callback": {
-"get": {
-"description": "Handles Google OAuth callback and returns auth result via postMessage.",
-"operationId": "googleAuthRedirect",
-"parameters": [
-{
-"name": "state",
-"required": true,
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "OAuth success HTML page"
-}
-},
-"summary": "Google OAuth callback",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/facebook": {
-"get": {
-"description": "Redirects user to Facebook OAuth dialog.",
-"operationId": "facebookAuth",
-"parameters": [
-{
-"name": "role",
-"required": false,
-"in": "query",
-"schema": {
-"type": "string",
-"enum": [
-"admin",
-"instructor",
-"learner"
-]
-}
-},
-{
-"name": "client",
-"required": false,
-"in": "query",
-"schema": {
-"type": "string",
-"enum": [
-"web",
-"mobile"
-]
-}
-},
-{
-"required": false,
-"name": "role",
-"in": "query",
-"schema": {
-"type": "string"
-}
-},
-{
-"required": false,
-"name": "client",
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": ""
-},
-"302": {
-"description": "Redirect to Facebook"
-}
-},
-"summary": "Facebook OAuth login",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/facebook/callback": {
-"get": {
-"description": "Handles Facebook OAuth callback and returns auth result via postMessage.",
-"operationId": "facebookAuthRedirect",
-"parameters": [
-{
-"name": "state",
-"required": true,
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "OAuth success HTML page"
-}
-},
-"summary": "Facebook OAuth callback",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/auth/complete-registration": {
-"post": {
-"description": "Completes registration for OAuth users by selecting a role.",
-"operationId": "completeRegistration",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/CompleteRegistrationDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Registration completed successfully"
-},
-"400": {
-"description": "Invalid temp token"
-}
-},
-"summary": "Complete OAuth registration",
-"tags": [
-"Auth"
-]
-}
-},
-"/api/admin/users": {
-"post": {
-"description": "Creates a new user. Admin only.",
-"operationId": "create",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/CreateUserDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "User created"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Create user (Admin)",
-"tags": [
-"Admin Users"
-]
-},
-"get": {
-"description": "Returns paginated list of all users. Admin only.",
-"operationId": "findAll",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Paginated users list"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List all users (Admin)",
-"tags": [
-"Admin Users"
-]
-}
-},
-"/api/admin/users/{id}": {
-"get": {
-"description": "Returns a single user by ID. Admin only.",
-"operationId": "findOne",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "User found"
-},
-"404": {
-"description": "User not found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get user by ID (Admin)",
-"tags": [
-"Admin Users"
-]
-},
-"patch": {
-"description": "Updates a user's details. Admin only.",
-"operationId": "update",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/UpdateUserDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "User updated"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update user (Admin)",
-"tags": [
-"Admin Users"
-]
-},
-"delete": {
-"description": "Deactivates a user account. Admin only.",
-"operationId": "remove",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "User deactivated"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Deactivate user (Admin)",
-"tags": [
-"Admin Users"
-]
-}
-},
-"/api/profile/me": {
-"get": {
-"description": "Returns the authenticated user's profile.",
-"operationId": "getProfile",
-"parameters": [],
-"responses": {
-"200": {
-"description": "User profile retrieved"
-},
-"401": {
-"description": "Unauthorized"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get current user profile",
-"tags": [
-"Profile"
-]
-},
-"patch": {
-"description": "Updates the authenticated user's first and last name.",
-"operationId": "updateProfile",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/UpdateProfileDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Profile updated"
-},
-"401": {
-"description": "Unauthorized"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update profile",
-"tags": [
-"Profile"
-]
-}
-},
-"/api/profile/me/preferences": {
-"patch": {
-"description": "Updates the authenticated user's preferences (language, theme).",
-"operationId": "updatePreferences",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/UpdatePreferencesDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Preferences updated"
-},
-"401": {
-"description": "Unauthorized"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update preferences",
-"tags": [
-"Profile"
-]
-}
-},
-"/api/profile/me/avatar": {
-"post": {
-"description": "Uploads a profile avatar image.",
-"operationId": "uploadAvatar",
-"parameters": [],
-"requestBody": {
-"required": true,
-"description": "Avatar image file",
-"content": {
-"multipart/form-data": {
-"schema": {
-"type": "object",
-"properties": {
-"file": {
-"type": "string",
-"format": "binary"
-}
-}
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Avatar uploaded"
-},
-"400": {
-"description": "File is required"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Upload avatar",
-"tags": [
-"Profile"
-]
-}
-},
-"/api/learner/instructors": {
-"get": {
-"description": "Search for instructors by name.",
-"operationId": "searchInstructors",
-"parameters": [
-{
-"name": "q",
-"required": true,
-"in": "query",
-"schema": {
-"type": "string"
-}
-},
-{
-"name": "limit",
-"required": false,
-"in": "query",
-"schema": {}
-},
-{
-"name": "page",
-"required": false,
-"in": "query",
-"schema": {}
-}
-],
-"responses": {
-"200": {
-"description": "Instructor search results"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Search instructors (Learner)",
-"tags": [
-"StudentInstructors"
-]
-}
-},
-"/api/learner/instructors/{id}": {
-"get": {
-"description": "Returns a single instructor's public profile. Learner only.",
-"operationId": "findOne",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Instructor found"
-},
-"404": {
-"description": "Instructor not found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get instructor by ID (Learner)",
-"tags": [
-"Learner Instructors"
-]
-}
-},
-"/api/admin/push-notifications/test": {
-"post": {
-"description": "Sends a test push notification to a specific user using Firebase Cloud Messaging without creating a database-backed in-app notification.",
-"operationId": "testPushNotification",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/TestPushNotificationDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Push notification successfully queued for sending."
-},
-"400": {
-"description": "Bad Request - Invalid payload."
-},
-"401": {
-"description": "Unauthorized."
-},
-"403": {
-"description": "Forbidden - Requires admin privileges."
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Test Push Notification",
-"tags": [
-"Admin Push Notifications"
-]
-}
-},
-"/api/instructor/subscription": {
-"get": {
-"description": "Returns the instructor's current subscription with usage.",
-"operationId": "getMySubscription",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Subscription usage"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get my subscription (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/plans": {
-"get": {
-"description": "Returns all active subscription plans for the instructor.",
-"operationId": "getPlans",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Plans list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List plans (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/checkout": {
-"post": {
-"description": "Creates a Stripe checkout session for subscription payment.",
-"operationId": "createCheckout",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/CreateCheckoutSessionDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Checkout URL returned"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Create Stripe checkout (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/portal": {
-"post": {
-"description": "Creates a Stripe customer portal session for managing subscription.",
-"operationId": "createPortal",
-"parameters": [],
-"responses": {
-"201": {
-"description": "Portal URL returned"
-},
-"400": {
-"description": "No Stripe customer found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Create Stripe portal (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/choose-plan": {
-"post": {
-"description": "Selects a plan. Free plans are applied immediately; paid plans redirect to Stripe.",
-"operationId": "choosePlan",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/CreateCheckoutSessionDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Plan chosen"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Choose subscription plan (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/storage/plans": {
-"get": {
-"description": "Returns active storage plans available for purchase.",
-"operationId": "getStoragePlans",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Storage plans list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List storage plans (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/storage": {
-"post": {
-"description": "Creates a Stripe checkout session for a selected storage add-on plan.",
-"operationId": "buyStorage",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"planId": {
-"type": "string",
-"description": "The ID of the storage plan"
-}
-}
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Checkout URL returned"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Buy storage add-on (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-},
-"get": {
-"description": "Returns the instructor's active storage add-ons.",
-"operationId": "getStorageAddons",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Storage add-ons list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get storage add-ons (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/refresh-subscription": {
-"post": {
-"description": "Refreshes the instructor's subscription usage data.",
-"operationId": "refreshSubscription",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Refreshed subscription data"
-},
-"201": {
-"description": ""
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Refresh subscription (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/instructor/subscription/cancel": {
-"post": {
-"description": "Cancels the instructor's active subscription.",
-"operationId": "cancel",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Subscription cancelled"
-},
-"201": {
-"description": ""
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Cancel subscription (Instructor)",
-"tags": [
-"Instructor Subscriptions"
-]
-}
-},
-"/api/admin/subscriptions": {
-"get": {
-"description": "Returns all subscriptions. Admin only.",
-"operationId": "getAll",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Subscriptions list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List all subscriptions (Admin)",
-"tags": [
-"Admin Subscriptions"
-]
-}
-},
-"/api/admin/subscriptions/plans": {
-"get": {
-"description": "Returns all active subscription plans. Admin only.",
-"operationId": "getPlans",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Plans list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List subscription plans (Admin)",
-"tags": [
-"Admin Subscriptions"
-]
-}
-},
-"/api/admin/subscriptions/{id}/status": {
-"patch": {
-"description": "Updates a subscription's status. Admin only.",
-"operationId": "updateStatus",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Subscription updated"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update subscription status (Admin)",
-"tags": [
-"Admin Subscriptions"
-]
-}
-},
-"/api/admin/subscriptions/storage-plans": {
-"get": {
-"description": "Returns all storage plans. Admin only.",
-"operationId": "getStoragePlans",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Storage plans list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List storage plans (Admin)",
-"tags": [
-"Admin Subscriptions"
-]
-},
-"post": {
-"description": "Creates a new storage plan. Admin only.",
-"operationId": "createStoragePlan",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"gigabytes": {
-"type": "number"
-},
-"pricePerGb": {
-"type": "number"
-}
-}
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Storage plan created"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Create storage plan (Admin)",
-"tags": [
-"Admin Subscriptions"
-]
-}
-},
-"/api/admin/subscriptions/storage-plans/{id}": {
-"patch": {
-"description": "Updates an existing storage plan. Admin only.",
-"operationId": "updateStoragePlan",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"type": "object",
-"properties": {
-"gigabytes": {
-"type": "number"
-},
-"pricePerGb": {
-"type": "number"
-},
-"isActive": {
-"type": "boolean"
-}
-}
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Storage plan updated"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update storage plan (Admin)",
-"tags": [
-"Admin Subscriptions"
-]
-}
-},
-"/api/stripe/webhook": {
-"post": {
-"description": "Handles incoming Stripe webhook events (public endpoint).",
-"operationId": "handleWebhook",
-"parameters": [
-{
-"name": "stripe-signature",
-"required": true,
-"in": "header",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Webhook received"
-}
-},
-"summary": "Stripe webhook",
-"tags": [
-"Stripe Webhook"
-]
-}
-},
-"/api/admin/courses": {
-"get": {
-"description": "Returns paginated list of all courses. Admin only.",
-"operationId": "findAll",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Paginated courses list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List all courses (Admin)",
-"tags": [
-"Admin Courses"
-]
-}
-},
-"/api/admin/courses/{id}": {
-"get": {
-"description": "Returns a single course by ID. Admin only.",
-"operationId": "findOne",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get course by ID (Admin)",
-"tags": [
-"Admin Courses"
-]
-},
-"patch": {
-"description": "Updates any course. Admin only.",
-"operationId": "update",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/UpdateCourseDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Course updated"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update course (Admin)",
-"tags": [
-"Admin Courses"
-]
-},
-"delete": {
-"description": "Deletes any course. Admin only.",
-"operationId": "remove",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course deleted"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Delete course (Admin)",
-"tags": [
-"Admin Courses"
-]
-}
-},
-"/api/instructor/courses": {
-"post": {
-"description": "Creates a new course. Instructor only.",
-"operationId": "create",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/CreateCourseDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Course created"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Create course (Instructor)",
-"tags": [
-"Instructor Courses"
-]
-},
-"get": {
-"description": "Returns paginated list of the instructor's courses.",
-"operationId": "findAll",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Paginated courses list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List instructor courses",
-"tags": [
-"Instructor Courses"
-]
-}
-},
-"/api/instructor/courses/stats/dashboard": {
-"get": {
-"description": "Returns dashboard statistics for the instructor.",
-"operationId": "getDashboardStats",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Dashboard stats"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get dashboard stats (Instructor)",
-"tags": [
-"Instructor Courses"
-]
-}
-},
-"/api/instructor/courses/{id}": {
-"get": {
-"description": "Returns a single course owned by the instructor.",
-"operationId": "findOne",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course found"
-},
-"404": {
-"description": "Course not found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get course by ID (Instructor)",
-"tags": [
-"Instructor Courses"
-]
-},
-"patch": {
-"description": "Updates a course's details.",
-"operationId": "update",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/UpdateCourseDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Course updated"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update course",
-"tags": [
-"Instructor Courses"
-]
-},
-"delete": {
-"description": "Deletes a course.",
-"operationId": "remove",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course deleted"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Delete course",
-"tags": [
-"Instructor Courses"
-]
-}
-},
-"/api/learner/courses": {
-"get": {
-"description": "Returns paginated list of public courses. Learner only.",
-"operationId": "findAll",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Paginated courses list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List public courses (Learner)",
-"tags": [
-"Learner Courses"
-]
-}
-},
-"/api/learner/courses/{id}": {
-"get": {
-"description": "Returns a single public course. Learner only.",
-"operationId": "findOne",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course found"
-},
-"404": {
-"description": "Course not found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get public course (Learner)",
-"tags": [
-"Learner Courses"
-]
-}
-},
-"/api/admin/enrollments": {
-"get": {
-"description": "Returns paginated list of all enrollments. Admin only.",
-"operationId": "findAll",
-"parameters": [
-{
-"name": "page",
-"required": false,
-"in": "query",
-"schema": {
-"type": "string"
-}
-},
-{
-"name": "limit",
-"required": false,
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Paginated enrollments list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List all enrollments (Admin)",
-"tags": [
-"Admin Enrollments"
-]
-}
-},
-"/api/admin/enrollments/{id}": {
-"patch": {
-"description": "Updates enrollment status. Admin only.",
-"operationId": "update",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/RespondEnrollmentDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Enrollment updated"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update enrollment (Admin)",
-"tags": [
-"Admin Enrollments"
-]
-}
-},
-"/api/instructor/courses/{courseId}/enrollments": {
-"get": {
-"description": "Returns enrollments for an instructor's course.",
-"operationId": "getCourseEnrollments",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course enrollments list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get course enrollments (Instructor)",
-"tags": [
-"Instructor Enrollments"
-]
-}
-},
-"/api/instructor/enrollments/{id}/respond": {
-"patch": {
-"description": "Approves or rejects an enrollment request.",
-"operationId": "respond",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/RespondEnrollmentDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Enrollment responded"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Respond to enrollment (Instructor)",
-"tags": [
-"Instructor Enrollments"
-]
-}
-},
-"/api/instructor/courses/{courseId}/invite": {
-"post": {
-"description": "Invites a learner to enroll in a course.",
-"operationId": "invite",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/InviteLearnerDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Learner invited"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Invite learner (Instructor)",
-"tags": [
-"Instructor Enrollments"
-]
-}
-},
-"/api/instructor/enrollments/{id}": {
-"delete": {
-"description": "Removes a learner from a course.",
-"operationId": "remove",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Learner removed"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Remove learner (Instructor)",
-"tags": [
-"Instructor Enrollments"
-]
-}
-},
-"/api/learner/courses/{courseId}/enroll": {
-"post": {
-"description": "Requests enrollment in a course as a learner.",
-"operationId": "requestEnrollment",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"201": {
-"description": "Enrollment requested"
-},
-"403": {
-"description": "Forbidden"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Request enrollment (Learner)",
-"tags": [
-"Learner Enrollments"
-]
-}
-},
-"/api/learner/my-courses": {
-"get": {
-"description": "Returns the learner's enrolled courses.",
-"operationId": "getMyCourses",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Enrolled courses list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get my courses (Learner)",
-"tags": [
-"Learner Enrollments"
-]
-}
-},
-"/api/learner/my-courses/{courseId}": {
-"get": {
-"description": "Returns enrolled course with contents.",
-"operationId": "getMyCourseDetail",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Course detail with contents"
-},
-"403": {
-"description": "Not enrolled"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get course detail (Learner)",
-"tags": [
-"Learner Enrollments"
-]
-}
-},
-"/api/instructor/courses/{courseId}/content": {
-"get": {
-"description": "Returns paginated list of course content items. Instructor only.",
-"operationId": "findAll",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Paginated content list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List course content (Instructor)",
-"tags": [
-"Instructor Content"
-]
-},
-"post": {
-"description": "Uploads a new content item (video, PDF, etc.) to a course. Instructor only.",
-"operationId": "upload",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"multipart/form-data": {
-"schema": {
-"$ref": "#/components/schemas/CreateVideoDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Content uploaded"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Upload content (Instructor)",
-"tags": [
-"Instructor Content"
-]
-}
-},
-"/api/instructor/courses/{courseId}/content/reorder": {
-"patch": {
-"description": "Reorders content items within a course. Instructor only.",
-"operationId": "reorder",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/ReorderVideosDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Content reordered"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Reorder content (Instructor)",
-"tags": [
-"Instructor Content"
-]
-}
-},
-"/api/instructor/courses/{courseId}/content/{contentId}": {
-"patch": {
-"description": "Updates a content item's metadata. Instructor only.",
-"operationId": "update",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-},
-{
-"name": "contentId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/UpdateVideoDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Content updated"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Update content (Instructor)",
-"tags": [
-"Instructor Content"
-]
-},
-"delete": {
-"description": "Removes a content item from a course. Instructor only.",
-"operationId": "remove",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-},
-{
-"name": "contentId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Content deleted"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Delete content (Instructor)",
-"tags": [
-"Instructor Content"
-]
-}
-},
-"/api/learner/my-courses/{courseId}/content": {
-"get": {
-"description": "Returns paginated list of course content for enrolled learners.",
-"operationId": "findAll",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Paginated content list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List course content (Learner)",
-"tags": [
-"Learner Content"
-]
-}
-},
-"/api/learner/my-courses/{courseId}/content/{contentId}": {
-"get": {
-"description": "Returns a single content item for an enrolled learner.",
-"operationId": "findOne",
-"parameters": [
-{
-"name": "courseId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-},
-{
-"name": "contentId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Content detail"
-},
-"404": {
-"description": "Content not found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get content detail (Learner)",
-"tags": [
-"Learner Content"
-]
-}
-},
-"/api/notifications": {
-"get": {
-"description": "Returns all notifications for the authenticated user.",
-"operationId": "findAll",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Notifications list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List notifications",
-"tags": [
-"Notifications"
-]
-}
-},
-"/api/notifications/{id}/read": {
-"patch": {
-"description": "Marks a single notification as read.",
-"operationId": "markAsRead",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Notification marked as read"
-},
-"404": {
-"description": "Notification not found"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Mark notification as read",
-"tags": [
-"Notifications"
-]
-}
-},
-"/api/notifications/read-all": {
-"post": {
-"description": "Marks all unread notifications as read.",
-"operationId": "markAllAsRead",
-"parameters": [],
-"responses": {
-"200": {
-"description": "All notifications marked as read"
-},
-"201": {
-"description": ""
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Mark all notifications as read",
-"tags": [
-"Notifications"
-]
-}
-},
-"/api/instructor/students/invite": {
-"post": {
-"description": "Sends an invitation email to a student email address.",
-"operationId": "invite",
-"parameters": [],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/InviteStudentDto"
-}
-}
-}
-},
-"responses": {
-"201": {
-"description": "Invitation sent"
-},
-"403": {
-"description": "Student limit reached or rate limited"
-},
-"409": {
-"description": "Already linked"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Invite student by email (Instructor)",
-"tags": [
-"InstructorStudents"
-]
-}
-},
-"/api/instructor/students": {
-"get": {
-"description": "Returns paginated list of students linked to the instructor.",
-"operationId": "listStudents",
-"parameters": [
-{
-"name": "status",
-"required": false,
-"in": "query",
-"schema": {
-"enum": [
-"invited",
-"requested",
-"active",
-"removed"
-],
-"type": "string"
-}
-},
-{
-"name": "page",
-"required": false,
-"in": "query",
-"schema": {
-"type": "number"
-}
-},
-{
-"name": "limit",
-"required": false,
-"in": "query",
-"schema": {
-"type": "number"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Paginated student list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List students (Instructor)",
-"tags": [
-"InstructorStudents"
-]
-}
-},
-"/api/instructor/students/requests": {
-"get": {
-"description": "Returns pending student join requests.",
-"operationId": "listRequests",
-"parameters": [
-{
-"name": "limit",
-"required": false,
-"in": "query",
-"schema": {}
-},
-{
-"name": "page",
-"required": false,
-"in": "query",
-"schema": {}
-}
-],
-"responses": {
-"200": {
-"description": "Join requests list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "List join requests (Instructor)",
-"tags": [
-"InstructorStudents"
-]
-}
-},
-"/api/instructor/students/requests/{id}/respond": {
-"patch": {
-"description": "Approve or decline a student join request.",
-"operationId": "respondToRequest",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/RespondRequestDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Request responded"
-},
-"403": {
-"description": "Student limit reached"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Respond to join request (Instructor)",
-"tags": [
-"InstructorStudents"
-]
-}
-},
-"/api/instructor/students/{id}": {
-"delete": {
-"description": "Removes a student from the instructor's student list.",
-"operationId": "removeStudent",
-"parameters": [
-{
-"name": "id",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Student removed"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Remove student (Instructor)",
-"tags": [
-"InstructorStudents"
-]
-}
-},
-"/api/learner/instructors/{instructorId}/join": {
-"post": {
-"description": "Send a join request to an instructor.",
-"operationId": "requestToJoin",
-"parameters": [
-{
-"name": "instructorId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"201": {
-"description": "Join request sent"
-},
-"409": {
-"description": "Already linked or pending"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Request to join instructor (Learner)",
-"tags": [
-"StudentInstructors"
-]
-}
-},
-"/api/learner/my-instructors": {
-"get": {
-"description": "Returns instructors the student is linked to.",
-"operationId": "myInstructors",
-"parameters": [],
-"responses": {
-"200": {
-"description": "Instructors list"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "My instructors (Learner)",
-"tags": [
-"StudentInstructors"
-]
-}
-},
-"/api/learner/my-instructors/{instructorId}/courses": {
-"get": {
-"operationId": "getInstructorCourses",
-"parameters": [
-{
-"name": "instructorId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": ""
-}
-},
-"tags": [
-"StudentInstructors"
-]
-}
-},
-"/api/learner/invitations/accept": {
-"get": {
-"description": "Accept an instructor invitation via token.",
-"operationId": "accept",
-"parameters": [
-{
-"name": "token",
-"required": true,
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Invitation accepted"
-},
-"400": {
-"description": "Invalid token"
-},
-"410": {
-"description": "Invitation expired"
-}
-},
-"summary": "Accept invitation (Learner)",
-"tags": [
-"LearnerInvitations"
-]
-}
-},
-"/api/learner/invitations/info": {
-"get": {
-"operationId": "getInfo",
-"parameters": [
-{
-"name": "token",
-"required": true,
-"in": "query",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": ""
-}
-},
-"tags": [
-"LearnerInvitations"
-]
-}
-},
-"/api/instructor/students/{studentId}/assign": {
-"post": {
-"description": "Assign a student to specific courses. Empty array removes all, omit to assign all.",
-"operationId": "assign",
-"parameters": [
-{
-"name": "studentId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"requestBody": {
-"required": true,
-"content": {
-"application/json": {
-"schema": {
-"$ref": "#/components/schemas/AssignCourseDto"
-}
-}
-}
-},
-"responses": {
-"200": {
-"description": "Courses assigned"
-},
-"201": {
-"description": ""
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Assign student to courses (Instructor)",
-"tags": [
-"CourseAssignments"
-]
-}
-},
-"/api/instructor/students/{studentId}/assignments": {
-"get": {
-"description": "Returns course IDs the student is assigned to.",
-"operationId": "getAssignments",
-"parameters": [
-{
-"name": "studentId",
-"required": true,
-"in": "path",
-"schema": {
-"type": "string"
-}
-}
-],
-"responses": {
-"200": {
-"description": "Student course assignments"
-}
-},
-"security": [
-{
-"bearer": []
-}
-],
-"summary": "Get student assignments (Instructor)",
-"tags": [
-"CourseAssignments"
-]
-}
-}
-},
-"info": {
-"title": "manara API",
-"description": "The manara API description",
-"version": "1.0",
-"contact": {}
-},
-"tags": [],
-"servers": [],
-"components": {
-"securitySchemes": {
-"bearer": {
-"scheme": "bearer",
-"bearerFormat": "JWT",
-"type": "http"
-}
-},
-"schemas": {
-"RegisterDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-},
-"mobileNumber": {
-"pattern": "^\\+[1-9]\\d{1,14}$",
-"type": "string",
-"minLength": 1
-},
-"password": {
-"pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
-"type": "string",
-"maxLength": 50,
-"minLength": 1
-},
-"firstName": {
-"minLength": 1,
-"type": "string"
-},
-"lastName": {
-"minLength": 1,
-"type": "string"
-},
-"role": {
-"enum": [
-"admin",
-"instructor",
-"learner"
-],
-"type": "string"
-},
-"client": {
-"enum": [
-"web",
-"mobile"
-],
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"email",
-"mobileNumber",
-"password",
-"firstName",
-"lastName"
-]
-},
-"DeviceInfo": {
-"properties": {
-"brand": {
-"minLength": 1,
-"type": "string"
-},
-"deviceType": {
-"minLength": 1,
-"type": "string"
-},
-"osVersion": {
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"brand",
-"deviceType"
-]
-},
-"LoginDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-},
-"password": {
-"maxLength": 50,
-"type": "string",
-"minLength": 1
-},
-"client": {
-"minLength": 1,
-"type": "string",
-"enum": [
-"web",
-"mobile"
-]
-},
-"deviceToken": {
-"type": "string"
-},
-"deviceInfo": {
-"$ref": "#/definitions/DeviceInfo"
-}
-},
-"type": "object",
-"required": [
-"email",
-"password",
-"client"
-]
-},
-"VerifyEmailDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-},
-"otp": {
-"minLength": 1,
-"maxLength": 6,
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"email",
-"otp"
-]
-},
-"SendOtpDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-}
-},
-"type": "object",
-"required": [
-"email"
-]
-},
-"SendMobileOtpDto": {
-"properties": {
-"mobileNumber": {
-"pattern": "^\\+[1-9]\\d{1,14}$",
-"type": "string",
-"minLength": 1
-},
-"client": {
-"minLength": 1,
-"type": "string",
-"enum": [
-"web",
-"mobile"
-]
-}
-},
-"type": "object",
-"required": [
-"mobileNumber",
-"client"
-]
-},
-"VerifyMobileOtpDto": {
-"properties": {
-"mobileNumber": {
-"pattern": "^\\+[1-9]\\d{1,14}$",
-"type": "string",
-"minLength": 1
-},
-"otp": {
-"minLength": 1,
-"type": "string"
-},
-"client": {
-"minLength": 1,
-"type": "string",
-"enum": [
-"web",
-"mobile"
-]
-},
-"deviceToken": {
-"type": "string"
-},
-"deviceInfo": {
-"$ref": "#/definitions/DeviceInfo"
-}
-},
-"type": "object",
-"required": [
-"mobileNumber",
-"otp",
-"client"
-]
-},
-"ForgotPasswordDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-}
-},
-"type": "object",
-"required": [
-"email"
-]
-},
-"ResetPasswordDto": {
-"properties": {
-"token": {
-"minLength": 1,
-"type": "string"
-},
-"newPassword": {
-"pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
-"type": "string",
-"maxLength": 50,
-"minLength": 1
-}
-},
-"type": "object",
-"required": [
-"token",
-"newPassword"
-]
-},
-"RefreshTokenDto": {
-"properties": {
-"refreshToken": {
-"minLength": 1,
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"refreshToken"
-]
-},
-"CompleteRegistrationDto": {
-"properties": {
-"tempToken": {
-"minLength": 1,
-"type": "string"
-},
-"role": {
-"enum": [
-"admin",
-"instructor",
-"learner"
-],
-"type": "string"
-},
-"client": {
-"enum": [
-"web",
-"mobile"
-],
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"tempToken"
-]
-},
-"CreateUserDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-},
-"mobileNumber": {
-"pattern": "^\\+[1-9]\\d{1,14}$",
-"type": "string"
-},
-"password": {
-"minLength": 1,
-"type": "string"
-},
-"firstName": {
-"minLength": 1,
-"type": "string"
-},
-"lastName": {
-"minLength": 1,
-"type": "string"
-},
-"role": {
-"minLength": 1,
-"type": "string",
-"enum": [
-"admin",
-"instructor",
-"learner"
-]
-},
-"isActive": {
-"type": "boolean"
-}
-},
-"type": "object",
-"required": [
-"email",
-"password",
-"firstName",
-"lastName",
-"role"
-]
-},
-"UpdateUserDto": {
-"properties": {
-"email": {
-"format": "email",
-"type": "string"
-},
-"password": {
-"minLength": 6,
-"type": "string"
-},
-"firstName": {
-"type": "string"
-},
-"lastName": {
-"type": "string"
-},
-"role": {
-"enum": [
-"admin",
-"instructor",
-"learner"
-],
-"type": "string"
-},
-"isActive": {
-"type": "boolean"
-}
-},
-"type": "object"
-},
-"UpdateProfileDto": {
-"properties": {
-"firstName": {
-"minLength": 1,
-"type": "string"
-},
-"lastName": {
-"minLength": 1,
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"firstName",
-"lastName"
-]
-},
-"UpdatePreferencesDto": {
-"properties": {
-"lang": {
-"type": "string",
-"enum": [
-"ar",
-"en"
-]
-},
-"mode": {
-"type": "string",
-"enum": [
-"light",
-"dark"
-]
-}
-},
-"type": "object"
-},
-"TestPushNotificationDto": {
-"properties": {
-"userId": {
-"minLength": 1,
-"type": "string"
-},
-"title": {
-"minLength": 1,
-"type": "string"
-},
-"body": {
-"minLength": 1,
-"type": "string"
-},
-"type": {
-"minLength": 1,
-"type": "string"
-},
-"data": {
-"type": "object"
-}
-},
-"type": "object",
-"required": [
-"userId",
-"title",
-"body",
-"type"
-]
-},
-"CreateCheckoutSessionDto": {
-"properties": {
-"planType": {
-"enum": [
-"free",
-"pro",
-"plus",
-"enterprise"
-],
-"type": "string"
-},
-"successUrl": {
-"type": "string"
-},
-"cancelUrl": {
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"planType"
-]
-},
-"UpdateCourseDto": {
-"properties": {
-"title": {
-"type": "string"
-},
-"description": {
-"type": "string"
-},
-"visibility": {
-"enum": [
-"public",
-"private"
-],
-"type": "string"
-},
-"thumbnailUrl": {
-"format": "url",
-"type": "string"
-},
-"isActive": {
-"type": "boolean"
-}
-},
-"type": "object"
-},
-"CreateCourseDto": {
-"properties": {
-"title": {
-"minLength": 1,
-"type": "string"
-},
-"description": {
-"minLength": 1,
-"type": "string"
-},
-"visibility": {
-"enum": [
-"public",
-"private"
-],
-"type": "string"
-},
-"thumbnailUrl": {
-"format": "url",
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"title",
-"description"
-]
-},
-"RespondEnrollmentDto": {
-"properties": {
-"status": {
-"minLength": 1,
-"type": "string",
-"enum": [
-"pending",
-"approved",
-"rejected"
-]
-}
-},
-"type": "object",
-"required": [
-"status"
-]
-},
-"InviteLearnerDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-}
-},
-"type": "object",
-"required": [
-"email"
-]
-},
-"CreateVideoDto": {
-"properties": {
-"title": {
-"minLength": 1,
-"type": "string"
-},
-"description": {
-"type": "string"
-}
-},
-"type": "object",
-"required": [
-"title"
-]
-},
-"ReorderVideosDto": {
-"properties": {
-"videoIds": {
-"minLength": 1,
-"type": "array",
-"items": {
-"type": "string"
-}
-}
-},
-"type": "object",
-"required": [
-"videoIds"
-]
-},
-"UpdateVideoDto": {
-"properties": {
-"title": {
-"type": "string"
-},
-"description": {
-"type": "string"
-}
-},
-"type": "object"
-},
-"InviteStudentDto": {
-"properties": {
-"email": {
-"minLength": 1,
-"type": "string",
-"format": "email"
-}
-},
-"type": "object",
-"required": [
-"email"
-]
-},
-"RespondRequestDto": {
-"properties": {
-"action": {
-"minLength": 1,
-"type": "string",
-"enum": [
-"approve",
-"decline"
-]
-}
-},
-"type": "object",
-"required": [
-"action"
-]
-},
-"AssignCourseDto": {
-"properties": {
-"courseIds": {
-"items": {
-"format": "uuid",
-"type": "string"
-},
-"type": "array"
-}
-},
-"type": "object"
-},
-"OAuthInitDto": {
-"properties": {
-"role": {
-"enum": [
-"admin",
-"instructor",
-"learner"
-],
-"type": "string"
-},
-"client": {
-"enum": [
-"web",
-"mobile"
-],
-"type": "string"
-}
-},
-"type": "object"
-}
-}
-}
+    "openapi": "3.0.0",
+    "paths": {
+        "/api": {
+            "get": {
+                "description": "Returns API health status.",
+                "operationId": "getHealthCheck",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "API is healthy"
+                    }
+                },
+                "summary": "Health check",
+                "tags": [
+                    "Health"
+                ]
+            }
+        },
+        "/api/auth/register": {
+            "post": {
+                "description": "Creates a new user account with email and password.",
+                "operationId": "register",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User registered successfully"
+                    },
+                    "400": {
+                        "description": "Validation failed or email already exists"
+                    }
+                },
+                "summary": "Register a new user",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/login": {
+            "post": {
+                "description": "Authenticates a user and returns JWT tokens.",
+                "operationId": "login",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login successful, returns tokens"
+                    },
+                    "401": {
+                        "description": "Invalid credentials"
+                    }
+                },
+                "summary": "Login with credentials",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/verify-email": {
+            "post": {
+                "description": "Verifies user email using OTP code.",
+                "operationId": "verifyEmail",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyEmailDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email verified successfully"
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP"
+                    }
+                },
+                "summary": "Verify email address",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/send-otp": {
+            "post": {
+                "description": "Sends a 6-digit OTP code to the provided email address.",
+                "operationId": "sendOtp",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendOtpDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OTP sent successfully"
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded"
+                    }
+                },
+                "summary": "Send OTP to email",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/send-mobile-otp": {
+            "post": {
+                "description": "Sends a 6-digit OTP code to the provided mobile number.",
+                "operationId": "sendMobileOtp",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SendMobileOtpDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mobile OTP sent successfully"
+                    },
+                    "429": {
+                        "description": "Rate limit exceeded"
+                    }
+                },
+                "summary": "Send Mobile OTP",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/verify-mobile-otp": {
+            "post": {
+                "description": "Verifies mobile OTP and returns JWT tokens.",
+                "operationId": "verifyMobileOtp",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyMobileOtpDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mobile OTP verified successfully, returns tokens"
+                    },
+                    "400": {
+                        "description": "Invalid or expired OTP"
+                    }
+                },
+                "summary": "Verify mobile OTP and login",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/forgot-password": {
+            "post": {
+                "description": "Sends a password reset link to the user's email.",
+                "operationId": "forgotPassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgotPasswordDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Reset email sent if account exists"
+                    }
+                },
+                "summary": "Request password reset",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/reset-password": {
+            "post": {
+                "description": "Resets the user password using a reset token.",
+                "operationId": "resetPassword",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset successfully"
+                    },
+                    "400": {
+                        "description": "Invalid or expired token"
+                    }
+                },
+                "summary": "Reset password",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/refresh": {
+            "post": {
+                "description": "Exchanges a refresh token for a new access token.",
+                "operationId": "refresh",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RefreshTokenDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Tokens refreshed successfully"
+                    },
+                    "401": {
+                        "description": "Invalid or expired refresh token"
+                    }
+                },
+                "summary": "Refresh access token",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/logout": {
+            "post": {
+                "description": "Invalidates the user's refresh token.",
+                "operationId": "logout",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Logged out successfully"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Logout user",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/google": {
+            "get": {
+                "description": "Redirects user to Google OAuth consent screen.",
+                "operationId": "googleAuth",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "admin",
+                                "instructor",
+                                "learner"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "client",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "web",
+                                "mobile"
+                            ]
+                        }
+                    },
+                    {
+                        "required": false,
+                        "name": "role",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "required": false,
+                        "name": "client",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "302": {
+                        "description": "Redirect to Google"
+                    }
+                },
+                "summary": "Google OAuth login",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/google/callback": {
+            "get": {
+                "description": "Handles Google OAuth callback and returns auth result via postMessage.",
+                "operationId": "googleAuthRedirect",
+                "parameters": [
+                    {
+                        "name": "state",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OAuth success HTML page"
+                    }
+                },
+                "summary": "Google OAuth callback",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/facebook": {
+            "get": {
+                "description": "Redirects user to Facebook OAuth dialog.",
+                "operationId": "facebookAuth",
+                "parameters": [
+                    {
+                        "name": "role",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "admin",
+                                "instructor",
+                                "learner"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "client",
+                        "required": false,
+                        "in": "query",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "web",
+                                "mobile"
+                            ]
+                        }
+                    },
+                    {
+                        "required": false,
+                        "name": "role",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "required": false,
+                        "name": "client",
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "302": {
+                        "description": "Redirect to Facebook"
+                    }
+                },
+                "summary": "Facebook OAuth login",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/facebook/callback": {
+            "get": {
+                "description": "Handles Facebook OAuth callback and returns auth result via postMessage.",
+                "operationId": "facebookAuthRedirect",
+                "parameters": [
+                    {
+                        "name": "state",
+                        "required": true,
+                        "in": "query",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OAuth success HTML page"
+                    }
+                },
+                "summary": "Facebook OAuth callback",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/auth/complete-registration": {
+            "post": {
+                "description": "Completes registration for OAuth users by selecting a role.",
+                "operationId": "completeRegistration",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteRegistrationDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Registration completed successfully"
+                    },
+                    "400": {
+                        "description": "Invalid temp token"
+                    }
+                },
+                "summary": "Complete OAuth registration",
+                "tags": [
+                    "Auth"
+                ]
+            }
+        },
+        "/api/admin/users": {
+            "post": {
+                "description": "Creates a new user. Admin only.",
+                "operationId": "create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUserDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "User created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create user (Admin)",
+                "tags": [
+                    "Admin Users"
+                ]
+            },
+            "get": {
+                "description": "Returns paginated list of all users. Admin only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated users list"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List all users (Admin)",
+                "tags": [
+                    "Admin Users"
+                ]
+            }
+        },
+        "/api/admin/users/{id}": {
+            "get": {
+                "description": "Returns a single user by ID. Admin only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User found"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get user by ID (Admin)",
+                "tags": [
+                    "Admin Users"
+                ]
+            },
+            "patch": {
+                "description": "Updates a user's details. Admin only.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUserDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "User updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update user (Admin)",
+                "tags": [
+                    "Admin Users"
+                ]
+            },
+            "delete": {
+                "description": "Deactivates a user account. Admin only.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "User deactivated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Deactivate user (Admin)",
+                "tags": [
+                    "Admin Users"
+                ]
+            }
+        },
+        "/api/profile/me": {
+            "get": {
+                "description": "Returns the authenticated user's profile.",
+                "operationId": "getProfile",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "User profile retrieved"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get current user profile",
+                "tags": [
+                    "Profile"
+                ]
+            },
+            "patch": {
+                "description": "Updates the authenticated user's first and last name.",
+                "operationId": "updateProfile",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProfileDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update profile",
+                "tags": [
+                    "Profile"
+                ]
+            }
+        },
+        "/api/profile/me/preferences": {
+            "patch": {
+                "description": "Updates the authenticated user's preferences (language, theme).",
+                "operationId": "updatePreferences",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdatePreferencesDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Preferences updated"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update preferences",
+                "tags": [
+                    "Profile"
+                ]
+            }
+        },
+        "/api/profile/me/avatar": {
+            "post": {
+                "description": "Uploads a profile avatar image.",
+                "operationId": "uploadAvatar",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "description": "Avatar image file",
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Avatar uploaded"
+                    },
+                    "400": {
+                        "description": "File is required"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Upload avatar",
+                "tags": [
+                    "Profile"
+                ]
+            }
+        },
+        "/api/learner/instructors": {
+            "get": {
+                "description": "Returns paginated list of instructors. Learner only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated instructors list"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List instructors (Learner)",
+                "tags": [
+                    "Learner Instructors"
+                ]
+            }
+        },
+        "/api/learner/instructors/{id}": {
+            "get": {
+                "description": "Returns a single instructor's public profile. Learner only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Instructor found"
+                    },
+                    "404": {
+                        "description": "Instructor not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get instructor by ID (Learner)",
+                "tags": [
+                    "Learner Instructors"
+                ]
+            }
+        },
+        "/api/admin/push-notifications/test": {
+            "post": {
+                "description": "Sends a test push notification to a specific user using Firebase Cloud Messaging without creating a database-backed in-app notification.",
+                "operationId": "testPushNotification",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TestPushNotificationDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Push notification successfully queued for sending."
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid payload."
+                    },
+                    "401": {
+                        "description": "Unauthorized."
+                    },
+                    "403": {
+                        "description": "Forbidden - Requires admin privileges."
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Test Push Notification",
+                "tags": [
+                    "Admin Push Notifications"
+                ]
+            }
+        },
+        "/api/instructor/storage/usage": {
+            "get": {
+                "description": "Returns effective quota (5 GB permanent base + active 3-month subscriptions + add-ons), used bytes, and active subscriptions. Instructor only.",
+                "operationId": "getStorageUsage",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Storage usage and active subscriptions"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get instructor storage usage",
+                "tags": [
+                    "Instructor Storage"
+                ]
+            }
+        },
+        "/api/instructor/storage/plans": {
+            "get": {
+                "description": "Returns all active 3-month storage expansion tiers (e.g. 10 GB, 25 GB, 50 GB, 100 GB). Instructor only.",
+                "operationId": "getPlans",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "List of storage plans"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List storage expansion plans",
+                "tags": [
+                    "Instructor Storage"
+                ]
+            }
+        },
+        "/api/instructor/storage/subscribe": {
+            "post": {
+                "description": "Initiates a 3-month storage plan expansion checkout session via Kashier. Instructor only.",
+                "operationId": "subscribe",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubscribeStoragePlanDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Storage subscription initiated with Kashier checkoutUrl"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Subscribe to storage expansion plan",
+                "tags": [
+                    "Instructor Storage"
+                ]
+            }
+        },
+        "/api/admin/storage-plans": {
+            "post": {
+                "description": "Creates a new 3-month storage expansion plan tier. Admin only.",
+                "operationId": "create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateStoragePlanDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Storage plan created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create storage plan (Admin)",
+                "tags": [
+                    "Admin Storage Plans"
+                ]
+            },
+            "get": {
+                "description": "Returns all storage expansion plans. Admin only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "List of all storage plans"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List all storage plans (Admin)",
+                "tags": [
+                    "Admin Storage Plans"
+                ]
+            }
+        },
+        "/api/admin/storage-plans/{id}": {
+            "get": {
+                "description": "Returns a single storage plan by UUID. Admin only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Storage plan found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Storage plan not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get storage plan by ID (Admin)",
+                "tags": [
+                    "Admin Storage Plans"
+                ]
+            },
+            "patch": {
+                "description": "Updates storage plan details. Admin only.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateStoragePlanDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Storage plan updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update storage plan (Admin)",
+                "tags": [
+                    "Admin Storage Plans"
+                ]
+            },
+            "delete": {
+                "description": "Soft deletes a storage expansion plan. Admin only.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Storage plan deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete storage plan (Admin)",
+                "tags": [
+                    "Admin Storage Plans"
+                ]
+            }
+        },
+        "/api/webhooks/kashier": {
+            "post": {
+                "description": "Receives payment status notifications from Kashier gateway, validates HMAC signature, and activates course purchases or storage subscriptions.",
+                "operationId": "handleWebhook",
+                "parameters": [
+                    {
+                        "name": "x-kashier-signature",
+                        "required": false,
+                        "in": "header",
+                        "description": "HMAC-SHA256 signature calculated with Kashier webhook secret",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed successfully"
+                    },
+                    "400": {
+                        "description": "Invalid signature or malformed payload"
+                    }
+                },
+                "summary": "Kashier payment webhook callback",
+                "tags": [
+                    "Payments"
+                ]
+            }
+        },
+        "/api/uploads/session/{sessionId}/status": {
+            "get": {
+                "description": "Returns current bytes uploaded and nextByteOffset. Allows Web and Mobile clients to resume interrupted uploads seamlessly.",
+                "operationId": "getStatus",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Upload session UUID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Current upload offset and progress status",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadStatusResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Upload session not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get upload session status and resume offset",
+                "tags": [
+                    "Uploads"
+                ]
+            }
+        },
+        "/api/uploads/session/{sessionId}": {
+            "delete": {
+                "description": "Cancels an in-progress direct upload, removes any orphaned cloud asset, and releases reserved storage quota.",
+                "operationId": "abortSession",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Upload session UUID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Session successfully aborted and quota released"
+                    },
+                    "404": {
+                        "description": "Upload session not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Abort upload session (Instructor)",
+                "tags": [
+                    "Uploads"
+                ]
+            }
+        },
+        "/api/admin/courses": {
+            "get": {
+                "description": "Returns paginated list of all courses. Admin only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated courses list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List all courses (Admin)",
+                "tags": [
+                    "Admin Courses"
+                ]
+            }
+        },
+        "/api/admin/courses/{id}": {
+            "get": {
+                "description": "Returns a single course by ID. Admin only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get course by ID (Admin)",
+                "tags": [
+                    "Admin Courses"
+                ]
+            },
+            "patch": {
+                "description": "Updates any course. Admin only.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCourseDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update course (Admin)",
+                "tags": [
+                    "Admin Courses"
+                ]
+            },
+            "delete": {
+                "description": "Deletes any course. Admin only.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete course (Admin)",
+                "tags": [
+                    "Admin Courses"
+                ]
+            }
+        },
+        "/api/instructor/courses": {
+            "post": {
+                "description": "Creates a new course. Instructor only.",
+                "operationId": "create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCourseDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Course created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create course (Instructor)",
+                "tags": [
+                    "Instructor Courses"
+                ]
+            },
+            "get": {
+                "description": "Returns paginated list of the instructor's courses.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated courses list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List instructor courses",
+                "tags": [
+                    "Instructor Courses"
+                ]
+            }
+        },
+        "/api/instructor/courses/stats/dashboard": {
+            "get": {
+                "description": "Returns dashboard statistics for the instructor.",
+                "operationId": "getDashboardStats",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Dashboard stats"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get dashboard stats (Instructor)",
+                "tags": [
+                    "Instructor Courses"
+                ]
+            }
+        },
+        "/api/instructor/courses/{id}": {
+            "get": {
+                "description": "Returns a single course owned by the instructor.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course found"
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get course by ID (Instructor)",
+                "tags": [
+                    "Instructor Courses"
+                ]
+            },
+            "patch": {
+                "description": "Updates a course's details.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCourseDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update course",
+                "tags": [
+                    "Instructor Courses"
+                ]
+            },
+            "delete": {
+                "description": "Deletes a course.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete course",
+                "tags": [
+                    "Instructor Courses"
+                ]
+            }
+        },
+        "/api/learner/courses": {
+            "get": {
+                "description": "Returns paginated list of public courses. Learner only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated courses list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List public courses (Learner)",
+                "tags": [
+                    "Learner Courses"
+                ]
+            }
+        },
+        "/api/learner/courses/{id}": {
+            "get": {
+                "description": "Returns a single public course. Learner only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course found"
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get public course (Learner)",
+                "tags": [
+                    "Learner Courses"
+                ]
+            }
+        },
+        "/api/learner/courses/{id}/purchase": {
+            "post": {
+                "description": "Initiates a Kashier payment session for paid courses, or enrolls the student immediately if the course is free (0 EGP). Learner only.",
+                "operationId": "purchaseCourse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Purchase initiated (returns checkoutUrl for paid or completed status for free)"
+                    },
+                    "400": {
+                        "description": "Bad request"
+                    },
+                    "409": {
+                        "description": "Already enrolled in course"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Purchase or enroll in course",
+                "tags": [
+                    "Learner Purchases & Courses"
+                ]
+            }
+        },
+        "/api/learner/my-courses": {
+            "get": {
+                "description": "Returns paginated list of all courses purchased and enrolled by the logged-in student. Learner only.",
+                "operationId": "getMyCourses",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated list of purchased courses"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get student purchased courses",
+                "tags": [
+                    "Learner Purchases & Courses"
+                ]
+            }
+        },
+        "/api/learner/my-courses/{id}": {
+            "get": {
+                "description": "Returns the complete course details and all unlocked content items (both preview and private) for a purchased course. Learner only.",
+                "operationId": "getMyCourseById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Full course with unlocked lessons"
+                    },
+                    "403": {
+                        "description": "Course not purchased by this student"
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get purchased course details with full content",
+                "tags": [
+                    "Learner Purchases & Courses"
+                ]
+            }
+        },
+        "/api/instructor/courses/{id}/sales": {
+            "get": {
+                "description": "Returns detailed list of all students who purchased this course, including price paid, platform commission deducted, and net instructor revenue. Instructor only.",
+                "operationId": "getCourseSales",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course sales breakdown"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get course sales list (Instructor)",
+                "tags": [
+                    "Instructor Sales & Revenue"
+                ]
+            }
+        },
+        "/api/instructor/revenue": {
+            "get": {
+                "description": "Returns total sales count, gross revenue, platform commissions deducted, and net earnings across all instructor courses. Instructor only.",
+                "operationId": "getRevenue",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Aggregated revenue summary"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get instructor revenue summary",
+                "tags": [
+                    "Instructor Sales & Revenue"
+                ]
+            }
+        },
+        "/api/public/universities": {
+            "get": {
+                "description": "Returns all active universities with complete faculty, department, and year JSONB trees.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "List of active universities"
+                    }
+                },
+                "summary": "Get all active universities with full academic hierarchy",
+                "tags": [
+                    "Public Universities"
+                ]
+            }
+        },
+        "/api/public/universities/{id}": {
+            "get": {
+                "description": "Returns details of a specific university by UUID.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "University found"
+                    },
+                    "404": {
+                        "description": "University not found"
+                    }
+                },
+                "summary": "Get single university details with faculties, departments, and years",
+                "tags": [
+                    "Public Universities"
+                ]
+            }
+        },
+        "/api/admin/universities": {
+            "post": {
+                "description": "Creates a new university with faculties and departments. Admin only.",
+                "operationId": "create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateUniversityDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "University created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create new university with faculties hierarchy",
+                "tags": [
+                    "Admin Universities"
+                ]
+            },
+            "get": {
+                "description": "Returns paginated list of all universities with pagination parameters. Admin only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated universities list"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Paginated list of universities for admin",
+                "tags": [
+                    "Admin Universities"
+                ]
+            }
+        },
+        "/api/admin/universities/{id}": {
+            "get": {
+                "description": "Returns single university for administration. Admin only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "University found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "University not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get university by ID",
+                "tags": [
+                    "Admin Universities"
+                ]
+            },
+            "patch": {
+                "description": "Updates university name or its faculty tree. Admin only.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateUniversityDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "University updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update university or its faculties JSONB data",
+                "tags": [
+                    "Admin Universities"
+                ]
+            },
+            "delete": {
+                "description": "Soft deletes a university by UUID. Admin only.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "University deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Soft delete university",
+                "tags": [
+                    "Admin Universities"
+                ]
+            }
+        },
+        "/api/public/categories": {
+            "get": {
+                "description": "Returns all active course categories with English/Arabic names and URL slugs.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "List of active categories"
+                    }
+                },
+                "summary": "Get all active course categories",
+                "tags": [
+                    "Public Categories"
+                ]
+            }
+        },
+        "/api/admin/categories": {
+            "post": {
+                "description": "Creates a new category with Arabic translation and auto-slug. Admin only.",
+                "operationId": "create",
+                "parameters": [],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateCategoryDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Category created"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Create a new course category",
+                "tags": [
+                    "Admin Categories"
+                ]
+            },
+            "get": {
+                "description": "Returns paginated list of all categories. Admin only.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated categories list"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Paginated list of categories for admin",
+                "tags": [
+                    "Admin Categories"
+                ]
+            }
+        },
+        "/api/admin/categories/{id}": {
+            "get": {
+                "description": "Returns category details. Admin only.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Category not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get category by ID",
+                "tags": [
+                    "Admin Categories"
+                ]
+            },
+            "patch": {
+                "description": "Updates category name or status. Admin only.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCategoryDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Category updated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update category",
+                "tags": [
+                    "Admin Categories"
+                ]
+            },
+            "delete": {
+                "description": "Soft deletes a category. Admin only.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Category deleted"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Soft delete category",
+                "tags": [
+                    "Admin Categories"
+                ]
+            }
+        },
+        "/api/public/courses": {
+            "get": {
+                "description": "Returns paginated list of active courses with category, instructor, and metadata. No authentication required.",
+                "operationId": "findAllCourses",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated public course list"
+                    }
+                },
+                "summary": "Browse and search public courses",
+                "tags": [
+                    "Public Discovery"
+                ]
+            }
+        },
+        "/api/public/courses/{id}": {
+            "get": {
+                "description": "Returns course details, instructor profile, total lesson count, and preview-only lessons. Private lessons remain hidden.",
+                "operationId": "findCourseById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course details with preview content"
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                },
+                "summary": "Get public course details with preview lessons",
+                "tags": [
+                    "Public Discovery"
+                ]
+            }
+        },
+        "/api/public/instructors": {
+            "get": {
+                "description": "Returns paginated list of instructors, filterable by university or searchable by name. No authentication required.",
+                "operationId": "findAllInstructors",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Paginated instructors list"
+                    }
+                },
+                "summary": "Search public instructors",
+                "tags": [
+                    "Public Discovery"
+                ]
+            }
+        },
+        "/api/public/instructors/{id}": {
+            "get": {
+                "description": "Returns instructor public profile along with all active courses authored by them. No authentication required.",
+                "operationId": "findInstructorById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Instructor profile and course list"
+                    },
+                    "404": {
+                        "description": "Instructor not found"
+                    }
+                },
+                "summary": "Get instructor public profile and courses",
+                "tags": [
+                    "Public Discovery"
+                ]
+            }
+        },
+        "/api/notifications": {
+            "get": {
+                "description": "Returns all notifications for the authenticated user.",
+                "operationId": "findAll",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "Notifications list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List notifications",
+                "tags": [
+                    "Notifications"
+                ]
+            }
+        },
+        "/api/notifications/{id}/read": {
+            "patch": {
+                "description": "Marks a single notification as read.",
+                "operationId": "markAsRead",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Notification marked as read"
+                    },
+                    "404": {
+                        "description": "Notification not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Mark notification as read",
+                "tags": [
+                    "Notifications"
+                ]
+            }
+        },
+        "/api/notifications/read-all": {
+            "post": {
+                "description": "Marks all unread notifications as read.",
+                "operationId": "markAllAsRead",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "All notifications marked as read"
+                    },
+                    "201": {
+                        "description": ""
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Mark all notifications as read",
+                "tags": [
+                    "Notifications"
+                ]
+            }
+        },
+        "/api/instructor/courses/{courseId}/content": {
+            "get": {
+                "description": "Returns paginated list of course content items. Instructor only.",
+                "operationId": "findAll",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated content list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List course content (Instructor)",
+                "tags": [
+                    "Instructor Content"
+                ]
+            }
+        },
+        "/api/instructor/courses/{courseId}/content/upload-session": {
+            "post": {
+                "description": "Validates instructor quota, reserves storage, and returns short-lived signed direct-upload credentials for the active cloud provider (Cloudinary). The client then transmits the file straight to the provider, bypassing API RAM and bandwidth entirely.",
+                "operationId": "initUploadSession",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Course UUID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/InitUploadSessionDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Upload session initialized with credentials",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadSessionResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid input parameters or unsupported MIME type"
+                    },
+                    "403": {
+                        "description": "Forbidden or course not owned by instructor"
+                    },
+                    "413": {
+                        "description": "Storage quota exceeded (5 GB permanent base + active add-ons)"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Initialize direct upload session (Instructor)",
+                "tags": [
+                    "Instructor Content"
+                ]
+            }
+        },
+        "/api/instructor/courses/{courseId}/content/complete-upload": {
+            "post": {
+                "description": "Validates completed upload, finalizes asset in storage, creates CourseContent database record, commits quota, and triggers notifications to enrolled students.",
+                "operationId": "completeUpload",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "description": "Course UUID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CompleteCourseContentUploadDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "CourseContent created and ready for viewing"
+                    },
+                    "400": {
+                        "description": "Session is not complete, signature mismatch, or invalid asset"
+                    },
+                    "404": {
+                        "description": "Course or upload session not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Complete direct upload & commit course content (Instructor)",
+                "tags": [
+                    "Instructor Content"
+                ]
+            }
+        },
+        "/api/instructor/courses/{courseId}/content/reorder": {
+            "patch": {
+                "description": "Reorders content items within a course. Instructor only.",
+                "operationId": "reorder",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderCourseContentDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Content reordered"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Reorder content (Instructor)",
+                "tags": [
+                    "Instructor Content"
+                ]
+            }
+        },
+        "/api/instructor/courses/{courseId}/content/{contentId}": {
+            "patch": {
+                "description": "Updates a content item's metadata. Instructor only.",
+                "operationId": "update",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "contentId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateCourseContentDto"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Content updated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Update content (Instructor)",
+                "tags": [
+                    "Instructor Content"
+                ]
+            },
+            "delete": {
+                "description": "Removes a content item from a course. Instructor only.",
+                "operationId": "remove",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "contentId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Content deleted"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Delete content (Instructor)",
+                "tags": [
+                    "Instructor Content"
+                ]
+            }
+        },
+        "/api/learner/my-courses/{courseId}/content": {
+            "get": {
+                "description": "Returns paginated list of course content for enrolled learners.",
+                "operationId": "findAll",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated content list"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "List course content (Learner)",
+                "tags": [
+                    "Learner Content"
+                ]
+            }
+        },
+        "/api/learner/my-courses/{courseId}/content/{contentId}": {
+            "get": {
+                "description": "Returns a single content item for an enrolled learner.",
+                "operationId": "findOne",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "contentId",
+                        "required": true,
+                        "in": "path",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Content detail"
+                    },
+                    "404": {
+                        "description": "Content not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ],
+                "summary": "Get content detail (Learner)",
+                "tags": [
+                    "Learner Content"
+                ]
+            }
+        }
+    },
+    "info": {
+        "title": "manara API",
+        "description": "The manara API description",
+        "version": "1.0",
+        "contact": {}
+    },
+    "tags": [],
+    "servers": [],
+    "components": {
+        "securitySchemes": {
+            "bearer": {
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "type": "http"
+            }
+        },
+        "schemas": {
+            "RegisterDto": {
+                "properties": {
+                    "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "mobileNumber": {
+                        "pattern": "^\\+[1-9]\\d{1,14}$",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "password": {
+                        "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 1
+                    },
+                    "firstName": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "admin",
+                            "instructor",
+                            "learner"
+                        ],
+                        "type": "string"
+                    },
+                    "client": {
+                        "enum": [
+                            "web",
+                            "mobile"
+                        ],
+                        "type": "string"
+                    },
+                    "universityId": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "faculty": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "department": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "mobileNumber",
+                    "password",
+                    "firstName",
+                    "lastName",
+                    "universityId",
+                    "faculty",
+                    "department"
+                ]
+            },
+            "DeviceInfo": {
+                "properties": {
+                    "brand": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "deviceType": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "osVersion": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "brand",
+                    "deviceType"
+                ]
+            },
+            "LoginDto": {
+                "properties": {
+                    "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "password": {
+                        "maxLength": 50,
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "client": {
+                        "minLength": 1,
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "mobile"
+                        ]
+                    },
+                    "deviceToken": {
+                        "type": "string"
+                    },
+                    "deviceInfo": {
+                        "$ref": "#/definitions/DeviceInfo"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password",
+                    "client"
+                ]
+            },
+            "VerifyEmailDto": {
+                "properties": {
+                    "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "otp": {
+                        "minLength": 1,
+                        "maxLength": 6,
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "otp"
+                ]
+            },
+            "SendOtpDto": {
+                "properties": {
+                    "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email"
+                ]
+            },
+            "SendMobileOtpDto": {
+                "properties": {
+                    "mobileNumber": {
+                        "pattern": "^\\+[1-9]\\d{1,14}$",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "client": {
+                        "minLength": 1,
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "mobile"
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "mobileNumber",
+                    "client"
+                ]
+            },
+            "VerifyMobileOtpDto": {
+                "properties": {
+                    "mobileNumber": {
+                        "pattern": "^\\+[1-9]\\d{1,14}$",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "otp": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "client": {
+                        "minLength": 1,
+                        "type": "string",
+                        "enum": [
+                            "web",
+                            "mobile"
+                        ]
+                    },
+                    "deviceToken": {
+                        "type": "string"
+                    },
+                    "deviceInfo": {
+                        "$ref": "#/definitions/DeviceInfo"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "mobileNumber",
+                    "otp",
+                    "client"
+                ]
+            },
+            "ForgotPasswordDto": {
+                "properties": {
+                    "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email"
+                ]
+            },
+            "ResetPasswordDto": {
+                "properties": {
+                    "token": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "newPassword": {
+                        "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$",
+                        "type": "string",
+                        "maxLength": 50,
+                        "minLength": 1
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "token",
+                    "newPassword"
+                ]
+            },
+            "RefreshTokenDto": {
+                "properties": {
+                    "refreshToken": {
+                        "minLength": 1,
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "refreshToken"
+                ]
+            },
+            "CompleteRegistrationDto": {
+                "properties": {
+                    "tempToken": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "admin",
+                            "instructor",
+                            "learner"
+                        ],
+                        "type": "string"
+                    },
+                    "client": {
+                        "enum": [
+                            "web",
+                            "mobile"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "tempToken"
+                ]
+            },
+            "CreateUserDto": {
+                "properties": {
+                    "email": {
+                        "minLength": 1,
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "mobileNumber": {
+                        "pattern": "^\\+[1-9]\\d{1,14}$",
+                        "type": "string"
+                    },
+                    "password": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "firstName": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "role": {
+                        "minLength": 1,
+                        "type": "string",
+                        "enum": [
+                            "admin",
+                            "instructor",
+                            "learner"
+                        ]
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    },
+                    "universityId": {
+                        "type": "string"
+                    },
+                    "faculty": {
+                        "type": "string"
+                    },
+                    "department": {
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "email",
+                    "password",
+                    "firstName",
+                    "lastName",
+                    "role"
+                ]
+            },
+            "UpdateUserDto": {
+                "properties": {
+                    "email": {
+                        "format": "email",
+                        "type": "string"
+                    },
+                    "password": {
+                        "minLength": 6,
+                        "type": "string"
+                    },
+                    "firstName": {
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "enum": [
+                            "admin",
+                            "instructor",
+                            "learner"
+                        ],
+                        "type": "string"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProfileDto": {
+                "properties": {
+                    "firstName": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "lastName": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "mobileNumber": {
+                        "type": "string"
+                    },
+                    "universityId": {
+                        "type": "string"
+                    },
+                    "faculty": {
+                        "type": "string"
+                    },
+                    "department": {
+                        "type": "string"
+                    },
+                    "year": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "firstName",
+                    "lastName"
+                ]
+            },
+            "UpdatePreferencesDto": {
+                "properties": {
+                    "lang": {
+                        "type": "string",
+                        "enum": [
+                            "ar",
+                            "en"
+                        ]
+                    },
+                    "mode": {
+                        "type": "string",
+                        "enum": [
+                            "light",
+                            "dark"
+                        ]
+                    }
+                },
+                "type": "object"
+            },
+            "TestPushNotificationDto": {
+                "properties": {
+                    "userId": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "title": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "body": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "type": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "data": {
+                        "type": "object"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "userId",
+                    "title",
+                    "body",
+                    "type"
+                ]
+            },
+            "SubscribeStoragePlanDto": {
+                "properties": {
+                    "planId": {
+                        "minLength": 1,
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "planId"
+                ]
+            },
+            "CreateStoragePlanDto": {
+                "properties": {
+                    "name": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "nameAr": {
+                        "type": "string"
+                    },
+                    "gigabytes": {
+                        "minLength": 1,
+                        "type": "number",
+                        "minimum": 1
+                    },
+                    "price": {
+                        "minLength": 1,
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "durationDays": {
+                        "type": "number"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "gigabytes",
+                    "price"
+                ]
+            },
+            "UpdateStoragePlanDto": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "nameAr": {
+                        "type": "string"
+                    },
+                    "gigabytes": {
+                        "minimum": 1,
+                        "type": "number"
+                    },
+                    "price": {
+                        "minimum": 0,
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "durationDays": {
+                        "type": "number"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "UploadStatusResponseDto": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {
+                        "type": "string",
+                        "description": "Upload session ID"
+                    },
+                    "status": {
+                        "enum": [
+                            "pending",
+                            "completed",
+                            "aborted",
+                            "expired"
+                        ],
+                        "type": "string",
+                        "description": "Session status"
+                    },
+                    "totalBytes": {
+                        "type": "number",
+                        "description": "Total file size in bytes"
+                    },
+                    "uploadedBytes": {
+                        "type": "number",
+                        "description": "Bytes uploaded so far"
+                    },
+                    "nextByteOffset": {
+                        "type": "number",
+                        "description": "Next byte offset to resume from"
+                    },
+                    "percentage": {
+                        "type": "number",
+                        "description": "Progress percentage (0 - 100)"
+                    }
+                },
+                "required": [
+                    "sessionId",
+                    "status",
+                    "totalBytes",
+                    "uploadedBytes",
+                    "nextByteOffset",
+                    "percentage"
+                ]
+            },
+            "UpdateCourseDto": {
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "price": {
+                        "minimum": 0,
+                        "type": "number"
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "categoryId": {
+                        "format": "uuid",
+                        "type": "string"
+                    },
+                    "thumbnailUrl": {
+                        "format": "url",
+                        "type": "string"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "CreateCourseDto": {
+                "properties": {
+                    "title": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "description": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "price": {
+                        "minLength": 1,
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "currency": {
+                        "type": "string"
+                    },
+                    "categoryId": {
+                        "format": "uuid",
+                        "type": "string"
+                    },
+                    "thumbnailUrl": {
+                        "format": "url",
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "title",
+                    "description",
+                    "price"
+                ]
+            },
+            "CreateUniversityDto": {
+                "properties": {
+                    "name": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "nameAr": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "faculties": {
+                        "minLength": 1,
+                        "type": "array",
+                        "items": {}
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "nameAr",
+                    "faculties"
+                ]
+            },
+            "UpdateUniversityDto": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "nameAr": {
+                        "type": "string"
+                    },
+                    "faculties": {
+                        "items": {},
+                        "type": "array"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "CreateCategoryDto": {
+                "properties": {
+                    "name": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "nameAr": {
+                        "minLength": 1,
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "nameAr"
+                ]
+            },
+            "UpdateCategoryDto": {
+                "properties": {
+                    "name": {
+                        "type": "string"
+                    },
+                    "nameAr": {
+                        "type": "string"
+                    },
+                    "slug": {
+                        "type": "string"
+                    },
+                    "isActive": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "InitUploadSessionDto": {
+                "properties": {
+                    "fileName": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "fileSize": {
+                        "minimum": 1,
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "mimeType": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "isPreview": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "fileName",
+                    "fileSize",
+                    "mimeType",
+                    "title"
+                ]
+            },
+            "UploadSessionResponseDto": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {
+                        "type": "string",
+                        "description": "Unique upload session ID",
+                        "example": "a1b2c3d4-e5f6-7890-abcd-1234567890ab"
+                    },
+                    "provider": {
+                        "enum": [
+                            "cloudinary",
+                            "s3",
+                            "gcs"
+                        ],
+                        "type": "string",
+                        "description": "Target storage provider",
+                        "example": "cloudinary"
+                    },
+                    "uploadUrl": {
+                        "type": "string",
+                        "description": "Target URL to upload the file directly to",
+                        "example": "https://api.cloudinary.com/v1_1/my-cloud/video/upload"
+                    },
+                    "httpMethod": {
+                        "enum": [
+                            "POST",
+                            "PUT"
+                        ],
+                        "type": "string",
+                        "description": "HTTP method to use when uploading the file",
+                        "example": "POST"
+                    },
+                    "chunkSize": {
+                        "type": "number",
+                        "description": "Recommended chunk size in bytes (e.g. 10MB)",
+                        "example": 10485760
+                    },
+                    "totalBytes": {
+                        "type": "number",
+                        "description": "Total declared file bytes",
+                        "example": 104857600
+                    },
+                    "fields": {
+                        "type": "object",
+                        "description": "Pre-signed fields/parameters required in upload form body"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "description": "Required headers to include with chunk requests"
+                    },
+                    "publicId": {
+                        "type": "string",
+                        "description": "Pre-assigned public ID or object key"
+                    }
+                },
+                "required": [
+                    "sessionId",
+                    "provider",
+                    "uploadUrl",
+                    "httpMethod",
+                    "chunkSize",
+                    "totalBytes"
+                ]
+            },
+            "CloudinaryResultDto": {
+                "properties": {
+                    "publicId": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "secureUrl": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "bytes": {},
+                    "resourceType": {
+                        "type": "string"
+                    },
+                    "format": {
+                        "type": "string"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "publicId",
+                    "secureUrl"
+                ]
+            },
+            "CompleteCourseContentUploadDto": {
+                "properties": {
+                    "sessionId": {
+                        "format": "uuid",
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "isPreview": {
+                        "type": "boolean"
+                    },
+                    "cloudinaryResult": {
+                        "type": "object"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "sessionId",
+                    "title"
+                ]
+            },
+            "ReorderCourseContentDto": {
+                "properties": {
+                    "contentIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "videoIds": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateCourseContentDto": {
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "isPreview": {
+                        "type": "boolean"
+                    }
+                },
+                "type": "object"
+            },
+            "OAuthInitDto": {
+                "properties": {
+                    "role": {
+                        "enum": [
+                            "admin",
+                            "instructor",
+                            "learner"
+                        ],
+                        "type": "string"
+                    },
+                    "client": {
+                        "enum": [
+                            "web",
+                            "mobile"
+                        ],
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
 }

@@ -61,10 +61,11 @@ class CourseModel extends CourseEntity {
   });
 
   factory CourseModel.fromJson(Map<String, dynamic> json) {
+    final createdAtRaw = json['createdAt'] ?? json['created_at'];
     return CourseModel(
-      id: json['id'] as String,
-      title: json['title'] as String,
-      description: json['description'] as String,
+      id: json['id'] as String? ?? '',
+      title: json['title'] as String? ?? '',
+      description: json['description'] as String? ?? '',
       visibility: json['visibility'] as String? ?? 'PUBLIC',
       instructor: json['instructor'] != null
           ? InstructorModel.fromJson(json['instructor'] as Map<String, dynamic>)
@@ -75,8 +76,8 @@ class CourseModel extends CourseEntity {
       difficulty: json['difficulty'] as String? ?? 'beginner',
       progress: (json['progress'] as num?)?.toDouble() ?? 0,
       isEnrolled: json['is_enrolled'] as bool? ?? json['isEnrolled'] as bool? ?? false,
-      createdAt: json['created_at'] != null
-          ? DateTime.parse(json['created_at'] as String)
+      createdAt: createdAtRaw is String && createdAtRaw.isNotEmpty
+          ? DateTime.tryParse(createdAtRaw)
           : null,
     );
   }
